@@ -13,6 +13,10 @@ class automaton(object):
         self.logicSymbols = ['=','<=','>=','<','>','&&','||']
         self.commonSymbols = [':',';',',','(',')','[',']','{','}']   
         self.naturalDigits = ['0','1','2','3','4','5','6','7','8','9']
+        self.lowercaseLetters = ['a','b','c','ç','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','x','w','y','z','_']
+        self.uppercaseLetters = ['A','B','C','Ç','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','W','Y','Z','_']
+        self.specialLowerCases = ['á','é','í','ó','ú','à','è','ì','ò','ù','â','ê','î','ô','û','ã','ẽ','ĩ','õ','ũ','ä','ë','ï','ö','ü']
+        self.specialUpperCases = ['Á','É','Í','Ó','Ú','À','È','Ì','Ò','Ù','Â','Ê','Î','Ô','Û','Ã','Ẽ','Ĩ','Õ','Ũ','Ä','Ë','Ï',̈́'Ö','Ü']
         self.numberOfCurrentLine = 1
 
     def __getSymbols__(self):
