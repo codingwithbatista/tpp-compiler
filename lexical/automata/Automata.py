@@ -173,3 +173,57 @@ class automaton(object):
             return False
     
 
+    def __isOPenParenthesesLexeme__(self, lexeme):
+        try:
+            return lexeme[0] == "(" and True or False
+        except IndexError:
+            return False
+
+
+    def __isCloseParenthesesLexeme__(self, lexeme):
+        try:
+            return lexeme[0] == ")" and True or False
+        except IndexError:
+            return 
+            
+
+    def __isTwoDotsLexeme_(self, lexeme):
+        try:
+            return lexeme[0] == ":" and True or False
+        except IndexError:
+            return False
+
+
+    def __isOpenBracketsLexeme__(self, lexeme):
+        try:
+            return lexeme[0] == "[" and True or False
+        except IndexError:
+            return False
+
+
+    def __isCloseBracketsLexeme__(self, lexeme):
+        try:
+            return lexeme[0] == "]" and True or False
+        except IndexError:
+            return False
+
+
+    def __isLogicAndLexeme__(self, lexeme):
+        try:
+            return lexeme[0:2] == "&&" and True or False
+        except IndexError:
+            return False
+
+
+    def __isLogicOrLexeme__(self, lexeme):
+        try:
+            return lexeme[0:2] == "||" and True or False
+        except IndexError:
+            return False
+
+
+    def __isNotLexeme__(self, lexeme):
+        try:
+            return lexeme[0] == "!" and True or False
+        except IndexError:
+            return False
