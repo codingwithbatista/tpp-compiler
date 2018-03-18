@@ -791,6 +791,61 @@ class automaton(object):
         
         elif self.__isIntegerTypeLexeme__(sourceCode):
             return self.getIntegerTypeToken(sourceCode)
+        
+        elif self.__isPlusLexeme__(sourceCode):
+            return self.getPlusToken(sourceCode)
+        
+        elif self.__isMinusLexeme__(sourceCode):
+            return self.getMinusToken(sourceCode)
+        
+        elif self.__isTimesLexeme__(sourceCode):
+            return self.getTimesToken(sourceCode)
+
+        elif self.__isDivisionLexeme__(sourceCode):
+            return self.getDivisionToken(sourceCode)
+        
+        elif self.__isAssignmentLexeme__(sourceCode):
+            return self.getAssignmentToken(sourceCode)
+        
+        elif self.__isEqualityLexeme__(sourceCode):
+            return self.getLogicEqualsToken(sourceCode)
+        
+        elif self.__isCommaLexeme__(sourceCode):
+            return self.getCommaToken(sourceCode)
+        
+        elif self.__isLessEqualsLexeme__(sourceCode):
+            return self.getLessEqualsToken(sourceCode)
+        
+        elif self.__isLessLexeme__(sourceCode):
+            return self.getLessToken(sourceCode)
+        
+        elif self.__isHigherEqualsLexeme__(sourceCode):
+            return self.getHigherEqualsToken(sourceCode)
+        
+        elif self.__isHigherLexeme__(sourceCode):
+            return self.getHigherToken(sourceCode)
+        
+        elif self.__isOPenParenthesesLexeme__(sourceCode):
+            return self.getOpenParethesesToken(sourceCode)
+        
+        elif self.__isCloseParenthesesLexeme__(sourceCode):
+            return self.getCloseParenthesesToken(sourceCode)
+        
+        elif self.__isOpenBracketsLexeme__(sourceCode):
+            return self.getOpenBracketsToken(sourceCode)
+        
+        elif self.__isCloseBracketsLexeme__(sourceCode):
+            return self.getCloseBracketsToken(sourceCode)
+        
+        elif self.__isLogicAndLexeme__(sourceCode):
+            return self.getLogicAndToken(sourceCode)
+        
+        elif self.__isLogicOrLexeme__(sourceCode):
+            return self.getLogicOrToken(sourceCode)
+        
+        elif self.__isNotLexeme__(sourceCode):
+            return self.getLogicNotToken(sourceCode)
+            
 
 
 
