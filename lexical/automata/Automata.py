@@ -261,6 +261,28 @@ class automaton(object):
         else:
             return None
     
+
+    def __discardSpace__(self, lexeme):
+        try:
+            if lexeme[0] == " ":
+                return lexeme[1:]
+            else :
+                return None
+        except IndexError:
+            return None
+    
+
+    def __discardBreakLine__(self, lexeme):
+        try:
+            if lexeme[0] == "\n":
+                self.numberOfCurrentLine = self.numberOfCurrentLine + 1
+                return lexeme["1:"]
+            else:
+                return None
+        except IndexError:
+            return None
+
+    
     def __isBreakLine__(self, lexeme):
         return lexeme[0] == "\n" and True or False
     
@@ -845,7 +867,13 @@ class automaton(object):
         
         elif self.__isNotLexeme__(sourceCode):
             return self.getLogicNotToken(sourceCode)
-            
+        
+        elif self.__discardComment__(sourceCode) != None:
+            return self.__discardComment__(sourceCode)
+        
+        elif self.__discardSpace__(sourceCode) != None:
+            return self.__discardSpace__(sourceCode)
+
 
 
 
