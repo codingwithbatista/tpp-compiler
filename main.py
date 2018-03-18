@@ -9,8 +9,8 @@ def printToken(token):
 
 if __name__ == "__main__":
     dfa = automaton()
-    source = "12.0e+2asd"
-    result, j = dfa.getScientificNotationToken(source)
+    source = ": vet[10]"
+    result, j = dfa.getTokenProcess(source)
     print(result.tokentype)
     print(result.tokenval)
     print(result.lexeme)

@@ -1021,6 +1021,12 @@ class automaton(object):
         elif self.__isCommaLexeme__(sourceCode):
             return self.getCommaToken(sourceCode)
         
+        elif self.__isAssignmentLexeme__(sourceCode):
+            return self.getAssignmentToken(sourceCode)
+        
+        elif self.__isTwoDotsLexeme_(sourceCode):
+            return self.getTwoDotsToken(sourceCode)
+        
         elif self.__isLessEqualsLexeme__(sourceCode):
             return self.getLessEqualsToken(sourceCode)
         
