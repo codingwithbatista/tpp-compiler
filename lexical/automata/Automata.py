@@ -2,7 +2,7 @@ from lexical.structure.token.Token import token
 from lexical.structure.token.TokenType import TokenType
 from lexical.structure.token.TokenVal import TokenVal
 from lexical.structure.Stack import stack
-
+import copy
 
 
 class automaton(object):
@@ -16,8 +16,9 @@ class automaton(object):
         self.lowercaseLetters = ['a','b','c','ç','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','x','w','y','z','_']
         self.uppercaseLetters = ['A','B','C','Ç','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','X','W','Y','Z','_']
         self.specialLowerCases = ['á','é','í','ó','ú','à','è','ì','ò','ù','â','ê','î','ô','û','ã','ẽ','ĩ','õ','ũ','ä','ë','ï','ö','ü']
-        self.specialUpperCases = ['Á','É','Í','Ó','Ú','À','È','Ì','Ò','Ù','Â','Ê','Î','Ô','Û','Ã','Ẽ','Ĩ','Õ','Ũ','Ä','Ë','Ï',̈́'Ö','Ü']
+        self.specialUpperCases = ['Á','É','Í','Ó','Ú','À','È','Ì','Ò','Ù','Â','Ê','Î','Ô','Û','Ã','Ẽ','Ĩ','Õ','Ũ','Ä','Ë','Ï','Ö','Ü']
         self.numberOfCurrentLine = 1
+        self.numberOfCurrentColumn = 1
 
     def __getSymbols__(self):
         symbols = self.mathsymbols + self.logicSymbols + self.commonSymbols
@@ -25,84 +26,78 @@ class automaton(object):
 
     
     def __isIFLexeme__(self, lexeme):
-        symbols = self.__getSymbols__()
         try:
-            return lexeme[0:2] == "se" and lexeme[2] in symbols and True or False
+            return lexeme[0:2] == "se" and self.__isLetter__(lexeme[2]) == False and True or False
         except IndexError:
             return lexeme[0:2] == "se" and len(lexeme) == 2 and True or False 
     
 
     def __isElseLexeme__(self, lexeme):
-        symbols = self.__getSymbols__()
         try:
-            return lexeme[0:5] == "senão" and lexeme[5] in symbols and True or False
+            return lexeme[0:5] == "senão" and self.__isLetter__(lexeme[5]) == False and True or False
         except IndexError:
             return lexeme[0:5] == "senão" and len(lexeme) == 5 and True or False
     
 
     def __isThenLexeme__(self, lexeme):
-        symbols = self.__getSymbols__()
         try:
-            return lexeme[0:5] == "então" and lexeme[5] in symbols and True or False
+            return lexeme[0:5] == "então" and self.__isLetter__(lexeme[5]) == False and True or False
         except IndexError:
             return lexeme[0:5] == "então" and len(lexeme) == 5 and True or False
     
 
-    def __isEndLexeme__(self, lexeme):
-        symbols = self.__getSymbols__()        
+    def __isEndLexeme__(self, lexeme):     
         try:
-            return lexeme[0:3] == "fim" and lexeme[3] in symbols and True or False
+            return lexeme[0:3] == "fim" and self.__isLetter__(lexeme[3]) == False and True or False
         except IndexError:
             return lexeme[0:3] == "fim" and len(lexeme) == 3 and True or False
     
 
     def __isForLexeme__(self, lexeme):
-        symbols = self.__getSymbols__()        
         try:
-            return lexeme[0:6] == "repita" and lexeme[6] in symbols and True or False
+            return lexeme[0:6] == "repita" and self.__isLetter__(lexeme[6]) == False and True or False
         except IndexError:
             return lexeme[0:6] == "repita" and len(lexeme) == 6 and True or False
     
 
     def __isFloatTypeLexeme__(self, lexeme):
-        symbols = self.__getSymbols__()
         try:
-            return lexeme[0:9] == "flutuante" and lexeme[9] in symbols and True or False
+            return lexeme[0:9] == "flutuante" and self.__isLetter__(lexeme[9]) == False and True or False
         except IndexError:
             return lexeme[0:9] == "flutuante" and len(lexeme) == 9 and True or False
 
 
     def __isReturnLexeme__(self, lexeme):
         try:
-            return lexeme[0:7] == "retorna" and True or False
+            return lexeme[0:7] == "retorna" and self.__isLetter__(lexeme[7]) == False and True or False
         except IndexError:
             return lexeme[0:7] == "retorna" and len(lexeme) == 7 and True or False
     
 
     def __isUntilLexeme__(self, lexeme):
         try:
-            return lexeme[0:3] == "até" and True or False
+            return lexeme[0:3] == "até" and self.__isLetter__(lexeme[3]) == False and True or False
         except IndexError:
             return lexeme[0:3] == "até" and len(lexeme) == 2 and True or False
     
 
     def __isReadLexeme__(self, lexeme):
         try:
-            return lexeme[0:4] == "leia" and True or False
+            return lexeme[0:4] == "leia" and self.__isLetter__(lexeme[4]) == False and True or False
         except IndexError:
             return lexeme[0:4] == "leia" and len(lexeme) == 4 and True or False
     
 
     def __isWriteLexeme__(self, lexeme):
         try:
-            return lexeme[0:7] == "escreve" and True or False
+            return lexeme[0:7] == "escreve" and self.__isLetter__(lexeme[7]) == False and True or False
         except IndexError:
             return lexeme[0:7] == "escreve" and len(lexeme) == 7 and True or False
     
 
     def __isIntegerTypeLexeme__(self, lexeme):
         try:
-            return lexeme[0:7] == "inteiro" and True or False
+            return lexeme[0:7] == "inteiro" and self.__isLetter__(lexeme[7]) == False and True or False
         except IndexError:
             return lexeme[0:7] == "inteiro" and len(lexeme) == 7 and True or False
     
@@ -256,6 +251,9 @@ class automaton(object):
                         stk.push("{")
                     elif lexeme[i] == "}":
                         stk.pop()
+                    elif self.__isBreakLine__(lexeme[i]):
+                        self.numberOfCurrentLine = self.numberOfCurrentLine + 1
+                        self.numberOfCurrentColumn = 1
                     if stk.isEmpty():
                         index = i + 1
                         return lexeme[index:]
@@ -269,6 +267,7 @@ class automaton(object):
     def __discardSpace__(self, lexeme):
         try:
             if lexeme[0] == " ":
+                self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
                 return lexeme[1:]
             else :
                 return None
@@ -280,7 +279,8 @@ class automaton(object):
         try:
             if lexeme[0] == "\n":
                 self.numberOfCurrentLine = self.numberOfCurrentLine + 1
-                return lexeme["1:"]
+                self.numberOfCurrentColumn = 1
+                return lexeme[1:]
             else:
                 return None
         except IndexError:
@@ -293,6 +293,18 @@ class automaton(object):
 
     def __isSpace__(self, lexeme):
         return lexeme[0] == " " and True or False
+
+    def __isLetter__(self, lexeme):
+        if lexeme[0] in self.lowercaseLetters:
+            return True
+        elif lexeme[0] in self.uppercaseLetters:
+            return True
+        elif lexeme[0] in self.specialLowerCases:
+            return True
+        elif lexeme[0] in self.specialUpperCases:
+            return True
+        else:
+            return False
 
 
     def getCurrentLine(self, sourceCode):
@@ -310,8 +322,10 @@ class automaton(object):
             lexeme = "se"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine,currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[2:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 2
             return tk, slicedSourceCode
         else:
             return None
@@ -324,8 +338,10 @@ class automaton(object):
             lexeme = "senão"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[5:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 5
             return tk, slicedSourceCode
         else:
             return None
@@ -338,8 +354,10 @@ class automaton(object):
             lexeme = "então"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[5:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 5
             return tk, slicedSourceCode
         else:
             return None
@@ -352,8 +370,10 @@ class automaton(object):
             lexeme = "fim"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[3:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 3
             return tk, slicedSourceCode
         else:
             return None
@@ -366,8 +386,10 @@ class automaton(object):
             lexeme = "repita"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[6:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 6
             return tk, slicedSourceCode
         else:
             return None
@@ -380,8 +402,10 @@ class automaton(object):
             lexeme = "retorna"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[7:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 7
             return tk, slicedSourceCode
         else:
             return None
@@ -394,8 +418,10 @@ class automaton(object):
             lexeme = "até"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[3:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 3
             return tk, slicedSourceCode
         else:
             return None
@@ -408,8 +434,10 @@ class automaton(object):
             lexeme = "leia"
             numberOfCurrentLine = self.numberOfCurrentLine
             currentLine = self.getCurrentLine(sourceCode)
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[4:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 4
             return tk, slicedSourceCode
         else:
             return None
@@ -422,8 +450,10 @@ class automaton(object):
             lexeme = "escreve"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[7:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 7
             return tk, slicedSourceCode
         else:
             return None
@@ -436,8 +466,10 @@ class automaton(object):
             lexeme = "inteiro"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[7:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 7
             return tk, slicedSourceCode
         else:
             return None
@@ -450,8 +482,10 @@ class automaton(object):
             lexeme = "flutuante"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[9:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 9
             return tk, slicedSourceCode
         else:
             return None
@@ -464,8 +498,10 @@ class automaton(object):
             lexeme = "+"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -478,8 +514,10 @@ class automaton(object):
             lexeme = "-"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -492,8 +530,10 @@ class automaton(object):
             lexeme = "*"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -506,8 +546,10 @@ class automaton(object):
             lexeme = "/"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -520,8 +562,10 @@ class automaton(object):
             lexeme = "="
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -534,8 +578,10 @@ class automaton(object):
             lexeme = ","
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -548,8 +594,10 @@ class automaton(object):
             lexeme = ":="
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[2:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 2
             return tk, slicedSourceCode
         else:
             return None
@@ -562,8 +610,10 @@ class automaton(object):
             lexeme = "<"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -576,8 +626,10 @@ class automaton(object):
             lexeme = ">"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -590,8 +642,10 @@ class automaton(object):
             lexeme = "<="
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[2:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 2
             return tk, slicedSourceCode
         else:
             return None
@@ -604,8 +658,10 @@ class automaton(object):
             lexeme = ">="
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[2:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 2
             return tk, slicedSourceCode
         else:
             return None
@@ -618,8 +674,10 @@ class automaton(object):
             lexeme = "("
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -632,8 +690,10 @@ class automaton(object):
             lexeme = ")"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -646,8 +706,10 @@ class automaton(object):
             lexeme = ":"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -660,8 +722,10 @@ class automaton(object):
             lexeme = "["
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -674,8 +738,10 @@ class automaton(object):
             lexeme = "]"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -688,8 +754,10 @@ class automaton(object):
             lexeme = "&&"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[2:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 2
             return tk, slicedSourceCode
         else:
             return None
@@ -701,8 +769,10 @@ class automaton(object):
             lexeme = "||"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[2:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 2
             return tk, slicedSourceCode
         else:
             return None
@@ -715,8 +785,10 @@ class automaton(object):
             lexeme = "!"
             currentLine = self.getCurrentLine(sourceCode)
             numberOfCurrentLine = self.numberOfCurrentLine
-            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+            numberOfCurrentColumn = self.numberOfCurrentColumn
+            tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
             slicedSourceCode = sourceCode[1:]
+            self.numberOfCurrentColumn = self.numberOfCurrentColumn + 1
             return tk, slicedSourceCode
         else:
             return None
@@ -738,8 +810,10 @@ class automaton(object):
                 lexeme = sourceCode[0:index]
                 currentLine = self.getCurrentLine(sourceCode)
                 numberOfCurrentLine = self.numberOfCurrentLine
-                tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+                numberOfCurrentColumn = self.numberOfCurrentColumn
+                tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
                 slicedSourceCode = sourceCode[index:]
+                self.numberOfCurrentColumn = self.numberOfCurrentColumn + index
                 return tk, slicedSourceCode
             except IndexError:
                 return None
@@ -775,14 +849,122 @@ class automaton(object):
                     lexeme = sourceCode[0:index]
                     numberOfCurrentLine = self.numberOfCurrentLine
                     currentLine = self.getCurrentLine(sourceCode)
-                    tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, currentLine)
+                    numberOfCurrentColumn = self.numberOfCurrentColumn
+                    tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine)
                     slicedSourceCode = sourceCode[index:]
+                    self.numberOfCurrentColumn = self.numberOfCurrentColumn + index
                     return tk, slicedSourceCode
             except IndexError:
                 return None
             else:
                 return None
     
+
+    def getIdToken(self, sourceCode):
+        letters = self.uppercaseLetters + self.lowercaseLetters + self.specialUpperCases + self.specialLowerCases
+        lettersAndDigits = letters + self.naturalDigits
+        try:
+            if sourceCode[0] not in letters:
+                return None
+            index = 0
+            for i in range(len(sourceCode)):
+                if sourceCode[i] in lettersAndDigits:
+                    index = i
+                else:
+                    index = index + 1
+                    tokentype = TokenType.IDENTIFICATOR.value
+                    tokenval = TokenVal.IDENTIFICATOR.value
+                    lexeme = sourceCode[0:index]
+                    currentLine = self.getCurrentLine(sourceCode)
+                    numberOfCurrentLine = self.numberOfCurrentLine
+                    numberOfCurrentColumn = self.numberOfCurrentColumn
+                    tk = token(tokentype.value, tokenval.value, lexeme, numberOfCurrentLine, numberOfCurrentColumn,currentLine) 
+                    slicedSourceCode = sourceCode[index:]
+                    self.numberOfCurrentColumn = self.numberOfCurrentColumn + index
+                    return tk, slicedSourceCode            
+        except IndexError:
+            return None
+    
+   
+
+    def getScientificNotationToken(self, sourceCode):
+        fixedNumberOfCurrentColumn = copy.deepcopy(self.numberOfCurrentColumn)
+        try:
+            if self.getFloatNumberToken(sourceCode) != None:
+                floatTK = self.getFloatNumberToken(sourceCode)[0]
+                index = len(floatTK.lexeme)
+                if sourceCode[index] == 'e' or sourceCode[index] == 'E':
+                    index = index + 1
+                    if sourceCode[index] == "+" or sourceCode[index] == "-":
+                        index = index + 1
+                
+                    if self.getFloatNumberToken(sourceCode[index:]) != None:
+                        floatTK = self.getFloatNumberToken(sourceCode[index:])[0]
+                        totalIndex = index + len(floatTK.lexeme)
+                        tokenval = TokenVal.SCIENTIFIC_NOTATION.value
+                        tokentype = TokenType.SCIENTIFIC_NOTATION.value
+                        numberOfCurrentLine = self.numberOfCurrentLine
+                        lexeme = sourceCode[0:totalIndex]
+                        numberOfCurrentColumn = fixedNumberOfCurrentColumn + len(lexeme)
+                        currentLine = self.getCurrentLine(sourceCode)
+                        tk = token(tokentype, tokenval, lexeme, numberOfCurrentLine, numberOfCurrentColumn, currentLine)
+                        slicedSourceCode = sourceCode[totalIndex:]
+                        self.numberOfCurrentColumn = fixedNumberOfCurrentColumn + totalIndex
+                        return tk, slicedSourceCode
+                    elif self.getIntegerNumberToken(sourceCode[index:]) != None:
+                        intTK = self.getIntegerNumberToken(sourceCode[index:])[0]
+                        totalIndex = index + len(intTK.lexeme)
+                        tokenval = TokenVal.SCIENTIFIC_NOTATION.value
+                        tokentype = TokenType.SCIENTIFIC_NOTATION.value
+                        numberOfCurrentLine = self.numberOfCurrentLine
+                        lexeme = sourceCode[0:totalIndex]
+                        numberOfCurrentColumn = fixedNumberOfCurrentColumn + len(lexeme)
+                        currentLine = self.getCurrentLine(sourceCode)
+                        tk = token(tokentype, tokenval, lexeme, numberOfCurrentLine, numberOfCurrentColumn, currentLine)
+                        slicedSourceCode = sourceCode[totalIndex:]
+                        self.numberOfCurrentColumn = fixedNumberOfCurrentColumn + totalIndex
+                        return tk, slicedSourceCode
+
+            elif self.getIntegerNumberToken(sourceCode) != None:
+                intTK = self.getIntegerNumberToken(sourceCode)[0]
+                index = len(intTK.lexeme)
+                if sourceCode[index] == 'e' or sourceCode[index] == 'E':
+                    index = index + 1
+                    if sourceCode[index] == "+" or sourceCode[index] == "-":
+                        index = index + 1
+                
+                    if self.getFloatNumberToken(sourceCode[index:]) != None:
+                        floatTK = self.getFloatNumberToken(sourceCode[index:])[0]
+                        totalIndex = index + len(floatTK.lexeme)
+                        tokenval = TokenVal.SCIENTIFIC_NOTATION.value
+                        tokentype = TokenType.SCIENTIFIC_NOTATION.value
+                        numberOfCurrentLine = self.numberOfCurrentLine
+                        lexeme = sourceCode[0:totalIndex]
+                        numberOfCurrentColumn = fixedNumberOfCurrentColumn + len(lexeme)
+                        currentLine = self.getCurrentLine(sourceCode)
+                        tk = token(tokentype, tokenval, lexeme, numberOfCurrentLine, numberOfCurrentColumn, currentLine)
+                        slicedSourceCode = sourceCode[totalIndex:]
+                        self.numberOfCurrentColumn = fixedNumberOfCurrentColumn + totalIndex
+                        return tk, slicedSourceCode
+                    elif self.getIntegerNumberToken(sourceCode[index:]) != None:
+                        intTK = self.getIntegerNumberToken(sourceCode[index:])[0]
+                        totalIndex = index + len(intTK.lexeme)
+                        tokenval = TokenVal.SCIENTIFIC_NOTATION.value
+                        tokentype = TokenType.SCIENTIFIC_NOTATION.value
+                        numberOfCurrentLine = self.numberOfCurrentLine
+                        lexeme = sourceCode[0:totalIndex]
+                        numberOfCurrentColumn = fixedNumberOfCurrentColumn + len(lexeme)
+                        currentLine = self.getCurrentLine(sourceCode)
+                        tk = token(tokentype, tokenval, lexeme, numberOfCurrentLine, numberOfCurrentColumn, currentLine)
+                        slicedSourceCode = sourceCode[totalIndex:]
+                        self.numberOfCurrentColumn = fixedNumberOfCurrentColumn + totalIndex
+                        return tk, slicedSourceCode
+            else:
+                return None
+        except IndexError:
+            return None
+        
+   
 
     def getTokenProcess(self, sourceCode):
         if self.__isElseLexeme__(sourceCode):
@@ -873,10 +1055,25 @@ class automaton(object):
             return self.getLogicNotToken(sourceCode)
         
         elif self.__discardComment__(sourceCode) != None:
-            return self.__discardComment__(sourceCode)
+            self.__discardComment__(sourceCode)
         
         elif self.__discardSpace__(sourceCode) != None:
-            return self.__discardSpace__(sourceCode)
+            self.__discardSpace__(sourceCode)
+        
+        elif self.__discardBreakLine__(sourceCode) != None:
+            self.__discardBreakLine__(sourceCode)
+        
+        elif self.__isLetter__(sourceCode):
+            return self.getIdToken(sourceCode)
+        
+        elif self.getScientificNotationToken(sourceCode) != None:
+            return self.getScientificNotationToken(sourceCode)
+        
+        elif self.getFloatNumberToken(sourceCode) != None:
+            return self.getFloatNumberToken(sourceCode)
+        
+        elif self.getIntegerNumberToken(sourceCode) != None:
+            return self.getIntegerNumberToken(sourceCode)
 
 
 

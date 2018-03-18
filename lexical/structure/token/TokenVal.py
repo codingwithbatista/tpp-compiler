@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class TokenVal(Enum):
-    IF = 'SE',
+    IF = 'SE'
     ELSE = 'SENAO'
     THEN = "ENTAO"
     END = "FIM"
@@ -13,7 +13,7 @@ class TokenVal(Enum):
     WRITE = "ESCREVE"
     FLOAT_TYPE = "TIPO_FLUTUANTE"
     INTEGER_TYPE = "TIPO_INTEIRO"
-    SUM = "SOMA"
+    PLUS = "SOMA"
     MINUS = "MENOS"
     TIMES = "VEZES"
     DIVISION = "DIVIDE"
@@ -34,3 +34,5 @@ class TokenVal(Enum):
     LOGIC_NOT = "NAO_LOGICO"
     INTEGER_NUMBER = "NUMERO_INTEIRO"
     FLOAT_NUMBER = "NUMERO_FLUTUANTE"
+    IDENTIFICATOR = "IDENTIFICADOR"
+    SCIENTIFIC_NOTATION = "NOTACAO_CIENTIFICA"

@@ -9,10 +9,12 @@ def printToken(token):
 
 if __name__ == "__main__":
     dfa = automaton()
-    if dfa.getFloatNumberToken("12.\n") != None:
-        token, line = dfa.getFloatNumberToken("12.23\n")
-        printToken(token)
-    source = "{comentatio aqui} resto da string"
-    result = dfa.getTokenProcess(source)
-    print(source)
-    print(result)
+    source = "12.0e+2asd"
+    result, j = dfa.getScientificNotationToken(source)
+    print(result.tokentype)
+    print(result.tokenval)
+    print(result.lexeme)
+    print(result.numberOfLine)
+    print(result.numberOfColumn)
+    print(j)
+

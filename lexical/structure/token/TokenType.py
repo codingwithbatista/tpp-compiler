@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class TokenType(Enum):
-    IF = "PR",
+    IF = "PR"
     ELSE = "PR"
     THEN = "PR"
     END = "PR"
@@ -34,4 +34,6 @@ class TokenType(Enum):
     LOGIC_OR = "SB"
     LOGIC_NOT = "SB"
     INTEGER_NUMBER = "NUM"
+    IDENTIFICATOR = "ID"
+    SCIENTIFIC_NOTATION = "NUM"
     
