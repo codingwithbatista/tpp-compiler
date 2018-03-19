@@ -265,8 +265,8 @@ class automaton(object):
 
     def __discardSpace__(self, lexeme):
         try:
-            if lexeme[0] == " ":
-
+            if lexeme[0] == " " or lexeme[0] == "\t":
+                print("\t" == lexeme[0])
                 return lexeme[1:]
             else :
                 return None
@@ -290,7 +290,7 @@ class automaton(object):
     
 
     def __isSpace__(self, lexeme):
-        return lexeme[0] == " " and True or False
+        return (lexeme[0] == " " or lexeme[0] == "\t") and True or False
 
     def __isLetter__(self, lexeme):
         if lexeme[0] in self.lowercaseLetters:
