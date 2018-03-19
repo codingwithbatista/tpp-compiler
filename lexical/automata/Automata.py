@@ -18,6 +18,7 @@ class automaton(object):
         self.specialLowerCases = ['á','é','í','ó','ú','à','è','ì','ò','ù','â','ê','î','ô','û','ã','ẽ','ĩ','õ','ũ','ä','ë','ï','ö','ü']
         self.specialUpperCases = ['Á','É','Í','Ó','Ú','À','È','Ì','Ò','Ù','Â','Ê','Î','Ô','Û','Ã','Ẽ','Ĩ','Õ','Ũ','Ä','Ë','Ï','Ö','Ü']
         self.currentLine = 1
+        self.currentColumn = 1
 
 
     def __getSymbols__(self):
@@ -266,7 +267,6 @@ class automaton(object):
     def __discardSpace__(self, lexeme):
         try:
             if lexeme[0] == " " or lexeme[0] == "\t":
-                print("\t" == lexeme[0])
                 return lexeme[1:]
             else :
                 return None
@@ -320,7 +320,6 @@ class automaton(object):
             lexeme = "se"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[2:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -333,7 +332,6 @@ class automaton(object):
             lexeme = "senão"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[5:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -346,7 +344,6 @@ class automaton(object):
             lexeme = "então"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[5:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -359,7 +356,6 @@ class automaton(object):
             lexeme = "fim"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[3:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -372,7 +368,6 @@ class automaton(object):
             lexeme = "repita"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[6:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -385,7 +380,6 @@ class automaton(object):
             lexeme = "retorna"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[7:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -398,7 +392,6 @@ class automaton(object):
             lexeme = "até"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[3:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -411,7 +404,6 @@ class automaton(object):
             lexeme = "leia"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[4:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -424,7 +416,6 @@ class automaton(object):
             lexeme = "escreve"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[7:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -437,7 +428,6 @@ class automaton(object):
             lexeme = "inteiro"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[7:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -450,7 +440,6 @@ class automaton(object):
             lexeme = "flutuante"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[9:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -463,7 +452,6 @@ class automaton(object):
             lexeme = "+"
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -474,12 +462,8 @@ class automaton(object):
             tokentype = TokenType.MINUS
             tokenval = TokenVal.MINUS
             lexeme = "-"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -489,13 +473,9 @@ class automaton(object):
         if self.__isTimesLexeme__(sourceCode):
             tokentype = TokenType.TIMES
             tokenval = TokenVal.TIMES
-            lexeme = "*"
-            
-            
-
+            lexeme = "*"    
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -506,12 +486,8 @@ class automaton(object):
             tokentype = TokenType.DIVISION
             tokenval = TokenVal.DIVISION
             lexeme = "/"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -522,12 +498,8 @@ class automaton(object):
             tokentype = TokenType.LOGIC_EQUALS
             tokenval = TokenVal.LOGIC_EQUALS
             lexeme = "="
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -538,12 +510,8 @@ class automaton(object):
             tokentype = TokenType.COMMA
             tokenval = TokenVal.COMMA
             lexeme = ","
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -554,12 +522,8 @@ class automaton(object):
             tokentype = TokenType.ASSIGNMENT
             tokenval = TokenVal.ASSIGNMENT
             lexeme = ":="
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[2:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -570,12 +534,8 @@ class automaton(object):
             tokentype = TokenType.LESS
             tokenval = TokenVal.LESS
             lexeme = "<"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -586,12 +546,8 @@ class automaton(object):
             tokentype = TokenType.HIGHER
             tokenval = TokenVal.HIGHER
             lexeme = ">"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -602,12 +558,8 @@ class automaton(object):
             tokentype = TokenType.LESS_EQUALS
             tokenval = TokenVal.LESS_EQUALS
             lexeme = "<="
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[2:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -618,12 +570,8 @@ class automaton(object):
             tokentype = TokenType.HIGHER_EQUALS
             tokenval = TokenVal.HIGHER_EQUALS
             lexeme = ">="
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[2:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -634,12 +582,8 @@ class automaton(object):
             tokentype = TokenType.OPEN_PARENTHESES
             tokenval = TokenVal.OPEN_PARENTHESES
             lexeme = "("
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -650,12 +594,8 @@ class automaton(object):
             tokentype = TokenType.CLOSE_PARENTHESES
             tokenval = TokenVal.CLOSE_PARENTHESES
             lexeme = ")"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -666,12 +606,8 @@ class automaton(object):
             tokentype = TokenType.TWO_DOTS
             tokenval = TokenVal.TWO_DOTS
             lexeme = ":"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -682,12 +618,8 @@ class automaton(object):
             tokentype = TokenType.OPEN_BRACKETS
             tokenval = TokenVal.OPEN_BRACKETS
             lexeme = "["
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -698,12 +630,8 @@ class automaton(object):
             tokentype = TokenType.CLOSE_BRACKETS
             tokenval = TokenVal.CLOSE_BRACKETS
             lexeme = "]"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -714,12 +642,8 @@ class automaton(object):
             tokentype = TokenType.LOGIC_AND
             tokenval = TokenVal.LOGIC_AND
             lexeme = "&&"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[2:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -729,13 +653,8 @@ class automaton(object):
             tokentype = TokenType.LOGIC_OR
             tokenval = TokenVal.LOGIC_OR
             lexeme = "||"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
-            tk.setNumberOfLine(self.currentLine)
             slicedSourceCode = sourceCode[2:]
-
             return tk, slicedSourceCode
         else:
             return None
@@ -746,12 +665,8 @@ class automaton(object):
             tokentype = TokenType.LOGIC_NOT
             tokenval = TokenVal.LOGIC_NOT
             lexeme = "!"
-            
-            
-
             tk = token(tokentype.value, tokenval.value, lexeme)
             slicedSourceCode = sourceCode[1:]
-            tk.setNumberOfLine(self.currentLine)
             return tk, slicedSourceCode
         else:
             return None
@@ -767,16 +682,11 @@ class automaton(object):
                     else:
                         break
                 index = index + 1
-                
                 tokentype = TokenType.INTEGER_NUMBER
                 tokenval = TokenVal.INTEGER_NUMBER
                 lexeme = sourceCode[0:index]
-                
-                
-
                 tk = token(tokentype.value, tokenval.value, lexeme)
                 slicedSourceCode = sourceCode[index:]
-                tk.setNumberOfLine(self.currentLine)
                 return tk, slicedSourceCode
             except IndexError:
                 return None
@@ -812,8 +722,6 @@ class automaton(object):
                     lexeme = sourceCode[0:index]
                     tk = token(tokentype.value, tokenval.value, lexeme)
                     slicedSourceCode = sourceCode[index:]
-                    tk.setNumberOfLine(self.currentLine)
-
                     return tk, slicedSourceCode
             except IndexError:
                 return None
@@ -834,14 +742,12 @@ class automaton(object):
                 lexeme = sourceCode[0:i]
                 tk = token(tokentype, tokenval, lexeme) 
                 slicedSourceCode = sourceCode[i:]
-                tk.setNumberOfLine(self.currentLine)
                 return tk, slicedSourceCode
         tokentype = TokenType.IDENTIFICATOR.value
         tokenval = TokenVal.IDENTIFICATOR.value
         lexeme = sourceCode[0:]
         tk = token(tokentype, tokenval, lexeme) 
         slicedSourceCode = ""
-        tk.setNumberOfLine(self.currentLine)
         return tk, slicedSourceCode
     
    
@@ -865,7 +771,6 @@ class automaton(object):
                         lexeme = sourceCode[0:totalIndex]
                         tk = token(tokentype, tokenval, lexeme)
                         slicedSourceCode = sourceCode[totalIndex:]
-                        tk.setNumberOfLine(self.currentLine)
                         return tk, slicedSourceCode
                     elif self.getIntegerNumberToken(sourceCode[index:]) != None:
                         intTK = self.getIntegerNumberToken(sourceCode[index:])[0]
@@ -875,7 +780,6 @@ class automaton(object):
                         lexeme = sourceCode[0:totalIndex]
                         tk = token(tokentype, tokenval, lexeme)
                         slicedSourceCode = sourceCode[totalIndex:]
-                        tk.setNumberOfLine(self.currentLine)
                         return tk, slicedSourceCode
 
             elif self.getIntegerNumberToken(sourceCode) != None:
@@ -894,7 +798,6 @@ class automaton(object):
                         lexeme = sourceCode[0:totalIndex]
                         tk = token(tokentype, tokenval, lexeme)
                         slicedSourceCode = sourceCode[totalIndex:]
-                        tk.setNumberOfLine(self.currentLine)
                         return tk, slicedSourceCode
                     elif self.getIntegerNumberToken(sourceCode[index:]) != None:
                         intTK = self.getIntegerNumberToken(sourceCode[index:])[0]
@@ -903,7 +806,6 @@ class automaton(object):
                         tokentype = TokenType.SCIENTIFIC_NOTATION.value
                         lexeme = sourceCode[0:totalIndex]
                         tk = token(tokentype, tokenval, lexeme)
-                        tk.setNumberOfLine(self.currentLine)
                         slicedSourceCode = sourceCode[totalIndex-1:]
                         return tk, slicedSourceCode
             else:
@@ -1047,6 +949,7 @@ class automaton(object):
                 sourceCode = self.getTokenProcess(sourceCode)
             else:
                 token, sourceCode = self.getTokenProcess(sourceCode)
+                token.setNumberOfLine(int(self.currentLine))
                 tokenlist.append(token)
         return tokenlist
 
