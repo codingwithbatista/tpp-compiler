@@ -1032,8 +1032,11 @@ class automaton(object):
         elif len(sourceCode) == 0:
             return None
         else:
-            print("unexpected token")
-            print(self.currentLine)
+            print("unexpected token in line", int(self.currentLine),":")
+            print(str(sourceCode).split("\n")[0])
+            print("unrecognized token:",str(self.getCurrentLine(sourceCode)).strip().split(" ")[0])
+            if str(sourceCode).split("\n")[0][0] == "}":
+                print("maybe you need to check comment block")
             sys.exit()
     
 
