@@ -1,0 +1,12 @@
+#!/bin/bash
+
+files=$(ls lexical-tests/*.tpp)
+for f in ${files[@]}
+do
+	echo "arquivo: " ${f} >> output_tests.txt
+	./main.py ${f} >> output_tests.txt
+	echo "termino da analise do arquivo " ${f} >> output_tests.txt
+done
+
+mkdir -p lexical-tests/results
+mv output_tests.txt lexical-tests/results/
