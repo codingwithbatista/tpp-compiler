@@ -806,7 +806,7 @@ class automaton(object):
                         tokentype = TokenType.SCIENTIFIC_NOTATION.value
                         lexeme = sourceCode[0:totalIndex]
                         tk = token(tokentype, tokenval, lexeme)
-                        slicedSourceCode = sourceCode[totalIndex-1:]
+                        slicedSourceCode = sourceCode[totalIndex:]
                         return tk, slicedSourceCode
             else:
                 return None
