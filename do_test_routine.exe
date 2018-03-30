@@ -3,10 +3,12 @@
 files=$(ls lexical-tests/*.tpp)
 for f in ${files[@]}
 do
-	echo "arquivo: " ${f} >> output_tests.txt
-	./main.py ${f} >> output_tests.txt
-	echo "termino da analise do arquivo " ${f} >> output_tests.txt
+	./main.py ${f} txt >> ${f/".tpp"/}_output_test.txt
+	echo "tokentype, tokenval, lexeme, Number of Line">> ${f/".tpp"/}_output_test.csv
+	./main.py ${f} csv >> ${f/".tpp"/}_output_test.csv
 done
 
-mkdir -p lexical-tests/results
-mv output_tests.txt lexical-tests/results/
+mkdir -p lexical-tests/results/txt
+mv lexical-tests/*.txt lexical-tests/results/txt
+mkdir -p lexical-tests/results/csv
+mv lexical-tests/*.csv lexical-tests/results/csv
