@@ -4,20 +4,24 @@ from lexical.ScanLex import scanlex
 from lexical.structure.token.Token import token
 
 
-def printToken(token):
-    print("<tokentype:", token.tokentype, "; tokenval:", token.tokenval,"; lexeme:", token.lexeme,"; line:", token.getNumberOfLine(),">")
+def printToken(token, option):
+    if "txt" == option:     
+        print("<tokentype:", token.tokentype, "; tokenval:", token.tokenval,"; lexeme:", token.lexeme,"; line:", token.getNumberOfLine(),">")
+    elif "csv" == option:
+        print(token.tokentype,",",token.tokenval,",",token.lexeme,",",token.getNumberOfLine())
   
 
 
-def printTokenList(tokelist=[]):
+def printTokenList(option, tokenlist=[]):
     for token in tokenlist:
-        printToken(token)
+        printToken(token, option)
 
 if __name__ == "__main__":
 
-
     lex = scanlex(sys.argv[1])
+    option = sys.argv[2]
+    
     tokenlist = lex.getTokenListProcess()
-    printTokenList(tokenlist)
+    printTokenList(option, tokenlist)
     
 

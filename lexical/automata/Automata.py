@@ -293,6 +293,8 @@ class automaton(object):
         return (lexeme[0] == " " or lexeme[0] == "\t") and True or False
 
     def __isLetter__(self, lexeme):
+        if len(lexeme) == 0:
+            return False
         if lexeme[0] in self.lowercaseLetters:
             return True
         elif lexeme[0] in self.uppercaseLetters:
@@ -923,13 +925,30 @@ class automaton(object):
             return self.getIdToken(sourceCode)
         
         elif self.getScientificNotationToken(sourceCode) != None:
-            return self.getScientificNotationToken(sourceCode)
+            result = self.getScientificNotationToken(sourceCode)
+            if self.__isLetter__(result[1]):
+                print("unexpected token in line", int(self.currentLine),":")
+                print(str(sourceCode).split("\n")[0])
+                print("numbers can't be followed by letters or underline")
+            return result
         
         elif self.getFloatNumberToken(sourceCode) != None:
-            return self.getFloatNumberToken(sourceCode)
+            result = self.getFloatNumberToken(sourceCode)
+            if self.__isLetter__(result[1]):
+                print("unexpected token in line", int(self.currentLine),":")
+                print(str(sourceCode).split("\n")[0])
+                print("numbers can't be followed by letters or underline")
+                sys.exit()
+            return result
         
         elif self.getIntegerNumberToken(sourceCode) != None:
-            return self.getIntegerNumberToken(sourceCode)
+            result = self.getIntegerNumberToken(sourceCode)
+            if self.__isLetter__(result[1]):
+                print("unexpected token in line", int(self.currentLine),":")
+                print(str(sourceCode).split("\n")[0])
+                print("numbers can't be followed by letters or underline")
+                sys.exit()
+            return result
         
         elif len(sourceCode) == 0:
             return None
