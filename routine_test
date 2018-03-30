@@ -1,0 +1,33 @@
+#!/bin/bash 
+execute_test_routine(){
+	files=$(ls lexical-tests/*.tpp)
+	for f in ${files[@]}
+		do
+			./main.py ${f} txt >> ${f/".tpp"/}_output_test.txt
+			echo "tokentype, tokenval, lexeme, Number of Line">> ${f/".tpp"/}_output_test.csv
+			./main.py ${f} csv >> ${f/".tpp"/}_output_test.csv
+		done
+
+	mkdir -p lexical-tests/results/txt
+	mv lexical-tests/*.txt lexical-tests/results/txt
+	mkdir -p lexical-tests/results/csv
+	mv lexical-tests/*.csv lexical-tests/results/csv
+}
+
+execute_clear_routine(){
+	rm -rf lexical-tests/results
+}
+
+
+if [ "$1" == "clean" ]; then
+	execute_clear_routine
+
+elif [ "$1" == "test" ]; then
+	execute_test_routine
+else
+	if [ "$1" == "" ]; then
+		echo "no parameter has been passed"
+	else 
+		echo "Unreconized option:" $1
+	fi
+fi

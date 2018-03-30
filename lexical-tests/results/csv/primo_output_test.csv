@@ -1,0 +1,58 @@
+tokentype, tokenval, lexeme, Number of Line
+PR , TIPO_INTEIRO , inteiro , 1
+ID , IDENTIFICADOR , principal , 1
+SB , ABRE_PARENTESES , ( , 1
+SB , FECHA_PARENTESES , ) , 1
+PR , TIPO_INTEIRO , inteiro , 2
+SB , DOIS PONTOS , : , 2
+ID , IDENTIFICADOR , digitado , 2
+PR , TIPO_INTEIRO , inteiro , 3
+SB , DOIS PONTOS , : , 3
+ID , IDENTIFICADOR , i , 3
+ID , IDENTIFICADOR , i , 4
+SB , ATRIBUICAO , := , 4
+NUM , NUMERO_INTEIRO , 1 , 4
+PR , REPITA , repita , 5
+PR , TIPO_FLUTUANTE , flutuante , 6
+SB , DOIS PONTOS , : , 6
+ID , IDENTIFICADOR , f , 6
+PR , TIPO_INTEIRO , inteiro , 7
+SB , DOIS PONTOS , : , 7
+ID , IDENTIFICADOR , int , 7
+PR , TIPO_FLUTUANTE , flutuante , 8
+SB , DOIS PONTOS , : , 8
+ID , IDENTIFICADOR , resultado , 8
+ID , IDENTIFICADOR , f , 9
+SB , ATRIBUICAO , := , 9
+ID , IDENTIFICADOR , i , 9
+SB , DIVIDE , / , 9
+NUM , NUMERO_FLUTUANTE , 2. , 9
+ID , IDENTIFICADOR , int , 10
+SB , ATRIBUICAO , := , 10
+ID , IDENTIFICADOR , i , 10
+SB , DIVIDE , / , 10
+NUM , NUMERO_INTEIRO , 2 , 10
+ID , IDENTIFICADOR , resultado , 11
+SB , ATRIBUICAO , := , 11
+ID , IDENTIFICADOR , f , 11
+SB , MENOS , - , 11
+ID , IDENTIFICADOR , int , 11
+PR , SE , se , 13
+ID , IDENTIFICADOR , resultado , 13
+SB , MAIOR , > , 13
+NUM , NUMERO_INTEIRO , 0 , 13
+ID , IDENTIFICADOR , escreva , 14
+SB , ABRE_PARENTESES , ( , 14
+ID , IDENTIFICADOR , i , 14
+SB , FECHA_PARENTESES , ) , 14
+PR , FIM , fim , 15
+ID , IDENTIFICADOR , i , 16
+SB , ATRIBUICAO , := , 16
+ID , IDENTIFICADOR , i , 16
+SB , SOMA , + , 16
+NUM , NUMERO_INTEIRO , 1 , 16
+PR , ATE , até , 17
+ID , IDENTIFICADOR , i , 17
+SB , MENOR_IGUAL , <= , 17
+ID , IDENTIFICADOR , digitado , 17
+PR , FIM , fim , 18
