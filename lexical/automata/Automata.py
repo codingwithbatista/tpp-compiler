@@ -956,7 +956,7 @@ class automaton(object):
             print("unexpected token in line", int(self.currentLine),":")
             print(str(sourceCode).split("\n")[0])
             
-            if str(sourceCode).split("\n")[0][0] == "}":
+            if (str(sourceCode).split("\n")[0][0] == "}") or (str(sourceCode).split("\n")[0][0] == "{"):
                 print("maybe you need to check comment block:", str(self.getCurrentLine(sourceCode)).strip().split(" ")[0])
             else:
                 print("unrecognized token:",str(self.getCurrentLine(sourceCode)).strip().split(" ")[0])
