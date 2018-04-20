@@ -106,3 +106,37 @@ class syntax_recognizer(object):
                 return False, -1
         except IndexError:
             return False, -1
+
+    
+    def __isAdditiveExpression(self, tokenlist=[]):
+        try:
+            isMultiplicativeExpression = self.__isMultiplicativeExpression(tokenlist)
+            if isMultiplicativeExpression[0]:
+                index = isMultiplicativeExpression[1]
+                isAdditiveStatement = self.__isAdditiveStatement(tokenlist[index:])
+                while isAdditiveStatement[0]:
+                    isAdditiveStatement = self.__isAdditiveStatement(tokenlist[index:])
+                    if isAdditiveStatement[0]:
+                        index = index + isAdditiveStatement[1]
+                return True, index
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isAdditiveStatement(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+            isSumOperator = self.__isSumOperator(token)
+
+            if isSumOperator:
+                isMultiplicativeExpression = self.__isMultiplicativeExpression(tokenlist[1:])
+                if isMultiplicativeExpression[0]:
+                    return True, (1 + isMultiplicativeExpression[1])
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
