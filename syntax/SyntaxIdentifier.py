@@ -328,8 +328,7 @@ class syntax_recognizer(object):
         except IndexError:
             return False, -1
     
-
-      
+    
     def __isExpression(self, tokenlist=[]):
         try:
             isLogicExpression = self.__isLogicExpression(tokenlist)
@@ -337,18 +336,15 @@ class syntax_recognizer(object):
 
             if isAssignment[0]:
                 return isAssignment
+
             elif isLogicExpression[0]:
                 return isLogicExpression
-            
-            
 
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
-    def isExpression(self, tokenlist=[]):
-        return self.__isExpression(tokenlist)
 
     def __isIndex(self, tokenlist=[]):
         try:
@@ -412,3 +408,32 @@ class syntax_recognizer(object):
             return False, -1
 
 
+    def __isReadStatement(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+            if token.tokenval == TokenVal.READ.value:
+                index = 1
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = 2
+                    isVar = self.__isVar(tokenlist[index:])
+                    if isVar[0]:
+                        index = index + isVar[1]
+                        token = tokenlist[index]
+                        if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            index = index + 1
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+    
+    def isRead(self, tokenlist=[]):
+        return self.__isReadStatement(tokenlist)
