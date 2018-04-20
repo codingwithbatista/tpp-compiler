@@ -663,4 +663,45 @@ class syntax_recognizer(object):
             return False, -1
     
 
-   
+    def __isAction(self, tokenlist=[]):
+        try:
+            isVarDeclare = self.__isVarDeclare(tokenlist)
+            if isVarDeclare[0]:
+                return isVarDeclare
+            
+            isRead = self.__isRead(tokenlist)
+            if isRead[0]:
+                return isRead
+            
+            isWrite = self.__isWrite(tokenlist)
+            if isWrite[0]:
+                return isWrite
+            
+            isReturn = self.__isReturn(tokenlist)
+            if isReturn[0]:
+                return isReturn
+            
+            isExpression = self.__isExpression(tokenlist)
+            if isExpression[0]:
+                return isExpression
+
+            return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def __isBody(self, tokenlist=[]):
+        try:
+            isAction = self.__isAction(tokenlist)
+            if isAction[0]:
+                index = isAction[1]
+                while isAction[0]:
+                    isAction = self.__isAction(tokenlist[index:])
+                    if isAction[0]:
+                        index = index + isAction[1]
+                return True, index
+            else:
+                return False, -1
+        except:
+            return False, -1
+    
