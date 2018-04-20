@@ -435,7 +435,7 @@ class syntax_recognizer(object):
             return False, -1
 
     
-    def __IsWrite(self, tokenlist=[]):
+    def __isWrite(self, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
@@ -461,3 +461,33 @@ class syntax_recognizer(object):
                 return False, -1
         except IndexError:
             return False, -1
+
+
+    def __isReturn(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.RETURN.value:
+                index = index + 1
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    isExpression = self.__isExpression(tokenlist[index:])
+                    if isExpression[0]:
+                        index = index + isExpression[1]
+                        token = tokenlist[index]
+                        if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            index = index + 1
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
