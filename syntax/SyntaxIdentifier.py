@@ -408,7 +408,7 @@ class syntax_recognizer(object):
             return False, -1
 
 
-    def __isReadStatement(self, tokenlist=[]):
+    def __isRead(self, tokenlist=[]):
         try:
             token = tokenlist[0]
             if token.tokenval == TokenVal.READ.value:
@@ -435,5 +435,29 @@ class syntax_recognizer(object):
             return False, -1
 
     
-    def isRead(self, tokenlist=[]):
-        return self.__isReadStatement(tokenlist)
+    def __IsWrite(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.WRITE.value:
+                index = index + 1
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    isVar = self.__isExpression(tokenlist[index:])
+                    if isVar[0]:
+                        index = index + isVar[1]
+                        token = tokenlist[index]
+                        if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            index = index + 1
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1                        
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
