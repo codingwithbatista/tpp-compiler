@@ -681,6 +681,10 @@ class syntax_recognizer(object):
             if isReturn[0]:
                 return isReturn
             
+            isConditional = self.__isConditional(tokenlist)
+            if isConditional[0]:
+                return isConditional
+            
             isExpression = self.__isExpression(tokenlist)
             if isExpression[0]:
                 return isExpression
@@ -704,4 +708,276 @@ class syntax_recognizer(object):
                 return False, -1
         except:
             return False, -1
+    
+
+    def __isFirstConditionalStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.IF.value:
+                index = index + 1
+                isExpression = self.__isExpression(tokenlist[index:])
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+                    if token.tokenval == TokenVal.THEN.value:
+                        index = index + 1
+                        isBody = self.__isBody(tokenlist[index:])
+                        if isBody[0]:
+                            index = index + isBody[1]
+                            token = tokenlist[index]
+                            if token.tokenval == TokenVal.END.value:
+                                index = index + 1
+                                return True, index
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isSecondConditionalStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.IF.value:
+                index = index + 1
+                isExpression = self.__isExpression(tokenlist[index:])
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+                    if token.tokenval == TokenVal.THEN.value:
+                        
+                        index = index + 1
+                        token = tokenlist[index]
+                        if token.tokenval == TokenVal.END.value:
+                            index = index + 1
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+
+            else:
+                return False, -1
+        except:
+            return False, -1
+
+
+
+    def __isThirdConditionalStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            
+            if token.tokenval == TokenVal.IF.value:
+                index = index + 1
+                isExpression = self.__isExpression(tokenlist[index:])
+
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.THEN.value:
+                        index = index + 1
+                        isBody = self.__isBody(tokenlist[index:])
+                        
+                        if isBody[0]:
+                            index = index + isBody[1]
+                            token = tokenlist[index]
+
+                            if token.tokenval == TokenVal.ELSE.value:
+                                index = index + 1
+                                isBody = self.__isBody(tokenlist[index:])
+
+                                if isBody[0]:
+                                    index = index + isBody[1]
+                                    token = tokenlist[index]
+
+                                    if token.tokenval == TokenVal.END.value:
+                                        index = index + 1
+                                        return True, index
+                                    else:
+                                        return False, -1
+                                else:
+                                    return False, -1
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else: 
+                    return False, -1
+            else:
+                return False, -1
+        except:
+            return False, -1
+
+
+    def __isFourthConditionalStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.IF.value:
+                index = index + 1
+                isExpression = self.__isExpression(tokenlist[index:])
+                
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.THEN.value:
+                        index = index + 1
+                        token = tokenlist[index]
+
+                        if token.tokenval == TokenVal.ELSE.value:
+                            index = index + 1
+                            isBody = self.__isBody(tokenlist[index:])
+
+                            if isBody[0]:
+                                index = index + isBody[1]
+                                token = tokenlist[index]
+
+                                if token.tokenval == TokenVal.END.value:
+                                    index = index + 1
+                                    return True, index
+                                
+                                else:
+                                    return False, -1
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isFifthConditionalStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            
+            if token.tokenval == TokenVal.IF.value:
+                index = index + 1
+                isExpression = self.__isExpression(tokenlist[index:])
+
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.THEN.value:
+                        index = index + 1
+                        isBody = self.__isBody(tokenlist[index:])
+
+                        if isBody[0]:
+                            index = index + isBody[1]
+                            token = tokenlist[index]
+
+                            if token.tokenval == TokenVal.ELSE.value:
+                                index = index + 1
+                                token = tokenlist[index]
+
+                                if token.tokenval == TokenVal.END.value:
+                                    index = index + 1
+                                    return True, index
+                                else:
+                                    return False, -1
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isSixthConditionalStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval == TokenVal.IF.value:
+                index = index + 1
+                isExpression = self.__isExpression(tokenlist[index:])
+
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.THEN.value:
+                        index = index + 1
+                        token = tokenlist[index]
+
+                        if token.tokenval == TokenVal.ELSE.value:
+                            index = index + 1
+                            token = tokenlist[index]
+
+                            if token.tokenval == TokenVal.END.value:
+                                index = index + 1
+                                return True, index
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+    def __isConditional(self, tokenlist):
+        try:
+            isFirstConditionalStatement = self.__isFirstConditionalStatement(tokenlist)
+            if isFirstConditionalStatement[0]:
+                return isFirstConditionalStatement
+            
+            isSecondConditionalStatement = self.__isSecondConditionalStatement(tokenlist)
+            if isSecondConditionalStatement[0]:
+                return isSecondConditionalStatement
+            
+            isThirdConditionalStatement = self.__isThirdConditionalStatement(tokenlist)
+            if isThirdConditionalStatement[0]:
+                return isThirdConditionalStatement
+
+            isFourthConditionalStatement = self.__isFourthConditionalStatement(tokenlist)
+            if isFourthConditionalStatement[0]:
+                return isFourthConditionalStatement
+
+            isFifthConditionalStatement = self.__isFifthConditionalStatement(tokenlist)
+            if isFifthConditionalStatement[0]:
+                return isFifthConditionalStatement
+            
+            isSixthConditionalStatement = self.__isSixthConditionalStatement(tokenlist)
+            if isSixthConditionalStatement[0]:
+                return isSixthConditionalStatement
+
+            return False, -1
+        except IndexError:
+            return False, -1
+
+    
     
