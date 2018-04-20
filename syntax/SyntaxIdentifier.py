@@ -86,8 +86,13 @@ class syntax_recognizer(object):
             isVar = self.__isVar(tokenlist)
             isNegativeNumber = self.__IsNegativeNumber(tokenlist)
             isFactorExpressionStatement = self.__isFactorExpressionStatement(tokenlist)
+            isCallFunction = self.__isCallFunction(tokenlist)
+            
             if isFactorExpressionStatement[0]:
                 return isFactorExpressionStatement
+
+            elif isCallFunction[0]:
+                return isCallFunction
 
             elif isVar[0]:
                 return isVar
@@ -594,6 +599,68 @@ class syntax_recognizer(object):
             return False, -1
     
 
-    def isCallFunction(self, tokenlist=[]):
-        return self.__isCallFunction(tokenlist)
+    def __isVarListStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
 
+            if token.tokenval == TokenVal.COMMA.value:
+                index = index + 1
+                isVar = self.__isVar(tokenlist[index:])
+                if isVar[0]:
+                    index = index + isVar[1]
+                    return True, index
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isVarList(self, tokenlist=[]):
+        try:
+            isVar = self.__isVar(tokenlist)
+            if isVar[0]:
+                index = isVar[1]
+                isVarListStatement = self.__isVarListStatement(tokenlist[index:])
+                while isVarListStatement[0]:
+                    isVarListStatement = self.__isVarListStatement(tokenlist[index:])
+                    if isVarListStatement[0]:
+                        index = index + isVarListStatement[1]
+
+                return True, index
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isVarDeclare(self, tokenlist=[]):
+        try:
+            types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval in types:
+                index = index + 1
+                token = tokenlist[index]
+                
+                if token.tokenval == TokenVal.TWO_DOTS.value:
+                    index = index + 1
+                    isVarList = self.__isVarList(tokenlist[index:])
+                    if isVarList[0]:
+                        index = index + isVarList[1]
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+
+        except:
+            return False, -1
+    
+
+   
