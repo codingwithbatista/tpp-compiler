@@ -491,3 +491,109 @@ class syntax_recognizer(object):
             return False, -1
 
 
+    def __isArgumentStatement(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+            if token.tokenval == TokenVal.COMMA.value:
+                index = 1
+                isExpression = self.__isExpression(tokenlist[index:])
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    return True, index
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except:
+            return False, -1
+
+
+    def __isArgumentList(self, tokenlist=[]):
+        try:
+            isExpression = self.__isExpression(tokenlist)
+            if isExpression[0]:
+                index = isExpression[1]
+                isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
+
+                if isArgumentStatement[0]:
+                    while isArgumentStatement[0]:
+                        isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
+                        if isArgumentStatement[0]:
+                            index = index + isArgumentStatement[1]
+                    return True, index
+                else:
+                    return isExpression
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+    
+    def __isCallFunctionWithoutArgumentsStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = index + 1
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    token = tokenlist[index]
+                    if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                        index = index + 1
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isCallFunctionWithArgumentsStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = index + 1
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    isArgumentList = self.__isArgumentList(tokenlist[index:])
+                    if isArgumentList[0]:
+                        index = index + isArgumentList[1]
+                        token = tokenlist[index]
+                        if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            index = index + 1
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isCallFunction(self, tokenlist=[]):
+        try:
+            isCallFunctionWithoutArgumentsStatement = self.__isCallFunctionWithoutArgumentsStatement(tokenlist)
+            isCallFunctionWithArgumentsStatement = self.__isCallFunctionWithArgumentsStatement(tokenlist)
+            if isCallFunctionWithArgumentsStatement[0]:
+                return isCallFunctionWithArgumentsStatement
+            elif isCallFunctionWithoutArgumentsStatement[0]:
+                return isCallFunctionWithoutArgumentsStatement
+            else:
+                return False, -1
+        except:
+            return False, -1
+    
+
+    def isCallFunction(self, tokenlist=[]):
+        return self.__isCallFunction(tokenlist)
+
