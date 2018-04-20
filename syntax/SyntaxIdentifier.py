@@ -48,7 +48,7 @@ class syntax_recognizer(object):
             token = tokenlist[0]
             if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                 index = 1
-                isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.__isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -96,7 +96,6 @@ class syntax_recognizer(object):
                 return True, 1
             
             elif isNegativeNumber[0]:
-                print("deu")
                 return isNegativeNumber
 
             else:
@@ -125,13 +124,54 @@ class syntax_recognizer(object):
         except IndexError:
             return False, -1
 
+    
+    def __isVarIndexStatement(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = 1
+                isIndex = self.__isIndex(tokenlist[index:])
+                if isIndex[0]:
+                    index = index + isIndex[1]
+                    return True, index
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isNegativeVarStatement(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+            if token.tokenval == TokenVal.MINUS.value:
+                token = tokenlist[1]
+                if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                    return True, 2
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
     def __isVar(self, tokenlist=[]):
         token = tokenlist[0]
-        if token.tokenval == TokenVal.IDENTIFICATOR.value:
+        isVarIndexStatement = self.__isVarIndexStatement(tokenlist)
+        isNegativeVar = self.__isNegativeVarStatement(tokenlist)
+        if isVarIndexStatement[0]:
+            return isVarIndexStatement
+        
+        elif token.tokenval == TokenVal.IDENTIFICATOR.value:
             return True, 1
+        
+        elif isNegativeVar[0]:
+            return isNegativeVar
+
         else:
             return False, -1
-        
     
 
     def __isUnaryExpression(self, tokenlist=[]):
@@ -290,16 +330,85 @@ class syntax_recognizer(object):
     
 
       
-    def isExpression(self, tokenlist=[]):
+    def __isExpression(self, tokenlist=[]):
         try:
             isLogicExpression = self.__isLogicExpression(tokenlist)
+            isAssignment = self.__isAssignment(tokenlist)
 
-            if isLogicExpression[0]:
+            if isAssignment[0]:
+                return isAssignment
+            elif isLogicExpression[0]:
                 return isLogicExpression
+            
+            
+
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
+    def isExpression(self, tokenlist=[]):
+        return self.__isExpression(tokenlist)
+
+    def __isIndex(self, tokenlist=[]):
+        try:
+            isIndexStatement = self.__isIndexStatement(tokenlist)
+            index = 0
+            if isIndexStatement[0]:
+                while isIndexStatement[0]:
+                    isIndexStatement = self.__isIndexStatement(tokenlist[index:])
+                    if isIndexStatement[0]:
+                        index = index + isIndexStatement[1]
+                
+                return True, index
+            else:
+                return False, -1
+        except:
+            return False, -1
+    
+
+    def __isIndexStatement(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+            if token.tokenval == TokenVal.OPEN_BRACKETS.value:
+                index = 1
+                isExpression = self.__isExpression(tokenlist[index:])
+                if isExpression[0]:
+                    index = index + isExpression[1]
+                    token = tokenlist[index]
+                    if token.tokenval == TokenVal.CLOSE_BRACKETS.value:
+                        index = index + 1
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isAssignment(self, tokenlist=[]):
+        try:
+            isVar = self.__isVar(tokenlist)
+
+            if isVar[0]:
+                index = isVar[1]
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.ASSIGNMENT.value:
+                    index = index + 1
+                    isExpression = self.__isExpression(tokenlist[index:])
+                    if isExpression[0]:
+                        index = index + isExpression[1]
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
 
 
