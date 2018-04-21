@@ -1171,7 +1171,7 @@ class syntax_recognizer(object):
             return False, -1
 
 
-    def isParameterList(self, tokenlist=[]):
+    def __isParameterList(self, tokenlist=[]):
         try:
             isParameter = self.__isParameter(tokenlist)
             if isParameter[0]:
@@ -1184,5 +1184,180 @@ class syntax_recognizer(object):
                 return True, index
             else:
                 return False, -1
+        except IndexError:
+            return False, -1
+
+    
+    def __isFirstHeaderStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = index + 1
+                token = tokenlist[index]
+
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    isParameterList = self.__isParameterList(tokenlist[index:])
+
+                    if isParameterList[0]:
+                        index = index + isParameterList[1]
+                        token = tokenlist[index]
+
+                        if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            index = index + 1
+                            isBody = self.__isBody(tokenlist[index:])
+
+                            if isBody[0]:
+                                index = index + isBody[1]
+                                token = tokenlist[index]
+
+                                if token.tokenval == TokenVal.END.value:
+                                    index = index + 1
+                                    return True, index
+                                else:
+                                    return False, -1
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def __isSecondHeaderStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = index + 1
+                token = tokenlist[index]
+
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                        index = index + 1
+                        isBody = self.__isBody(tokenlist[index:])
+
+                        if isBody[0]:
+                            index = index + isBody[1]
+                            token = tokenlist[index]
+
+                            if token.tokenval == TokenVal.END.value:
+                                index = index + 1
+                                return True, index
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def __isThirdHeaderStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = index + 1
+                token = tokenlist[index]
+
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    isParameterList = self.__isParameterList(tokenlist[index:])
+
+                    if isParameterList[0]:
+                        index = index + isParameterList[1]
+                        token = tokenlist[index]
+
+                        if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            index = index + 1
+                            token = tokenlist[index]
+
+                            if token.tokenval == TokenVal.END.value:
+                                index = index + 1
+                                return True, index
+                            else:
+                                return False, -1
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except:
+            return False, -1
+    
+
+    def __isFourthHeaderStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                index = index + 1
+                token = tokenlist[index]
+
+                if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    index = index + 1
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                        index = index + 1
+                        token = tokenlist[index]
+
+                        if token.tokenval == TokenVal.END.value:
+                            index = index + 1
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def isHeader(self, tokenlist=[]):
+        try:
+            isFirstHeaderStatement = self.__isFirstHeaderStatement(tokenlist)
+            if isFirstHeaderStatement[0]:
+                return isFirstHeaderStatement
+            
+            isSecondHeaderStatement = self.__isSecondHeaderStatement(tokenlist)
+            if isSecondHeaderStatement[0]:
+                return isSecondHeaderStatement
+
+            isThirdHeaderStatement = self.__isThirdHeaderStatement(tokenlist)
+            if isThirdHeaderStatement[0]:
+                return isThirdHeaderStatement
+            
+            isFourthHeaderStatement = self.__isFourthHeaderStatement(tokenlist)
+            if isFourthHeaderStatement[0]:
+                return isFourthHeaderStatement
+            
+            return False, -1
+
         except IndexError:
             return False, -1
