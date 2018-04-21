@@ -1,10 +1,10 @@
 from lexical.structure.token.TokenVal import TokenVal
+from syntax.Error import syntaxErrorHandler
 
-
-class syntax_recognizer(object):
+class syntax_scanner(object):
 
     def __init__(self):
-        pass
+        self.errorHandler = syntaxErrorHandler()
     
 
     def __isNumber(self,token):
@@ -693,6 +693,7 @@ class syntax_recognizer(object):
             if isExpression[0]:
                 return isExpression
 
+            #self.errorHandler.errorActionStatement()
             return False, -1
         except IndexError:
             return False, -1
@@ -818,6 +819,7 @@ class syntax_recognizer(object):
                         else:
                             return False, -1
                     else:
+                       
                         return False, -1
                 else: 
                     return False, -1
@@ -952,7 +954,9 @@ class syntax_recognizer(object):
         except IndexError:
             return False, -1
 
+   
     def __isConditional(self, tokenlist):
+          
         try:
             isFirstConditionalStatement = self.__isFirstConditionalStatement(tokenlist)
             if isFirstConditionalStatement[0]:
@@ -1435,3 +1439,12 @@ class syntax_recognizer(object):
 
     def isAProgram(self, tokenlist=[]):
         return self.__isDeclarationsList(tokenlist)
+
+
+class syntax_process(object):
+
+    def exec(self, tokenlist=[]):
+        sr = syntax_scanner()
+        process = sr.isAProgram(tokenlist)
+        if process[0] == True and (len(tokenlist) != int(process[1])):
+            sr.errorHandler.errorActionStatement()
