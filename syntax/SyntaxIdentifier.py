@@ -685,6 +685,10 @@ class syntax_recognizer(object):
             if isConditional[0]:
                 return isConditional
             
+            isRepeat = self.__isRepeat(tokenlist)
+            if isRepeat[0]:
+                return isRepeat
+
             isExpression = self.__isExpression(tokenlist)
             if isExpression[0]:
                 return isExpression
@@ -771,7 +775,6 @@ class syntax_recognizer(object):
                 return False, -1
         except:
             return False, -1
-
 
 
     def __isThirdConditionalStatement(self, tokenlist=[]):
@@ -979,5 +982,81 @@ class syntax_recognizer(object):
         except IndexError:
             return False, -1
 
+    
+    def __isRepeatWithBodyStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval == TokenVal.FOR.value:
+                index = index + 1
+                isBody = self.__isBody(tokenlist[index:])
+
+                if isBody[0]:
+                    index = index + isBody[1]
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.UNTIL.value:
+                        index = index + 1
+                        isExpression = self.__isExpression(tokenlist[index:])
+
+                        if isExpression[0]:
+                            index = index + isExpression[1]
+                            return True, index
+                        else:
+                            return False, -1
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
+
+    def __isRepeatWithoutBodyStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval == TokenVal.FOR.value:
+                index = index + 1
+                token = tokenlist[index]
+                
+                if token.tokenval == TokenVal.UNTIL.value:
+                    index = index + 1
+                    isExpression = self.__isExpression(tokenlist[index:])
+                    
+                    if isExpression[0]:
+                        index = index + isExpression[1]
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except:
+            return False, -1
+
+    
+    def __isRepeat(self, tokenlist):
+        try:
+            isRepeatWithBodyStatement = self.__isRepeatWithBodyStatement(tokenlist)
+
+            if isRepeatWithBodyStatement[0]:
+                return isRepeatWithBodyStatement
+            
+            isRepeatWithoutBodyStatement = self.__isRepeatWithoutBodyStatement(tokenlist)
+
+            if isRepeatWithoutBodyStatement[0]:
+                return isRepeatWithoutBodyStatement
+
+            return False, -1
+        except IndexError:
+            return False, -1
+
+    
     
     
