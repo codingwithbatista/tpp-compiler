@@ -1041,7 +1041,7 @@ class syntax_recognizer(object):
             return False, -1
 
     
-    def __isRepeat(self, tokenlist):
+    def __isRepeat(self, tokenlist=[]):
         try:
             isRepeatWithBodyStatement = self.__isRepeatWithBodyStatement(tokenlist)
 
@@ -1058,5 +1058,131 @@ class syntax_recognizer(object):
             return False, -1
 
     
+    def __isParameterStatement(self, tokenlist=[]):
+        try:
+            types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
+            index = 0
+            token = tokenlist[index]
+
+            if token.tokenval in types:
+                index = index + 1
+                token = tokenlist[index]
+
+                if token.tokenval == TokenVal.TWO_DOTS.value:
+                    index = index + 1
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                        index = index + 1
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return True, -1
+
+        except IndexError:
+            return False, -1
+
+
+    def __isUnidimensionalParameter(self, tokenlist=[]):
+        try:
+            isParameterStatement = self.__isParameterStatement(tokenlist)
+            index = 0
+            if isParameterStatement[0]:
+                index = index + isParameterStatement[1]
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_BRACKETS.value:
+                    index = index + 1
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.CLOSE_BRACKETS.value:
+                        index = index + 1
+                        return True, index
+                    else:
+                        return False, -1
+
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def __isBidimensionalParameter(self, tokenlist=[]):
+        try:
+            isUnidimensional = self.__isUnidimensionalParameter(tokenlist)
+            if isUnidimensional[0]:
+                index = isUnidimensional[1]
+                token = tokenlist[index]
+                if token.tokenval == TokenVal.OPEN_BRACKETS.value:
+                    index = index + 1
+                    token = tokenlist[index]
+
+                    if token.tokenval == TokenVal.CLOSE_BRACKETS.value:
+                        index = index + 1
+                        return True, index
+                    else:
+                        return False, -1
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+   
+    def __isParameter(self, tokenlist=[]):
+        try:
+            isBidimensionalParameter = self.__isBidimensionalParameter(tokenlist)
+            if isBidimensionalParameter[0]:
+                return isBidimensionalParameter
+
+            isUnidimensionalParameter = self.__isUnidimensionalParameter(tokenlist)
+            if isUnidimensionalParameter[0]:
+                return isUnidimensionalParameter
+            
+            isParameterStatement = self.__isParameterStatement(tokenlist)
+            if isParameterStatement[0]:
+                return isParameterStatement
+            
+            return False, -1
+        except:
+            return False, -1
     
     
+    def __isParameterListStatement(self, tokenlist=[]):
+        try:
+            index = 0
+            token = tokenlist[index]
+            if token.tokenval == TokenVal.COMMA.value:
+                index = index + 1
+                isParameter = self.__isParameter(tokenlist[index:])
+                if isParameter[0]:
+                    index = index + isParameter[1]
+                    return True, index
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except:
+            return False, -1
+
+
+    def isParameterList(self, tokenlist=[]):
+        try:
+            isParameter = self.__isParameter(tokenlist)
+            if isParameter[0]:
+                index = isParameter[1]
+                isParameterStatement = self.__isParameterStatement(tokenlist[index:])
+                while isParameterStatement[0]:
+                    isParameterStatement = self.__isParameterListStatement(tokenlist[index:])
+                    if isParameterStatement[0]:
+                        index = index + isParameterStatement[1]
+                return True, index
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
