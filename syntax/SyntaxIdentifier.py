@@ -1339,7 +1339,7 @@ class syntax_recognizer(object):
             return False, -1
     
 
-    def isHeader(self, tokenlist=[]):
+    def __isHeader(self, tokenlist=[]):
         try:
             isFirstHeaderStatement = self.__isFirstHeaderStatement(tokenlist)
             if isFirstHeaderStatement[0]:
@@ -1361,3 +1361,77 @@ class syntax_recognizer(object):
 
         except IndexError:
             return False, -1
+
+
+    def __isFunctionDeclaration(self, tokenlist=[]):
+        try:
+            types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
+            index = 0
+            token = tokenlist[index]
+            isHeader = self.__isHeader(tokenlist)
+            if token.tokenval in types:
+                index = index + 1
+                isHeader = self.__isHeader(tokenlist[index:])
+
+                if isHeader[0]:
+                    index = index + isHeader[1]
+                    return True, index
+                else:
+                    return False, -1
+
+            elif isHeader[0]:
+                return isHeader
+
+            else:
+                return False, -1
+
+        except IndexError:
+            return False, -1
+    
+
+    def __isVarInitialization(self, tokenlist=[]):
+        try:
+            return self.__isAssignment(tokenlist)
+        except IndexError:
+            return False, -1
+
+
+    def __isDeclaration(self, tokenlist=[]):
+        try:
+            isVarDeclare = self.__isVarDeclare(tokenlist)
+            if isVarDeclare[0]:
+                return isVarDeclare
+
+            isVarInitialization = self.__isVarInitialization(tokenlist)
+            if isVarInitialization[0]:
+                return isVarInitialization
+            
+            isFunctionDeclaration = self.__isFunctionDeclaration(tokenlist)
+            if isFunctionDeclaration[0]:
+                return isFunctionDeclaration
+            
+            return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def __isDeclarationsList(self, tokenlist=[]):
+        try:
+            isDeclaration = self.__isDeclaration(tokenlist)
+            if isDeclaration[0]:
+                index = isDeclaration[1]
+                while isDeclaration[0]:
+                    isDeclaration = self.__isDeclaration(tokenlist[index:])
+                    if isDeclaration[0]:
+                        index = index + isDeclaration[1]
+                
+                return True, index
+            
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+    
+
+    def isAProgram(self, tokenlist=[]):
+        return self.__isDeclarationsList(tokenlist)
