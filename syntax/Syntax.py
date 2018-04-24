@@ -1,4 +1,7 @@
 from lexical.structure.token.TokenVal import TokenVal
+from lexical.structure.token.Token import token
+from syntax.Error import SyntaxError
+
 
 class syntax_scanner(object):
 
@@ -428,13 +431,14 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            self.errorHandler.readStatementError(tokenlist)
+                            self.errorHandler.readStatementError(tokenlist[index], SyntaxError.READ_CLOSE_PARENTHESES)
                             return False, -1
                     else:
-                        self.errorHandler.readStatementError(tokenlist)
+                        self.errorHandler.readStatementError(tokenlist[index], SyntaxError.READ_VAR)
                         return False, -1
                 else:
-                    self.errorHandler.readStatementError(tokenlist)
+                    
+                    self.errorHandler.readStatementError(tokenlist[index], SyntaxError.READ_OPEN_PARENTHESES)
                     return False, -1
             else:
                 return False, -1
@@ -487,10 +491,13 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
+                            self.errorHandler.returnStatementError(tokenlist[index], SyntaxError.RETURN_CLOSE_PARENTHESES)
                             return False, -1
                     else:
+                        self.errorHandler.returnStatementError(tokenlist[index], SyntaxError.RETURN_EXPRESSION)
                         return False, -1
                 else:
+                    self.errorHandler.returnStatementError(tokenlist[index], SyntaxError.RETURN_CLOSE_PARENTHESES)
                     return False, -1
             else:
                 return False, -1
@@ -987,7 +994,7 @@ class syntax_scanner(object):
             if isSixthConditionalStatement[0]:
                 return isSixthConditionalStatement
             
-            self.errorHandler.conditionalError(tokenlist)
+
             return False, -1
         except IndexError:
             return False, -1
@@ -1454,71 +1461,53 @@ class syntaxErrorHandler(object):
     def __init__(self):
         self.errorFound = False
 
-
-    def conditionalError(self, tokenlist=[]):
-        if self.errorFound == False and tokenlist[0].tokenval == TokenVal.IF.value:
-            self.__noExpressionFound(tokenlist)
-            if self.errorFound == False:
-                self.__noThenFound(tokenlist)
-
-    def __noExpressionFound(self, tokenlist=[]):
-        isExpression = syntax_scanner().isExpression(tokenlist[1:])
+    
+    def readStatementError(self, token=token, syntax_error=SyntaxError):
+        if syntax_error == SyntaxError.READ_OPEN_PARENTHESES and self.errorFound == False:
+            self.__notOpenParentheses(token)
         
-        if isExpression[0] == False:
-            print("In line", tokenlist[1].getNumberOfLine(),":")
-            print("No expression found after conditional SE.")
-            self.errorFound = True
-    
-    
-    def __noThenFound(self, tokenlist=[]):
-        isExpression = syntax_scanner().isExpression(tokenlist[1:])
-        index = isExpression[1] + 1
+        elif syntax_error == SyntaxError.READ_VAR and self.errorFound == False:
+            self.__notVarStatement(token)
         
-        if tokenlist[index].tokenval != TokenVal.THEN.value:
-            print("In line", tokenlist[index].getNumberOfLine(), ":")
-            print("Expected ENTAO, but got", tokenlist[index].tokenval, "instead")
-            self.errorFound = True
-
-    def readStatementError(self, tokenlist=[]):
-        index = 0
-        token = tokenlist[index]
-        if token.tokenval == TokenVal.READ.value and self.errorFound == False:
-            index = index + 1
-            self.__repeatNoOPenParenthesesError(tokenlist[index:])
-            if self.errorFound == False:
-                self.__isNotVarStatementError(index, tokenlist)
-            if self.errorFound == False:
-                self.__isNotCloseParenthesesError(tokenlist[index:])
-
+        elif syntax_error == SyntaxError.READ_CLOSE_PARENTHESES and self.errorFound == False:
+            self.__notCloseParentheses(token)
     
-    def __repeatNoOPenParenthesesError(self, tokenlist=[]):
-        token = tokenlist[0]
-        if token.tokenval != TokenVal.OPEN_PARENTHESES.value:
-            print("In line", token.getNumberOfLine(), ":")
-            print("Expected (, but got a", token.tokenval)
-            self.errorFound = True
-
     
-    def __isNotVarStatementError(self, index=int, tokenlist=[]):
-        isVar = syntax_scanner().isVar(tokenlist)
-        if isVar[0] == False:
-            if tokenlist[index + 1].tokenval != TokenVal.CLOSE_PARENTHESES.value:
-                self.__isNotCloseParenthesesError(tokenlist[index+1:])
-            else:
-                print("In line", tokenlist[0].getNumberOfLine(), ":")
-                print("It was expected a variable statement, but it isn't")
-            self.errorFound= True
+    def returnStatementError(self, token=token, syntax_error=SyntaxError):
         
+        if syntax_error == SyntaxError.RETURN_OPEN_PARENTHESES and self.errorFound == False:
+            self.__notOpenParentheses(token)
+
+        elif syntax_error == SyntaxError.RETURN_EXPRESSION and self.errorFound == False:
+            self.__notExpressionStatement(token)
+        
+        elif syntax_error == SyntaxError.RETURN_CLOSE_PARENTHESES and self.errorFound == False:
+            self.__notOpenParentheses(token)
+
+
+    def __notOpenParentheses(self, token=token):
+        print("In line", token.getNumberOfLine(),",")
+        print("It was expected OPEN_PARENTHESES, but got ", token.tokenval)
+        self.errorFound = True 
 
     
-    def __isNotCloseParenthesesError(self, tokenlist=[]):
-        token = tokenlist[0]
-        if token.tokenval != TokenVal.CLOSE_PARENTHESES.value:
-            print("In line", token.getNumberOfLine())
-            print("Expected ), but got a", token.tokenval)
-            self.errorFound = True
-            
-        
+    def __notVarStatement(self, token=token):
+        print("In line", token.getNumberOfLine(),",")
+        print("It was expected a VARIABLE STATEMENT, but it isn't")
+        self.errorFound = True
+    
+
+    def __notExpressionStatement(self, token=token):
+        print("In line", token.getNumberOfLine())
+        print("It was expected a EXPRESSION STATEMENT, but it isn't")
+        self.errorFound = True
+    
+
+    def __notCloseParentheses(self, token=token):
+        print("In line", token.getNumberOfLine(), ",")
+        print("It was expected CLOSE_PARENTHESES, but got", token.tokenval)
+        self.errorFound = True
+
     
 
 class syntax_process(object):

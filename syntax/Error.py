@@ -1,21 +1,9 @@
+from enum import Enum
+class SyntaxError(Enum):
 
-class syntaxErrorHandler(object):
-
-    def __init__(self):
-        self.currentStatement = ""
-
-   
-    def errorActionStatement(self):
-        token = self.currentToken
-        print("syntax error in line", token.getNumberOfLine(),".")
-        #print("statement: ", self.currentStatement)
-        print("unexpected", token.lexeme,", but was expected", self.expectedToken)
-        
-    
-
-    def setCurrentToken(self, token):
-        self.currentToken = token
-
-
-    def setExpectedToken(self, expectedToken=str):
-        self.expectedToken = expectedToken
+    READ_OPEN_PARENTHESES = 1.1
+    READ_VAR = 1.2
+    READ_CLOSE_PARENTHESES = 1.3
+    RETURN_OPEN_PARENTHESES = 2.1
+    RETURN_EXPRESSION = 2.2
+    RETURN_CLOSE_PARENTHESES = 2.3
