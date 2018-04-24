@@ -455,18 +455,21 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = index + 1
-                    isVar = self.isExpression(tokenlist[index:])
-                    if isVar[0]:
-                        index = index + isVar[1]
+                    isExpression = self.isExpression(tokenlist[index:])
+                    if isExpression[0]:
+                        index = index + isExpression[1]
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
                             index = index + 1
                             return True, index
                         else:
+                            self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_CLOSE_PARENTHESES)
                             return False, -1
                     else:
+                        self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_EXPRESSION)
                         return False, -1                        
                 else:
+                    self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_OPEN_PARENTHESES)
                     return False, -1
             else:
                 return False, -1
@@ -1483,6 +1486,17 @@ class syntaxErrorHandler(object):
         
         elif syntax_error == SyntaxError.RETURN_CLOSE_PARENTHESES and self.errorFound == False:
             self.__notOpenParentheses(token)
+
+
+    def writeStatementError(self, token=token, syntax_error=SyntaxError):
+        if syntax_error == SyntaxError.WRITE_OPEN_PARENTHESES and self.errorFound == False:
+            self.__notOpenParentheses(token)
+        
+        elif syntax_error == SyntaxError.WRITE_EXPRESSION and self.errorFound == False:
+            self.__notExpressionStatement(token)
+        
+        elif syntax_error == SyntaxError.WRITE_CLOSE_PARENTHESES and self.errorFound == False:
+            self.__notCloseParentheses(token)
 
 
     def __notOpenParentheses(self, token=token):
