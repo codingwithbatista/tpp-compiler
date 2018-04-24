@@ -1,5 +1,4 @@
 from lexical.structure.token.TokenVal import TokenVal
-from syntax.Error import syntaxErrorHandler
 
 class syntax_scanner(object):
 
@@ -48,7 +47,7 @@ class syntax_scanner(object):
             token = tokenlist[0]
             if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                 index = 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -83,7 +82,7 @@ class syntax_scanner(object):
     def __isFactor(self, tokenlist=[]):
         try:
             token = tokenlist[0]
-            isVar = self.__isVar(tokenlist)
+            isVar = self.isVar(tokenlist)
             isNegativeNumber = self.__IsNegativeNumber(tokenlist)
             isFactorExpressionStatement = self.__isFactorExpressionStatement(tokenlist)
             isCallFunction = self.__isCallFunction(tokenlist)
@@ -162,7 +161,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    def __isVar(self, tokenlist=[]):
+    def isVar(self, tokenlist=[]):
         token = tokenlist[0]
         isVarIndexStatement = self.__isVarIndexStatement(tokenlist)
         isNegativeVar = self.__isNegativeVarStatement(tokenlist)
@@ -334,7 +333,7 @@ class syntax_scanner(object):
             return False, -1
     
     
-    def __isExpression(self, tokenlist=[]):
+    def isExpression(self, tokenlist=[]):
         try:
             isLogicExpression = self.__isLogicExpression(tokenlist)
             isAssignment = self.__isAssignment(tokenlist)
@@ -373,7 +372,7 @@ class syntax_scanner(object):
             token = tokenlist[0]
             if token.tokenval == TokenVal.OPEN_BRACKETS.value:
                 index = 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -392,14 +391,14 @@ class syntax_scanner(object):
 
     def __isAssignment(self, tokenlist=[]):
         try:
-            isVar = self.__isVar(tokenlist)
+            isVar = self.isVar(tokenlist)
 
             if isVar[0]:
                 index = isVar[1]
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.ASSIGNMENT.value:
                     index = index + 1
-                    isExpression = self.__isExpression(tokenlist[index:])
+                    isExpression = self.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         index = index + isExpression[1]
                         return True, index
@@ -421,7 +420,7 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = 2
-                    isVar = self.__isVar(tokenlist[index:])
+                    isVar = self.isVar(tokenlist[index:])
                     if isVar[0]:
                         index = index + isVar[1]
                         token = tokenlist[index]
@@ -429,10 +428,13 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
+                            self.errorHandler.readStatementError(tokenlist)
                             return False, -1
                     else:
+                        self.errorHandler.readStatementError(tokenlist)
                         return False, -1
                 else:
+                    self.errorHandler.readStatementError(tokenlist)
                     return False, -1
             else:
                 return False, -1
@@ -449,7 +451,7 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = index + 1
-                    isVar = self.__isExpression(tokenlist[index:])
+                    isVar = self.isExpression(tokenlist[index:])
                     if isVar[0]:
                         index = index + isVar[1]
                         token = tokenlist[index]
@@ -477,7 +479,7 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = index + 1
-                    isExpression = self.__isExpression(tokenlist[index:])
+                    isExpression = self.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         index = index + isExpression[1]
                         token = tokenlist[index]
@@ -501,7 +503,7 @@ class syntax_scanner(object):
             token = tokenlist[0]
             if token.tokenval == TokenVal.COMMA.value:
                 index = 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     return True, index
@@ -515,7 +517,7 @@ class syntax_scanner(object):
 
     def __isArgumentList(self, tokenlist=[]):
         try:
-            isExpression = self.__isExpression(tokenlist)
+            isExpression = self.isExpression(tokenlist)
             if isExpression[0]:
                 index = isExpression[1]
                 isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
@@ -606,7 +608,7 @@ class syntax_scanner(object):
 
             if token.tokenval == TokenVal.COMMA.value:
                 index = index + 1
-                isVar = self.__isVar(tokenlist[index:])
+                isVar = self.isVar(tokenlist[index:])
                 if isVar[0]:
                     index = index + isVar[1]
                     return True, index
@@ -620,7 +622,7 @@ class syntax_scanner(object):
 
     def __isVarList(self, tokenlist=[]):
         try:
-            isVar = self.__isVar(tokenlist)
+            isVar = self.isVar(tokenlist)
             if isVar[0]:
                 index = isVar[1]
                 isVarListStatement = self.__isVarListStatement(tokenlist[index:])
@@ -689,7 +691,7 @@ class syntax_scanner(object):
             if isRepeat[0]:
                 return isRepeat
 
-            isExpression = self.__isExpression(tokenlist)
+            isExpression = self.isExpression(tokenlist)
             if isExpression[0]:
                 return isExpression
 
@@ -721,7 +723,8 @@ class syntax_scanner(object):
             token = tokenlist[index]
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
+
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -754,7 +757,8 @@ class syntax_scanner(object):
             token = tokenlist[index]
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
+
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -785,7 +789,7 @@ class syntax_scanner(object):
             
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
 
                 if isExpression[0]:
                     index = index + isExpression[1]
@@ -835,8 +839,8 @@ class syntax_scanner(object):
             token = tokenlist[index]
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.__isExpression(tokenlist[index:])
-                
+                isExpression = self.isExpression(tokenlist[index:])
+
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -880,7 +884,7 @@ class syntax_scanner(object):
             
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
 
                 if isExpression[0]:
                     index = index + isExpression[1]
@@ -924,7 +928,7 @@ class syntax_scanner(object):
 
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.__isExpression(tokenlist[index:])
+                isExpression = self.isExpression(tokenlist[index:])
 
                 if isExpression[0]:
                     index = index + isExpression[1]
@@ -942,6 +946,7 @@ class syntax_scanner(object):
                                 index = index + 1
                                 return True, index
                             else:
+                            
                                 return False, -1
                         else:
                             return False, -1
@@ -981,7 +986,8 @@ class syntax_scanner(object):
             isSixthConditionalStatement = self.__isSixthConditionalStatement(tokenlist)
             if isSixthConditionalStatement[0]:
                 return isSixthConditionalStatement
-
+            
+            self.errorHandler.conditionalError(tokenlist)
             return False, -1
         except IndexError:
             return False, -1
@@ -1002,7 +1008,7 @@ class syntax_scanner(object):
 
                     if token.tokenval == TokenVal.UNTIL.value:
                         index = index + 1
-                        isExpression = self.__isExpression(tokenlist[index:])
+                        isExpression = self.isExpression(tokenlist[index:])
 
                         if isExpression[0]:
                             index = index + isExpression[1]
@@ -1030,7 +1036,7 @@ class syntax_scanner(object):
                 
                 if token.tokenval == TokenVal.UNTIL.value:
                     index = index + 1
-                    isExpression = self.__isExpression(tokenlist[index:])
+                    isExpression = self.isExpression(tokenlist[index:])
                     
                     if isExpression[0]:
                         index = index + isExpression[1]
@@ -1441,10 +1447,86 @@ class syntax_scanner(object):
         return self.__isDeclarationsList(tokenlist)
 
 
+
+
+class syntaxErrorHandler(object):
+
+    def __init__(self):
+        self.errorFound = False
+
+
+    def conditionalError(self, tokenlist=[]):
+        if self.errorFound == False and tokenlist[0].tokenval == TokenVal.IF.value:
+            self.__noExpressionFound(tokenlist)
+            if self.errorFound == False:
+                self.__noThenFound(tokenlist)
+
+    def __noExpressionFound(self, tokenlist=[]):
+        isExpression = syntax_scanner().isExpression(tokenlist[1:])
+        
+        if isExpression[0] == False:
+            print("In line", tokenlist[1].getNumberOfLine(),":")
+            print("No expression found after conditional SE.")
+            self.errorFound = True
+    
+    
+    def __noThenFound(self, tokenlist=[]):
+        isExpression = syntax_scanner().isExpression(tokenlist[1:])
+        index = isExpression[1] + 1
+        
+        if tokenlist[index].tokenval != TokenVal.THEN.value:
+            print("In line", tokenlist[index].getNumberOfLine(), ":")
+            print("Expected ENTAO, but got", tokenlist[index].tokenval, "instead")
+            self.errorFound = True
+
+    def readStatementError(self, tokenlist=[]):
+        index = 0
+        token = tokenlist[index]
+        if token.tokenval == TokenVal.READ.value and self.errorFound == False:
+            index = index + 1
+            self.__repeatNoOPenParenthesesError(tokenlist[index:])
+            if self.errorFound == False:
+                self.__isNotVarStatementError(index, tokenlist)
+            if self.errorFound == False:
+                self.__isNotCloseParenthesesError(tokenlist[index:])
+
+    
+    def __repeatNoOPenParenthesesError(self, tokenlist=[]):
+        token = tokenlist[0]
+        if token.tokenval != TokenVal.OPEN_PARENTHESES.value:
+            print("In line", token.getNumberOfLine(), ":")
+            print("Expected (, but got a", token.tokenval)
+            self.errorFound = True
+
+    
+    def __isNotVarStatementError(self, index=int, tokenlist=[]):
+        isVar = syntax_scanner().isVar(tokenlist)
+        if isVar[0] == False:
+            if tokenlist[index + 1].tokenval != TokenVal.CLOSE_PARENTHESES.value:
+                self.__isNotCloseParenthesesError(tokenlist[index+1:])
+            else:
+                print("In line", tokenlist[0].getNumberOfLine(), ":")
+                print("It was expected a variable statement, but it isn't")
+            self.errorFound= True
+        
+
+    
+    def __isNotCloseParenthesesError(self, tokenlist=[]):
+        token = tokenlist[0]
+        if token.tokenval != TokenVal.CLOSE_PARENTHESES.value:
+            print("In line", token.getNumberOfLine())
+            print("Expected ), but got a", token.tokenval)
+            self.errorFound = True
+            
+        
+    
+
 class syntax_process(object):
 
     def exec(self, tokenlist=[]):
         sr = syntax_scanner()
         process = sr.isAProgram(tokenlist)
-        if process[0] == True and (len(tokenlist) != int(process[1])):
-            sr.errorHandler.errorActionStatement()
+        if process[0] == True and (len(tokenlist) == int(process[1])):
+            print("successful syntactic check")
+        else:
+            print(process)
