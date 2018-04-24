@@ -406,6 +406,7 @@ class syntax_scanner(object):
                         index = index + isExpression[1]
                         return True, index
                     else:
+                        self.errorHandler.assignmentError(tokenlist[index], SyntaxError.ASSIGNMENT_EXPRESSION)
                         return False, -1
                 else:
                     return False, -1
@@ -463,6 +464,7 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
+                            print("here")
                             self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_CLOSE_PARENTHESES)
                             return False, -1
                     else:
@@ -1541,6 +1543,13 @@ class syntaxErrorHandler(object):
             self.errorFound = True
 
     
+    def assignmentError(self, token=token, syntax_error=SyntaxError):
+        if self.errorFound == False and syntax_error == SyntaxError.ASSIGNMENT_EXPRESSION:
+            print("in line", token.getNumberOfLine(), ",")
+            print("It was expected EXPRESSION, but it isn't")
+            self.errorFound = True
+
+
 
 class syntax_process(object):
 
@@ -1548,6 +1557,6 @@ class syntax_process(object):
         sr = syntax_scanner()
         process = sr.isAProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
-            print("successful syntactic check")
+            print("successfull syntactic check")
         else:
             print(process)
