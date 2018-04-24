@@ -586,8 +586,11 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
+                            # error at here
+                            self.errorHandler.callFunctionStatementError(token, SyntaxError.CALL_FUNCTION_CLOSE_PARENTHESES)
                             return False, -1
                     else:
+                        self.errorHandler.callFunctionStatementError(token, SyntaxError.CALL_FUNCTION_PARAMETERLIST)
                         return False, -1
                 else:
                     return False, -1
@@ -600,11 +603,14 @@ class syntax_scanner(object):
     def __isCallFunction(self, tokenlist=[]):
         try:
             isCallFunctionWithoutArgumentsStatement = self.__isCallFunctionWithoutArgumentsStatement(tokenlist)
+            if isCallFunctionWithoutArgumentsStatement[0]:
+                return isCallFunctionWithoutArgumentsStatement
+              
             isCallFunctionWithArgumentsStatement = self.__isCallFunctionWithArgumentsStatement(tokenlist)
+            
             if isCallFunctionWithArgumentsStatement[0]:
                 return isCallFunctionWithArgumentsStatement
-            elif isCallFunctionWithoutArgumentsStatement[0]:
-                return isCallFunctionWithoutArgumentsStatement
+            
             else:
                 return False, -1
         except:
@@ -1501,26 +1507,38 @@ class syntaxErrorHandler(object):
 
     def __notOpenParentheses(self, token=token):
         print("In line", token.getNumberOfLine(),",")
-        print("It was expected OPEN_PARENTHESES, but got ", token.tokenval)
+        print("It was expected ABRE_PARENTESES, but got ", token.tokenval)
         self.errorFound = True 
 
     
     def __notVarStatement(self, token=token):
         print("In line", token.getNumberOfLine(),",")
-        print("It was expected a VARIABLE STATEMENT, but it isn't")
+        print("It was expected a VARIAVEL, but it isn't")
         self.errorFound = True
     
 
     def __notExpressionStatement(self, token=token):
         print("In line", token.getNumberOfLine())
-        print("It was expected a EXPRESSION STATEMENT, but it isn't")
+        print("It was expected a EXPRESSAO, but it isn't")
         self.errorFound = True
     
 
     def __notCloseParentheses(self, token=token):
         print("In line", token.getNumberOfLine(), ",")
-        print("It was expected CLOSE_PARENTHESES, but got", token.tokenval)
+        print("It was expected FECHA_PARENTESES, but got", token.tokenval)
         self.errorFound = True
+    
+
+    def callFunctionStatementError(self, token=token, syntax_error=SyntaxError):
+        if self.errorFound == False and syntax_error == SyntaxError.CALL_FUNCTION_CLOSE_PARENTHESES:
+            print("In line", token.getNumberOfLine(), ",")
+            print("It was expected FECHA_PARENTESES, but got", token.tokenval)
+            self.errorFound = True
+
+        elif self.errorFound == False and syntax_error == SyntaxError.CALL_FUNCTION_PARAMETERLIST:
+            print("in line", token.getNumberOfLine())
+            print("It was expected a LIST_PARAMETROS, but it isn't")
+            self.errorFound = True
 
     
 
