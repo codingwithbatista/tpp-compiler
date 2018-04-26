@@ -81,15 +81,33 @@ class syntax_scanner(object):
                 return False, -1
         except IndexError:
             return False, -1
+    
+
+    def __isPositiveNumber(self, tokenlist=[]):
+        try:
+            token = tokenlist[0]
+            if token.tokenval == TokenVal.PLUS.value:
+                index = 1
+                token = tokenlist[index]
+                if self.__isNumber(token):
+                    return True, 2
+                else:
+                    return False, -1
+            else:
+                return False, -1
+        except IndexError:
+            return False, -1
+
 
     def __isFactor(self, tokenlist=[]):
         try:
             token = tokenlist[0]
             isVar = self.isVar(tokenlist)
             isNegativeNumber = self.__IsNegativeNumber(tokenlist)
+            isPositiveNumber = self.__isPositiveNumber(tokenlist)
             isFactorExpressionStatement = self.__isFactorExpressionStatement(tokenlist)
             isCallFunction = self.__isCallFunction(tokenlist)
-            
+                    
             if isFactorExpressionStatement[0]:
                 return isFactorExpressionStatement
 
@@ -105,6 +123,8 @@ class syntax_scanner(object):
             elif isNegativeNumber[0]:
                 return isNegativeNumber
 
+            elif isPositiveNumber[0]:
+                return isPositiveNumber
             else:
                 return False, -1
         except IndexError:
@@ -1034,6 +1054,7 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
+                        self.errorHandler.repeatStatementError(tokenlist[index], SyntaxError.REPEAT_NOT_UNTIL)
                         return False, -1
                 else:
                     return False, -1
@@ -1062,6 +1083,7 @@ class syntax_scanner(object):
                     else:
                         return False, -1
                 else:
+                    self.errorHandler.repeatStatementError(tokenlist[index], SyntaxError.REPEAT_NOT_UNTIL)
                     return False, -1
             else:
                 return False, -1
@@ -1547,6 +1569,13 @@ class syntaxErrorHandler(object):
         if self.errorFound == False and syntax_error == SyntaxError.ASSIGNMENT_EXPRESSION:
             print("in line", token.getNumberOfLine(), ",")
             print("It was expected EXPRESSION, but it isn't")
+            self.errorFound = True
+
+    
+    def repeatStatementError(self, token=token, syntax_error=SyntaxError):
+        if self.errorFound == False and syntax_error == SyntaxError.REPEAT_NOT_UNTIL:
+            print("In line", token.getNumberOfLine(),",")
+            print("I was expect UNTIL, but got", token.tokenval)
             self.errorFound = True
 
 
