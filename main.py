@@ -1,8 +1,8 @@
-#!/home/costa/.anaconda3/bin/python3.6.4
+#!/home/costa/.anaconda3/bin/python3.6
 import sys
 from lexical.ScanLex import scanlex
 from lexical.structure.token.Token import token
-from syntax.Syntax import syntax_scanner
+from syntax.Syntax import syntax_process
 
 def printToken(token, option):
     if "txt" == option:     
@@ -22,11 +22,10 @@ if __name__ == "__main__":
     option = sys.argv[2]
     
     tokenlist = lex.getTokenListProcess()
-    printTokenList(option, tokenlist)
+    #printTokenList(option, tokenlist)
 
-    syntax = syntax_scanner()
-
-    print(syntax.isAProgram(tokenlist))
+    syntax = syntax_process()
+    syntax.exec(tokenlist)
 
     
 
