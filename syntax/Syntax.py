@@ -7,7 +7,7 @@ class syntax_scanner(object):
 
     def __init__(self):
         self.errorFound = False
-        self.previousNonTerminal = ""
+        
 
     def __isNumber(self,token):
         number = [TokenVal.SCIENTIFIC_NOTATION.value, TokenVal.FLOAT_NUMBER.value
