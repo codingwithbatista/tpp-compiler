@@ -1,13 +1,13 @@
 from lexical.structure.token.TokenVal import TokenVal
 from lexical.structure.token.Token import token
-from syntax.Error import SyntaxError
+
 
 
 class syntax_scanner(object):
 
     def __init__(self):
-        self.errorHandler = syntaxErrorHandler()
-    
+        self.errorFound = False
+        self.previousNonTerminal = ""
 
     def __isNumber(self,token):
         number = [TokenVal.SCIENTIFIC_NOTATION.value, TokenVal.FLOAT_NUMBER.value
@@ -372,7 +372,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-
+    # feito levantamento de erros
     def __isIndex(self, tokenlist=[]):
         try:
             isIndexStatement = self.__isIndexStatement(tokenlist)
@@ -389,7 +389,7 @@ class syntax_scanner(object):
         except:
             return False, -1
     
-
+    # feito levantamento de erros
     def __isIndexStatement(self, tokenlist=[]):
         try:
             token = tokenlist[0]
@@ -403,15 +403,21 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Index", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
-
+    # feito levantamento de erros
     def __isAssignment(self, tokenlist=[]):
         try:
             isVar = self.isVar(tokenlist)
@@ -426,7 +432,9 @@ class syntax_scanner(object):
                         index = index + isExpression[1]
                         return True, index
                     else:
-                        self.errorHandler.assignmentError(tokenlist[index], SyntaxError.ASSIGNMENT_EXPRESSION)
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Assignment", token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
                     return False, -1
@@ -435,7 +443,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-
+    # feito levantamento de erros
     def __isRead(self, tokenlist=[]):
         try:
             token = tokenlist[0]
@@ -452,21 +460,26 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            self.errorHandler.readStatementError(tokenlist[index], SyntaxError.READ_CLOSE_PARENTHESES)
+                            if self.errorFound == False:
+                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                             return False, -1
                     else:
-                        self.errorHandler.readStatementError(tokenlist[index], SyntaxError.READ_VAR)
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Variable", token.getNumberOfLine())
+                        self.errorFound = True
                         return False, -1
                 else:
-                    
-                    self.errorHandler.readStatementError(tokenlist[index], SyntaxError.READ_OPEN_PARENTHESES)
+                    if self.errorFound == False:
+                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
+                    self.errorFound = True
                     return False, -1
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
-    
+    # feito levantamento de erros
     def __isWrite(self, tokenlist=[]):
         try:
             index = 0
@@ -484,21 +497,26 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            print("here")
-                            self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_CLOSE_PARENTHESES)
+                            if self.errorFound == False:
+                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                             return False, -1
                     else:
-                        self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_EXPRESSION)
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Expression", token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1                        
                 else:
-                    self.errorHandler.writeStatementError(tokenlist[index], SyntaxError.WRITE_OPEN_PARENTHESES)
+                    if self.errorFound == False:
+                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
-
+    # feito levantamento de erros
     def __isReturn(self, tokenlist=[]):
         try:
             index = 0
@@ -516,13 +534,19 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            self.errorHandler.returnStatementError(tokenlist[index], SyntaxError.RETURN_CLOSE_PARENTHESES)
+                            if self.errorFound == False:
+                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                             return False, -1
                     else:
-                        self.errorHandler.returnStatementError(tokenlist[index], SyntaxError.RETURN_EXPRESSION)
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Expression", token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
-                    self.errorHandler.returnStatementError(tokenlist[index], SyntaxError.RETURN_CLOSE_PARENTHESES)
+                    if self.errorFound == False:
+                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -608,11 +632,8 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            # error at here
-                            self.errorHandler.callFunctionStatementError(token, SyntaxError.CALL_FUNCTION_CLOSE_PARENTHESES)
                             return False, -1
                     else:
-                        self.errorHandler.callFunctionStatementError(token, SyntaxError.CALL_FUNCTION_PARAMETERLIST)
                         return False, -1
                 else:
                     return False, -1
@@ -638,7 +659,7 @@ class syntax_scanner(object):
         except:
             return False, -1
     
-
+    # foi realizado o levantamento de erros
     def __isVarListStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -651,13 +672,16 @@ class syntax_scanner(object):
                     index = index + isVar[1]
                     return True, index
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorFound("ID", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
-
+    # foi realizado o levantamento de erros
     def __isVarList(self, tokenlist=[]):
         try:
             isVar = self.isVar(tokenlist)
@@ -675,7 +699,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-
+    # foi realizado levantamento de erros
     def __isVarDeclare(self, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
@@ -693,6 +717,9 @@ class syntax_scanner(object):
                         index = index + isVarList[1]
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Variable declarion", token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
                     return False, -1
@@ -1030,7 +1057,10 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
+
+
     
+    # foi realizado levantamento de erros
     def __isRepeatWithBodyStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -1052,11 +1082,21 @@ class syntax_scanner(object):
                             index = index + isExpression[1]
                             return True, index
                         else:
+
+                            if self.errorFound == False:
+                                self.__printErrorStatement("Repeat", token.getNumberOfLine())
+                                self.errorFound = True
                             return False, -1
+                            
                     else:
-                        self.errorHandler.repeatStatementError(tokenlist[index], SyntaxError.REPEAT_NOT_UNTIL)
+                        if self.errorFound == False:
+                            self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Body", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1064,6 +1104,7 @@ class syntax_scanner(object):
             return False, -1
 
 
+    # foi realizado levantamento de erros
     def __isRepeatWithoutBodyStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -1081,16 +1122,23 @@ class syntax_scanner(object):
                         index = index + isExpression[1]
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Repeat", token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
-                    self.errorHandler.repeatStatementError(tokenlist[index], SyntaxError.REPEAT_NOT_UNTIL)
+                    if self.errorFound == False:
+                        print("aqui")
+                        self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
         except:
             return False, -1
 
-    
+
+    # foi realizado levantamento de erros
     def __isRepeat(self, tokenlist=[]):
         try:
             isRepeatWithBodyStatement = self.__isRepeatWithBodyStatement(tokenlist)
@@ -1102,12 +1150,11 @@ class syntax_scanner(object):
 
             if isRepeatWithoutBodyStatement[0]:
                 return isRepeatWithoutBodyStatement
-
             return False, -1
         except IndexError:
             return False, -1
 
-    
+    # foi realizado levantamento de erros
     def __isParameterStatement(self, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
@@ -1126,6 +1173,9 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Parameter", token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
                     return False, -1
@@ -1135,7 +1185,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-
+    # foi realizado levantamento de erros
     def __isUnidimensionalParameter(self, tokenlist=[]):
         try:
             isParameterStatement = self.__isParameterStatement(tokenlist)
@@ -1151,6 +1201,9 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
 
                 else:
@@ -1161,6 +1214,7 @@ class syntax_scanner(object):
             return False, -1
     
 
+    # foi realizado levantamento de erros
     def __isBidimensionalParameter(self, tokenlist=[]):
         try:
             isUnidimensional = self.__isUnidimensionalParameter(tokenlist)
@@ -1175,6 +1229,9 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
                         return False, -1
                 else:
                     return False, -1
@@ -1183,7 +1240,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
     
-   
+    # foi realizado levantamento de erros
     def __isParameter(self, tokenlist=[]):
         try:
             isBidimensionalParameter = self.__isBidimensionalParameter(tokenlist)
@@ -1202,7 +1259,7 @@ class syntax_scanner(object):
         except:
             return False, -1
     
-    
+    # foi realizado levantamento de erros
     def __isParameterListStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -1214,13 +1271,16 @@ class syntax_scanner(object):
                     index = index + isParameter[1]
                     return True, index
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorFound("TYPE", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
         except:
             return False, -1
 
-
+    # foi realizado levantamento de erros
     def __isParameterList(self, tokenlist=[]):
         try:
             isParameter = self.__isParameter(tokenlist)
@@ -1438,7 +1498,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
     
-
+    # levantamento de erros realizado
     def __isVarInitialization(self, tokenlist=[]):
         try:
             return self.__isAssignment(tokenlist)
@@ -1487,98 +1547,14 @@ class syntax_scanner(object):
         return self.__isDeclarationsList(tokenlist)
 
 
-
-
-class syntaxErrorHandler(object):
-
-    def __init__(self):
-        self.errorFound = False
+    def __printErrorFound(self, expected=str, received=str, line=int):
+        print("In line", line)
+        print("Expected", expected, ", but got a ", received)
 
     
-    def readStatementError(self, token=token, syntax_error=SyntaxError):
-        if syntax_error == SyntaxError.READ_OPEN_PARENTHESES and self.errorFound == False:
-            self.__notOpenParentheses(token)
-        
-        elif syntax_error == SyntaxError.READ_VAR and self.errorFound == False:
-            self.__notVarStatement(token)
-        
-        elif syntax_error == SyntaxError.READ_CLOSE_PARENTHESES and self.errorFound == False:
-            self.__notCloseParentheses(token)
-    
-    
-    def returnStatementError(self, token=token, syntax_error=SyntaxError):
-        
-        if syntax_error == SyntaxError.RETURN_OPEN_PARENTHESES and self.errorFound == False:
-            self.__notOpenParentheses(token)
-
-        elif syntax_error == SyntaxError.RETURN_EXPRESSION and self.errorFound == False:
-            self.__notExpressionStatement(token)
-        
-        elif syntax_error == SyntaxError.RETURN_CLOSE_PARENTHESES and self.errorFound == False:
-            self.__notOpenParentheses(token)
-
-
-    def writeStatementError(self, token=token, syntax_error=SyntaxError):
-        if syntax_error == SyntaxError.WRITE_OPEN_PARENTHESES and self.errorFound == False:
-            self.__notOpenParentheses(token)
-        
-        elif syntax_error == SyntaxError.WRITE_EXPRESSION and self.errorFound == False:
-            self.__notExpressionStatement(token)
-        
-        elif syntax_error == SyntaxError.WRITE_CLOSE_PARENTHESES and self.errorFound == False:
-            self.__notCloseParentheses(token)
-
-
-    def __notOpenParentheses(self, token=token):
-        print("In line", token.getNumberOfLine(),",")
-        print("It was expected ABRE_PARENTESES, but got ", token.tokenval)
-        self.errorFound = True 
-
-    
-    def __notVarStatement(self, token=token):
-        print("In line", token.getNumberOfLine(),",")
-        print("It was expected a VARIAVEL, but it isn't")
-        self.errorFound = True
-    
-
-    def __notExpressionStatement(self, token=token):
-        print("In line", token.getNumberOfLine())
-        print("It was expected a EXPRESSAO, but it isn't")
-        self.errorFound = True
-    
-
-    def __notCloseParentheses(self, token=token):
-        print("In line", token.getNumberOfLine(), ",")
-        print("It was expected FECHA_PARENTESES, but got", token.tokenval)
-        self.errorFound = True
-    
-
-    def callFunctionStatementError(self, token=token, syntax_error=SyntaxError):
-        if self.errorFound == False and syntax_error == SyntaxError.CALL_FUNCTION_CLOSE_PARENTHESES:
-            print("In line", token.getNumberOfLine(), ",")
-            print("It was expected FECHA_PARENTESES, but got", token.tokenval)
-            self.errorFound = True
-
-        elif self.errorFound == False and syntax_error == SyntaxError.CALL_FUNCTION_PARAMETERLIST:
-            print("in line", token.getNumberOfLine())
-            print("It was expected a LIST_PARAMETROS, but it isn't")
-            self.errorFound = True
-
-    
-    def assignmentError(self, token=token, syntax_error=SyntaxError):
-        if self.errorFound == False and syntax_error == SyntaxError.ASSIGNMENT_EXPRESSION:
-            print("in line", token.getNumberOfLine(), ",")
-            print("It was expected EXPRESSION, but it isn't")
-            self.errorFound = True
-
-    
-    def repeatStatementError(self, token=token, syntax_error=SyntaxError):
-        if self.errorFound == False and syntax_error == SyntaxError.REPEAT_NOT_UNTIL:
-            print("In line", token.getNumberOfLine(),",")
-            print("I was expect UNTIL, but got", token.tokenval)
-            self.errorFound = True
-
-
+    def __printErrorStatement(self, statement=str, line=int):
+        print("Near line", line,":")
+        print("The ", statement, " statement got errors" )
 
 class syntax_process(object):
 
@@ -1587,5 +1563,4 @@ class syntax_process(object):
         process = sr.isAProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
             print("successfull syntactic check")
-        else:
-            print(process)
+
