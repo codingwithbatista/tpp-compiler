@@ -281,6 +281,9 @@ class syntax_scanner(object):
                 if isMultiplicativeExpression[0]:
                     return True, (1 + isMultiplicativeExpression[1])
                 else:
+                    print("In line", token.getNumberOfLine())
+                    print("Error in additive expression")
+                    self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -315,6 +318,9 @@ class syntax_scanner(object):
                 if isAdditiveExpression[0]:
                     return True, (index + isAdditiveExpression[1])
                 else:
+                    print("In line", token.getNumberOfLine())
+                    print("Erro in relational expression")
+                    self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -332,6 +338,9 @@ class syntax_scanner(object):
                 if isSimpleExpression[0]:
                     return True, (index + isSimpleExpression[1])
                 else:
+                    print("In line", token.getNumberOfLine())
+                    print("Error in logic expression statement")
+                    self.errorFound = True
                     return False, -1
             else:
                 return False,-1
@@ -805,10 +814,17 @@ class syntax_scanner(object):
                             else:
                                 return False, -1
                         else:
+                            
                             return False, -1
                     else:
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -837,8 +853,14 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True                        
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
 
             else:
@@ -888,9 +910,14 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
-                       
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True                       
                         return False, -1
                 else: 
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -933,8 +960,14 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -977,8 +1010,14 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1016,8 +1055,14 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                         return False, -1
                 else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1327,6 +1372,10 @@ class syntax_scanner(object):
                                     index = index + 1
                                     return True, index
                                 else:
+                                    if self.errorFound == False:
+                                        print("Near the statement that begins near line", token.getNumberOfLine())
+                                        print("The statement needs an END token")
+                                        self.errorFound = True
                                     return False, -1
                             else:
                                 return False, -1
@@ -1367,6 +1416,10 @@ class syntax_scanner(object):
                                 index = index + 1
                                 return True, index
                             else:
+                                if self.errorFound == False:
+                                    print("Near the statement that begins near line", token.getNumberOfLine())
+                                    print("The statement needs an END token")
+                                    self.errorFound = True
                                 return False, -1
                         else:
                             return False, -1
@@ -1404,6 +1457,10 @@ class syntax_scanner(object):
                                 index = index + 1
                                 return True, index
                             else:
+                                if self.errorFound == False:
+                                    print("Near the statement that begins near line", token.getNumberOfLine())
+                                    print("The statement needs an END token")
+                                    self.errorFound = True
                                 return False, -1
                         else:
                             return False, -1
@@ -1438,6 +1495,10 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
+                            if self.errorFound == False:
+                                    print("Near the statement that begins near line", token.getNumberOfLine())
+                                    print("The statement needs an END token")
+                                    self.errorFound = True
                             return False, -1
                     else:
                         return False, -1
@@ -1563,4 +1624,9 @@ class syntax_process(object):
         process = sr.isAProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
             print("successfull syntactic check")
+        elif(len(tokenlist) > process[1] and process[1] > 0 and sr.errorFound == False):
+            line = tokenlist[process[1] + 1].getNumberOfLine()
+            print("Error near the statement that begins near line", line)
+            print("near the token", tokenlist[process[1]].tokenval)
+
 
