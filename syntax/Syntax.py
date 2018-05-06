@@ -1,5 +1,6 @@
 from lexical.structure.token.TokenVal import TokenVal
 from lexical.structure.token.Token import token
+from syntax.Rules import syntax_rule
 from anytree import Node, RenderTree, PreOrderIter, Walker, Resolver
 
 class syntax_scanner(object):
@@ -7,6 +8,7 @@ class syntax_scanner(object):
     def __init__(self):
         self.errorFound = False
         self.current_node = None
+        self.sr = syntax_rule()
         
         
 
@@ -51,7 +53,8 @@ class syntax_scanner(object):
             token = tokenlist[0]
             if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                 index = 1
-                isExpression = self.isExpression(tokenlist[index:])
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -103,11 +106,11 @@ class syntax_scanner(object):
     def __isFactor(self, tokenlist=[]):
         try:
             token = tokenlist[0]
-            isVar = self.isVar(tokenlist)
-            isNegativeNumber = self.__IsNegativeNumber(tokenlist)
-            isPositiveNumber = self.__isPositiveNumber(tokenlist)
-            isFactorExpressionStatement = self.__isFactorExpressionStatement(tokenlist)
-            isCallFunction = self.__isCallFunction(tokenlist)
+            isVar = self.sr.isVar(tokenlist)
+            isNegativeNumber = self.sr.IsNegativeNumber(tokenlist)
+            isPositiveNumber = self.sr.isPositiveNumber(tokenlist)
+            isFactorExpressionStatement = self.sr.isFactorExpressionStatement(tokenlist)
+            isCallFunction = self.sr.isCallFunction(tokenlist)
                     
             if isFactorExpressionStatement[0]:
                 return isFactorExpressionStatement
@@ -153,15 +156,18 @@ class syntax_scanner(object):
             return False, -1
 
     
-    def __isVarIndexStatement(self, tokenlist=[]):
+    def __isVarIndexStatement(self, node, tokenlist=[]):
         try:
             token = tokenlist[0]
-
+            new_node = Node("VAR_INDEX_STMT", parent=node, tokenval="VAR_INDEX_STMT")
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
                 index = 1
-                isIndex = self.__isIndex(tokenlist[index:])
+                #isIndex = self.__isIndex(tokenlist[index:])
+                isIndex = self.sr.isIndex(tokenlist[index:])
                 if isIndex[0]:
+                    self.__consumeIndex(new_node, tokenlist[index:])
                     index = index + isIndex[1]
+                    
                     return True, index
                 else:
                     return False, -1
@@ -185,14 +191,20 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    def isVar(self, tokenlist=[]):
+    def __consumeVar(self, node, tokenlist=[]):
         token = tokenlist[0]
-        isVarIndexStatement = self.__isVarIndexStatement(tokenlist)
-        isNegativeVar = self.__isNegativeVarStatement(tokenlist)
+        var_node = Node("VAR", parent=node, tokenval = "VAR")
+        #isVarIndexStatement = self.__isVarIndexStatement(tokenlist)
+        #isNegativeVar = self.__isNegativeVarStatement(tokenlist)
+        isVarIndexStatement = self.sr.isVarIndexStatement(tokenlist)
+        isNegativeVar = self.sr.isNegativeVarStatement(tokenlist)
         if isVarIndexStatement[0]:
+            self.__isVarIndexStatement(var_node, tokenlist)
             return isVarIndexStatement
         
         elif token.tokenval == TokenVal.IDENTIFICATOR.value:
+            Node("ID", parent=var_node, tokenval = token.tokenval, tokentype = token.tokentype,
+            lexeme = token.lexeme, line = token.getNumberOfLine())
             return True, 1
         
         elif isNegativeVar[0]:
@@ -366,12 +378,14 @@ class syntax_scanner(object):
             return False, -1
     
     
-    def isExpression(self, tokenlist=[]):
+    def __consumeExpression(self, node, tokenlist=[]):
         try:
+            Node("EXPRESSION", parent=node, tokenval="EXPRESSION")
             isLogicExpression = self.__isLogicExpression(tokenlist)
-            isAssignment = self.__isAssignment(tokenlist)
-
+            #isAssignment = self.__isAssignment(tokenlist)
+            isAssignment = self.sr.isAssignment(tokenlist)
             if isAssignment[0]:
+                self.__consumeAssignment(node, tokenlist)
                 return isAssignment
 
             elif isLogicExpression[0]:
@@ -383,14 +397,19 @@ class syntax_scanner(object):
             return False, -1
 
     # feito levantamento de erros
-    def __isIndex(self, tokenlist=[]):
+    def __consumeIndex(self, node, tokenlist=[]):
         try:
-            isIndexStatement = self.__isIndexStatement(tokenlist)
+            #isIndexStatement = self.__isIndexStatement(tokenlist)
+            isIndexStatement = self.sr.isIndexStatement(tokenlist)
             index = 0
-            if isIndexStatement[0]:
+            if isIndexStatement[0]:            
+                #self.__consumeIndexStatement(tokenlist)
+                index_stmt = Node("INDEX_STMT", tokenval = "INDEX_STMT", parent=node)
                 while isIndexStatement[0]:
-                    isIndexStatement = self.__isIndexStatement(tokenlist[index:])
+                    #isIndexStatement = self.__isIndexStatement(tokenlist[index:])
+                    isIndexStatement = self.sr.isIndexStatement(tokenlist[index:])
                     if isIndexStatement[0]:
+                        self.__consumeIndexStatement(index_stmt, tokenlist)
                         index = index + isIndexStatement[1]
                 
                 return True, index
@@ -400,16 +419,23 @@ class syntax_scanner(object):
             return False, -1
     
     # feito levantamento de erros
-    def __isIndexStatement(self, tokenlist=[]):
+    def __consumeIndexStatement(self, node, tokenlist=[]):
         try:
             token = tokenlist[0]
+            new_node = Node("INDEX", parent=node, tokenval="INDEX")
             if token.tokenval == TokenVal.OPEN_BRACKETS.value:
+                Node("OPEN_BRACKET", parent=new_node, tokenval = token.tokenval,
+                 tokentype= token.tokentype, lexeme=token.lexeme, line=token.getNumberOfLine())
                 index = 1
-                isExpression = self.isExpression(tokenlist[index:])
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(new_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
                     if token.tokenval == TokenVal.CLOSE_BRACKETS.value:
+                        Node("CLOSE_BRACKET", parent=new_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme= token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         return True, index
                     else:
@@ -428,17 +454,24 @@ class syntax_scanner(object):
             return False, -1
 
     # feito levantamento de erros
-    def __isAssignment(self, tokenlist=[]):
+    def __consumeAssignment(self, node, tokenlist=[]):
         try:
-            isVar = self.isVar(tokenlist)
+            assign_node = Node("ASSIGNMENT_SMT", tokenval="ASSIGNMENT_STMT", parent=node)
+            isVar = self.sr.isVar(tokenlist)
 
             if isVar[0]:
+                self.__consumeVar(assign_node, tokenlist)
                 index = isVar[1]
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.ASSIGNMENT.value:
+                    Node("ASSIGNMENT", parent=assign_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, 
+                    line = token.getNumberOfLine())
                     index = index + 1
-                    isExpression = self.isExpression(tokenlist[index:])
+                    #isExpression = self.isExpression(tokenlist[index:])
+                    isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
+                        self.__consumeExpression(assign_node, tokenlist[index:])
                         index = index + isExpression[1]
                         return True, index
                     else:
@@ -462,7 +495,7 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = 2
-                    isVar = self.isVar(tokenlist[index:])
+                    isVar = self.sr.isVar(tokenlist[index:])
                     if isVar[0]:
                         index = index + isVar[1]
                         token = tokenlist[index]
@@ -499,7 +532,8 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = index + 1
-                    isExpression = self.isExpression(tokenlist[index:])
+                    #isExpression = self.isExpression(tokenlist[index:])
+                    isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         index = index + isExpression[1]
                         token = tokenlist[index]
@@ -536,7 +570,8 @@ class syntax_scanner(object):
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = index + 1
-                    isExpression = self.isExpression(tokenlist[index:])
+                    #isExpression = self.isExpression(tokenlist[index:])
+                    isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         index = index + isExpression[1]
                         token = tokenlist[index]
@@ -569,7 +604,8 @@ class syntax_scanner(object):
             token = tokenlist[0]
             if token.tokenval == TokenVal.COMMA.value:
                 index = 1
-                isExpression = self.isExpression(tokenlist[index:])
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     return True, index
@@ -583,7 +619,8 @@ class syntax_scanner(object):
 
     def __isArgumentList(self, tokenlist=[]):
         try:
-            isExpression = self.isExpression(tokenlist)
+            #isExpression = self.isExpression(tokenlist)
+            isExpression = self.sr.isExpression(tokenlist)
             if isExpression[0]:
                 index = isExpression[1]
                 isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
@@ -677,7 +714,8 @@ class syntax_scanner(object):
 
             if token.tokenval == TokenVal.COMMA.value:
                 index = index + 1
-                isVar = self.isVar(tokenlist[index:])
+                #isVar = self.isVar(tokenlist[index:])
+                isVar = self.sr.isVar(tokenlist[index:])
                 if isVar[0]:
                     index = index + isVar[1]
                     return True, index
@@ -692,10 +730,13 @@ class syntax_scanner(object):
             return False, -1
 
     # foi realizado o levantamento de erros
-    def __isVarList(self, tokenlist=[]):
+    def __consumeVarList(self, node, tokenlist=[]):
         try:
-            isVar = self.isVar(tokenlist)
+            #isVar = self.isVar(tokenlist)
+            isVar = self.sr.isVar(tokenlist)
+            new_node = Node("VAR_LIST", tokenval="VAR_LIST", parent = node)
             if isVar[0]:
+                self.__consumeVar(new_node, tokenlist)
                 index = isVar[1]
                 isVarListStatement = self.__isVarListStatement(tokenlist[index:])
                 while isVarListStatement[0]:
@@ -710,7 +751,7 @@ class syntax_scanner(object):
             return False, -1
 
     # foi realizado levantamento de erros
-    def __isVarDeclare(self, tokenlist=[]):
+    def __consumeVarDeclare(self, node, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
             index = 0
@@ -722,9 +763,14 @@ class syntax_scanner(object):
                 
                 if token.tokenval == TokenVal.TWO_DOTS.value:
                     index = index + 1
-                    isVarList = self.__isVarList(tokenlist[index:])
+                    #isVarList = self.__isVarList(tokenlist[index:])
+                    isVarList = self.sr.isVarList(tokenlist[index:])
                     if isVarList[0]:
+                        new_node = Node("VAR_DECLARE", parent=node, tokenval="VAR_DECLARE")
+                        self.__consumeVarList(new_node, tokenlist[index:])
                         index = index + isVarList[1]
+                        
+                        
                         return True, index
                     else:
                         if self.errorFound == False:
@@ -742,7 +788,7 @@ class syntax_scanner(object):
 
     def __isAction(self, tokenlist=[]):
         try:
-            isVarDeclare = self.__isVarDeclare(tokenlist)
+            isVarDeclare = self.sr.isVarDeclare(tokenlist)
             if isVarDeclare[0]:
                 return isVarDeclare
             
@@ -766,7 +812,8 @@ class syntax_scanner(object):
             if isRepeat[0]:
                 return isRepeat
 
-            isExpression = self.isExpression(tokenlist)
+            #isExpression = self.isExpression(tokenlist)
+            isExpression = self.sr.isExpression(tokenlist)
             if isExpression[0]:
                 return isExpression
 
@@ -798,7 +845,8 @@ class syntax_scanner(object):
             token = tokenlist[index]
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.isExpression(tokenlist[index:])
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
 
                 if isExpression[0]:
                     index = index + isExpression[1]
@@ -839,8 +887,8 @@ class syntax_scanner(object):
             token = tokenlist[index]
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.isExpression(tokenlist[index:])
-
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -877,8 +925,8 @@ class syntax_scanner(object):
             
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.isExpression(tokenlist[index:])
-
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -932,8 +980,8 @@ class syntax_scanner(object):
             token = tokenlist[index]
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.isExpression(tokenlist[index:])
-
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -983,8 +1031,8 @@ class syntax_scanner(object):
             
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.isExpression(tokenlist[index:])
-
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -1033,8 +1081,8 @@ class syntax_scanner(object):
 
             if token.tokenval == TokenVal.IF.value:
                 index = index + 1
-                isExpression = self.isExpression(tokenlist[index:])
-
+                #isExpression = self.isExpression(tokenlist[index:])
+                isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     index = index + isExpression[1]
                     token = tokenlist[index]
@@ -1122,8 +1170,8 @@ class syntax_scanner(object):
 
                     if token.tokenval == TokenVal.UNTIL.value:
                         index = index + 1
-                        isExpression = self.isExpression(tokenlist[index:])
-
+                        #isExpression = self.isExpression(tokenlist[index:])
+                        isExpression = self.sr.isExpression(tokenlist[index:])
                         if isExpression[0]:
                             index = index + isExpression[1]
                             return True, index
@@ -1162,8 +1210,8 @@ class syntax_scanner(object):
                 
                 if token.tokenval == TokenVal.UNTIL.value:
                     index = index + 1
-                    isExpression = self.isExpression(tokenlist[index:])
-                    
+                    #isExpression = self.isExpression(tokenlist[index:])
+                    isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         index = index + isExpression[1]
                         return True, index
@@ -1511,10 +1559,12 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isHeader(self, tokenlist=[]):
+    def __consumeHeader(self, node, tokenlist=[]):
         try:
+            header_node = Node("HEADER", parent=node, tokenval = "HEADER")
             isFirstHeaderStatement = self.__isFirstHeaderStatement(tokenlist)
             if isFirstHeaderStatement[0]:
+                # parei aqui
                 return isFirstHeaderStatement
             
             isSecondHeaderStatement = self.__isSecondHeaderStatement(tokenlist)
@@ -1535,23 +1585,30 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isFunctionDeclaration(self, tokenlist=[]):
+    def __consumeFunctionDeclaration(self, node, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
             index = 0
             token = tokenlist[index]
-            isHeader = self.__isHeader(tokenlist)
+            #isHeader = self.__isHeader(tokenlist)
+            func_dcl = Node("FUNCTION_DECLARATION", tokenval="FUNCTION_DECLARATION", parent=node)
+            isHeader = self.sr.isHeader(tokenlist)
             if token.tokenval in types:
+                Node("TYPE", parent=func_dcl, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
-                isHeader = self.__isHeader(tokenlist[index:])
-
+                #isHeader = self.__isHeader(tokenlist[index:])
+                isHeader = self.sr.isHeader(tokenlist[index:])
                 if isHeader[0]:
+                    self.__consumeHeader(func_dcl, tokenlist[index:])
                     index = index + isHeader[1]
+                    
                     return True, index
                 else:
                     return False, -1
 
             elif isHeader[0]:
+                self.__consumeHeader(func_dcl, tokenlist)
                 return isHeader
 
             else:
@@ -1561,30 +1618,33 @@ class syntax_scanner(object):
             return False, -1
     
     # levantamento de erros realizado
-    def __isVarInitialization(self, tokenlist=[]):
+    def __consumeVarInitialization(self, node, tokenlist=[]):
         try:
-            return self.__isAssignment(tokenlist)
+            var_initialization = Node("VAR_INITIALIZATION", parent=node, tokenval="VAR_INITIALIZATION")
+            self.__consumeAssignment(var_initialization, tokenlist)
+            #return self.__Assignment(tokenlist)
+            return self.sr.isAssignment(tokenlist)
         except IndexError:
             return False, -1
 
 
-    def __isDeclaration(self, tokenlist=[]):
+    def __consumeDeclaration(self, tokenlist=[]):
         try:
-            isVarDeclare = self.__isVarDeclare(tokenlist)
-  
+            isVarDeclare = self.sr.isVarDeclare(tokenlist)
+            r = Resolver("name")
+            node = r.get(self.st, "DECLARATION_LIST")
             if isVarDeclare[0]:
-                
-                Node("VAR_DECLARE", parent=self.current_node, tokenval="VAR_DECLARE")
+                self.__consumeVarDeclare(node, tokenlist)
                 return isVarDeclare
 
-            isVarInitialization = self.__isVarInitialization(tokenlist)
+            isVarInitialization = self.sr.isVarInitialization(tokenlist)
             if isVarInitialization[0]:
-                Node("VAR_INITIALIZATION", parent=self.current_node, tokenval="VAR_INITIALIZATION")
+                self.__consumeVarInitialization(node, tokenlist)
                 return isVarInitialization
             
-            isFunctionDeclaration = self.__isFunctionDeclaration(tokenlist)
+            isFunctionDeclaration = self.sr.isFunctionDeclaration(tokenlist)
             if isFunctionDeclaration[0]:
-                Node("FUNCTION_DECLARATION", parent=self, tokenval="FUNCTION_DECLARATION")
+                self.__consumeFunctionDeclaration(node,tokenlist)
                 return isFunctionDeclaration
             
             return False, -1
@@ -1594,16 +1654,15 @@ class syntax_scanner(object):
 
     def __isDeclarationsList(self, tokenlist=[]):
         try:
-            isDeclaration = self.__isDeclaration(tokenlist)
+            isDeclaration = self.sr.isDeclaration(tokenlist)
             if isDeclaration[0]:
-                index = isDeclaration[1]
+                Node("DECLARATION_LIST", parent=self.st, tokenval="DECLARATION_LIST")
+                index = 0
                 while isDeclaration[0]:
-                    isDeclaration = self.__isDeclaration(tokenlist[index:])
+                    isDeclaration = self.sr.isDeclaration(tokenlist[index:])
                     if isDeclaration[0]:
-                        index = index + isDeclaration[1]
-                
-                Node("DECLARATION_LIST", tokenval="DECLARATION_LIST", parent=self.st)
-              
+                        self.__consumeDeclaration(tokenlist[index:])
+                        index = index + isDeclaration[1] 
 
                 return True, index
             
@@ -1615,7 +1674,6 @@ class syntax_scanner(object):
 
     def isAProgram(self, tokenlist=[]):
         self.st = Node("PROGRAM",parent=None,tokenval="PROGRAM")
-        #print(RenderTree(self.st))
         return self.__isDeclarationsList(tokenlist)
 
 
@@ -1642,6 +1700,6 @@ class syntax_process(object):
             print("near the token", tokenlist[process[1]].tokenval)
         
         print(RenderTree(sr.st))
-        print(sr.st.descendants[0])
+        #print(sr.st.descendants[0])
         #r = Resolver("name")
         #print(r.get(sr.st,"DECLARATION_LIST"))
