@@ -1,12 +1,13 @@
 from lexical.structure.token.TokenVal import TokenVal
 from lexical.structure.token.Token import token
-
-
+from anytree import Node, RenderTree, PreOrderIter, Walker, Resolver
 
 class syntax_scanner(object):
 
     def __init__(self):
         self.errorFound = False
+        self.current_node = None
+        
         
 
     def __isNumber(self,token):
@@ -1570,15 +1571,20 @@ class syntax_scanner(object):
     def __isDeclaration(self, tokenlist=[]):
         try:
             isVarDeclare = self.__isVarDeclare(tokenlist)
+  
             if isVarDeclare[0]:
+                
+                Node("VAR_DECLARE", parent=self.current_node, tokenval="VAR_DECLARE")
                 return isVarDeclare
 
             isVarInitialization = self.__isVarInitialization(tokenlist)
             if isVarInitialization[0]:
+                Node("VAR_INITIALIZATION", parent=self.current_node, tokenval="VAR_INITIALIZATION")
                 return isVarInitialization
             
             isFunctionDeclaration = self.__isFunctionDeclaration(tokenlist)
             if isFunctionDeclaration[0]:
+                Node("FUNCTION_DECLARATION", parent=self, tokenval="FUNCTION_DECLARATION")
                 return isFunctionDeclaration
             
             return False, -1
@@ -1596,6 +1602,9 @@ class syntax_scanner(object):
                     if isDeclaration[0]:
                         index = index + isDeclaration[1]
                 
+                Node("DECLARATION_LIST", tokenval="DECLARATION_LIST", parent=self.st)
+              
+
                 return True, index
             
             else:
@@ -1605,6 +1614,8 @@ class syntax_scanner(object):
     
 
     def isAProgram(self, tokenlist=[]):
+        self.st = Node("PROGRAM",parent=None,tokenval="PROGRAM")
+        #print(RenderTree(self.st))
         return self.__isDeclarationsList(tokenlist)
 
 
@@ -1624,9 +1635,13 @@ class syntax_process(object):
         process = sr.isAProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
             print("successfull syntactic check")
+        
         elif(len(tokenlist) > process[1] and process[1] > 0 and sr.errorFound == False):
             line = tokenlist[process[1] + 1].getNumberOfLine()
             print("Error near the statement that begins near line", line)
             print("near the token", tokenlist[process[1]].tokenval)
-
-
+        
+        print(RenderTree(sr.st))
+        print(sr.st.descendants[0])
+        #r = Resolver("name")
+        #print(r.get(sr.st,"DECLARATION_LIST"))

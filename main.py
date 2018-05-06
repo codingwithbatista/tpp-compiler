@@ -1,4 +1,4 @@
-#!/home/costa/.anaconda3/bin/python3.6
+#!/usr/bin/python3
 import sys
 from lexical.ScanLex import scanlex
 from lexical.structure.token.Token import token
