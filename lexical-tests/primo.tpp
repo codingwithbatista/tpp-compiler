@@ -10,7 +10,7 @@ inteiro principal()
 		int := i/2
 		resultado := f - int
 		
-		se  resultado > 0
+		se  resultado > 0 então
 			escreva (i)
 		fim
 		i := i+1

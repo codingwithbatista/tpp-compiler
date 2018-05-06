@@ -1,6 +1,6 @@
 inteiro: n
 flutuante: a[10]
-
+n := 2
 inteiro fatorial(inteiro: n)
     inteiro: fat
     se n > 0 então {não calcula se n > 0}
