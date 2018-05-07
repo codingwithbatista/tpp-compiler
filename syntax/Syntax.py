@@ -1375,8 +1375,10 @@ class syntax_scanner(object):
             return False, -1
 
     # foi realizado levantamento de erros
-    def __isParameterList(self, tokenlist=[]):
+    def __consumeParameterList(self, node, tokenlist=[]):
         try:
+            parameter_list_stmt = Node("PARAMETER_LIST_STMT", parent=node, tokenval="PARAMETER_LIST_STMT")
+
             isParameter = self.__isParameter(tokenlist)
             if isParameter[0]:
                 index = isParameter[1]
@@ -1392,27 +1394,36 @@ class syntax_scanner(object):
             return False, -1
 
     
-    def __isFirstHeaderStatement(self, tokenlist=[]):
+    def __consumeFirstHeaderStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-            
+            first_header_stmt = Node("FIRST_HEADER_STMT", parent=node, 
+            tokenval = "FIRST_HEADER_STMT")
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent=first_header_stmt, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
 
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent=first_header_stmt, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
-                    isParameterList = self.__isParameterList(tokenlist[index:])
-
+                    isParameterList = self.sr.isParameterList(tokenlist[index:])
+                    #isParameterList = self.__isParameterList(tokenlist[index:])
+                    
                     if isParameterList[0]:
+                        self.__consumeParameterList(first_header_stmt, tokenlist[index:])
                         index = index + isParameterList[1]
                         token = tokenlist[index]
 
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            Node("CLOSE_PARENTHESES", parent=first_header_stmt, tokenval = token.tokenval,
+                            tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                             index = index + 1
                             isBody = self.__isBody(tokenlist[index:])
-
+                            # parei aqui
                             if isBody[0]:
                                 index = index + isBody[1]
                                 token = tokenlist[index]
@@ -1492,8 +1503,8 @@ class syntax_scanner(object):
 
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     index = index + 1
-                    isParameterList = self.__isParameterList(tokenlist[index:])
-
+                    #isParameterList = self.__ParameterList(tokenlist[index:])
+                    isParameterList = self.sr.isParameterList(tokenlist[index:])
                     if isParameterList[0]:
                         index = index + isParameterList[1]
                         token = tokenlist[index]
@@ -1562,9 +1573,11 @@ class syntax_scanner(object):
     def __consumeHeader(self, node, tokenlist=[]):
         try:
             header_node = Node("HEADER", parent=node, tokenval = "HEADER")
-            isFirstHeaderStatement = self.__isFirstHeaderStatement(tokenlist)
+            #isFirstHeaderStatement = self.__isFirstHeaderStatement(tokenlist)
+            isFirstHeaderStatement = self.sr.isFirstHeaderStatement(tokenlist)
             if isFirstHeaderStatement[0]:
                 # parei aqui
+                self.__consumeFirstHeaderStatement(header_node, tokenlist)
                 return isFirstHeaderStatement
             
             isSecondHeaderStatement = self.__isSecondHeaderStatement(tokenlist)
