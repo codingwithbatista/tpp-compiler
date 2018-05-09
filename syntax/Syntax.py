@@ -377,7 +377,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
     
-    
+    ####### << continuar a partir daqui >> #########
     def __consumeExpression(self, node, tokenlist=[]):
         try:
             Node("EXPRESSION", parent=node, tokenval="EXPRESSION")
@@ -487,19 +487,28 @@ class syntax_scanner(object):
             return False, -1
 
     # feito levantamento de erros
-    def __isRead(self, tokenlist=[]):
+    def __consumeRead(self, node, tokenlist=[]):
         try:
+            read_node = Node("READ_STMT", tokenval = "READ_STMT", parent = node)
             token = tokenlist[0]
             if token.tokenval == TokenVal.READ.value:
+                Node("READ", parent = read_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = 1
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = read_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                    lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = 2
                     isVar = self.sr.isVar(tokenlist[index:])
                     if isVar[0]:
+                        self.__consumeVar(read_node, tokenlist[index:])
                         index = index + isVar[1]
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            Node("CLOSE_PARENTHESES", parent = read_node, tokenval = token.tokenval,
+                            tokentype = token.tokentype, lexeme = token.lexeme, 
+                            line = token.getNumberOfLine())
                             index = index + 1
                             return True, index
                         else:
@@ -523,21 +532,31 @@ class syntax_scanner(object):
             return False, -1
 
     # feito levantamento de erros
-    def __isWrite(self, tokenlist=[]):
+    def __consumeWrite(self, node, tokenlist=[]):
+        # continua aqui 3
         try:
             index = 0
             token = tokenlist[index]
+            write_node = Node("WRITE_STMT", tokenval = "WRITE_STMT", parent = node)
             if token.tokenval == TokenVal.WRITE.value:
+                Node("WRITE", parent = write_node, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = write_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     #isExpression = self.isExpression(tokenlist[index:])
                     isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
+                        self.__consumeExpression(write_node, tokenlist[index:])
                         index = index + isExpression[1]
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            Node("CLOSE_PARENTHESES", parent= write_node, tokenval = token.tokenval,
+                            tokentype = token.tokentype, lexeme = token.lexeme,
+                            line = token.getNumberOfLine())
                             index = index + 1
                             return True, index
                         else:
@@ -561,21 +580,29 @@ class syntax_scanner(object):
             return False, -1
 
     # feito levantamento de erros
-    def __isReturn(self, tokenlist=[]):
+    def __consumeReturn(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
+            return_node = Node("RETURN_STMT", parent = node, tokenval = "RETURN_STMT")
             if token.tokenval == TokenVal.RETURN.value:
+                Node("RETURN", parent =  return_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                line = token.getNumberOfLine(), lexeme = token.lexeme)
                 index = index + 1
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = return_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                    lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     #isExpression = self.isExpression(tokenlist[index:])
                     isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
+                        self.__consumeExpression(tokenlist[index:])
                         index = index + isExpression[1]
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            Node("CLOSE_PARENTHESES", parent = return_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                            lexeme = token.lexeme, line = token.getNumberOfLine())
                             index = index + 1
                             return True, index
                         else:
@@ -599,14 +626,19 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isArgumentStatement(self, tokenlist=[]):
+    def __consumeArgumentStatement(self, node, tokenlist=[]):
         try:
+            argument_node = Node("ARGUMENT_STATEMENT_STMT", parent = node, 
+            tokenval = "ARGUMENT_STATEMENT_STMT")
             token = tokenlist[0]
             if token.tokenval == TokenVal.COMMA.value:
+                Node("COMMA", parent = argument_node, tokenval = token.tokenval, 
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(argument_node, tokenlist[index:])
                     index = index + isExpression[1]
                     return True, index
                 else:
@@ -617,18 +649,22 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isArgumentList(self, tokenlist=[]):
+    def __consumeArgumentList(self, node, tokenlist=[]):
         try:
             #isExpression = self.isExpression(tokenlist)
+            argument_list_node = Node("ARGUMENT_LIST_STMT", tokenval = "ARGUMENT_LIST_STMT", parent = node)
             isExpression = self.sr.isExpression(tokenlist)
             if isExpression[0]:
+                self.__consumeExpression(argument_list_node, tokenlist)
                 index = isExpression[1]
-                isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
-
+                #isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
+                isArgumentStatement = self.sr.isArgumentStatement(tokenlist[index:])
                 if isArgumentStatement[0]:
                     while isArgumentStatement[0]:
-                        isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
+                        #isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
+                        isArgumentStatement = self.sr.isArgumentStatement(tokenlist[index:])
                         if isArgumentStatement[0]:
+                            self.__consumeArgumentStatement(argument_list_node, tokenlist[index:])
                             index = index + isArgumentStatement[1]
                     return True, index
                 else:
@@ -639,17 +675,25 @@ class syntax_scanner(object):
             return False, -1
     
     
-    def __isCallFunctionWithoutArgumentsStatement(self, tokenlist=[]):
+    def __consumeCallFunctionWithoutArgumentsStatement(self, node, tokenlist=[]):
         try:
+            call_function_node = Node("CALL_FUNCTION_WITHOUT_ARGUMENTS_STMT", tokenval = "CALL_FUNCTION_WITHOUT_ARGUMENTS_STMT",
+            parent = node)
             index = 0
             token = tokenlist[index]
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent = call_function_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = call_function_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     token = tokenlist[index]
                     if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                        Node("CLOSE_PARENTHESES", parent = call_function_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         return True, index
                     else:
@@ -662,20 +706,31 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isCallFunctionWithArgumentsStatement(self, tokenlist=[]):
+    def __consumeCallFunctionWithArgumentsStatement(self, node, tokenlist=[]):
         try:
+            call_function_node = Node("CALL_FUNCTION_WITH_ARGUMENTS_STMT", tokenval = "CALL_FUNCTION_WITH_ARGUMENTS_STMT",
+            parent = node)
             index = 0
             token = tokenlist[index]
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent = call_function_node, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = call_function_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
-                    isArgumentList = self.__isArgumentList(tokenlist[index:])
+                    #isArgumentList = self.__isArgumentList(tokenlist[index:])
+                    isArgumentList = self.sr.isArgumentList(tokenlist[index:])
                     if isArgumentList[0]:
+                        self.__consumeArgumentList(call_function_node, tokenlist[index:])
                         index = index + isArgumentList[1]
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            Node("CLOSE_PARENTHESES", parent = call_function_node, tokenval = token.tokenval,
+                            tokentype = token.tokentype, line = token.getNumberOfLine(),
+                            lexeme = token.lexeme)
                             index = index + 1
                             return True, index
                         else:
@@ -690,15 +745,18 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isCallFunction(self, tokenlist=[]):
+    def __consumeCallFunction(self, node, tokenlist=[]):
         try:
-            isCallFunctionWithoutArgumentsStatement = self.__isCallFunctionWithoutArgumentsStatement(tokenlist)
+            call_function_node = Node("CALL_FUNCTION_STMT", tokenval = "CALL_FUNCTION_STMT", parent = node)
+            isCallFunctionWithoutArgumentsStatement = self.sr.isCallFunctionWithoutArgumentsStatement(tokenlist)
             if isCallFunctionWithoutArgumentsStatement[0]:
+                self.__consumeCallFunctionWithoutArgumentsStatement(call_function_node, tokenlist)
                 return isCallFunctionWithoutArgumentsStatement
               
-            isCallFunctionWithArgumentsStatement = self.__isCallFunctionWithArgumentsStatement(tokenlist)
+            isCallFunctionWithArgumentsStatement = self.sr.isCallFunctionWithArgumentsStatement(tokenlist)
             
             if isCallFunctionWithArgumentsStatement[0]:
+                self.__consumeCallFunctionWithArgumentsStatement(call_function_node, tokenlist)
                 return isCallFunctionWithArgumentsStatement
             
             else:
@@ -786,35 +844,48 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isAction(self, tokenlist=[]):
+    def __consumeAction(self, node, tokenlist=[]):
         try:
+            action_node = Node("ACTION_STMT", parent = node, tokenval = "ACTION_STMT")
             isVarDeclare = self.sr.isVarDeclare(tokenlist)
             if isVarDeclare[0]:
+                self.__consumeVarDeclare(action_node,tokenlist)
                 return isVarDeclare
             
-            isRead = self.__isRead(tokenlist)
+            
+            isRead = self.sr.isRead(tokenlist)
             if isRead[0]:
+                self.__consumeRead(action_node, tokenlist)
                 return isRead
             
-            isWrite = self.__isWrite(tokenlist)
+            #isWrite = self.__isWrite(tokenlist)
+            isWrite = self.sr.isWrite(tokenlist)
             if isWrite[0]:
+                self.__consumeWrite(action_node, tokenlist)
                 return isWrite
             
-            isReturn = self.__isReturn(tokenlist)
+            #isReturn = self.__isReturn(tokenlist)
+            isReturn = self.sr.isReturn(tokenlist)
             if isReturn[0]:
+                self.__consumeReturn(action_node, tokenlist)
                 return isReturn
-            
-            isConditional = self.__isConditional(tokenlist)
+                
+           
+            isConditional = self.sr.isConditional(tokenlist)
             if isConditional[0]:
+                self.__consumeConditional(action_node, tokenlist)
                 return isConditional
             
-            isRepeat = self.__isRepeat(tokenlist)
+            #isRepeat = self.__isRepeat(tokenlist)
+            isRepeat = self.sr.isRepeat(tokenlist)
             if isRepeat[0]:
+                self.__consumeRepeat(action_node, tokenlist)
                 return isRepeat
 
             #isExpression = self.isExpression(tokenlist)
             isExpression = self.sr.isExpression(tokenlist)
             if isExpression[0]:
+                self.__consumeExpression(action_node, tokenlist)
                 return isExpression
 
             #self.errorHandler.errorActionStatement()
@@ -823,14 +894,20 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isBody(self, tokenlist=[]):
+    def __consumeBody(self, node, tokenlist=[]):
         try:
-            isAction = self.__isAction(tokenlist)
+            body_node = Node("BODY_STMT", parent=node, tokenval="BODY_STMT")
+            #isAction = self.__isAction(tokenlist)
+            isAction = self.sr.isAction(tokenlist)
             if isAction[0]:
-                index = isAction[1]
+                # parei aqui 2
+                
+                #index = isAction[1]
+                index = 0
                 while isAction[0]:
-                    isAction = self.__isAction(tokenlist[index:])
+                    isAction = self.sr.isAction(tokenlist[index:])
                     if isAction[0]:
+                        self.__consumeAction(body_node, tokenlist[index:])
                         index = index + isAction[1]
                 return True, index
             else:
@@ -839,25 +916,36 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isFirstConditionalStatement(self, tokenlist=[]):
+    def __consumeFirstConditionalStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
+            first_conditional_node = Node("FIRST_CONDITIONAL_STMT", parent = node, 
+            tokenval = "FIRST_CONDITIONAL_STMT")
             if token.tokenval == TokenVal.IF.value:
+                Node("IF", parent = first_conditional_node, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
 
                 if isExpression[0]:
+                    self.__consumeExpression(first_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
                     if token.tokenval == TokenVal.THEN.value:
+                        Node("THEN", parent = first_conditional_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
-                        isBody = self.__isBody(tokenlist[index:])
+                        #isBody = self.__consumeBody(tokenlist[index:])
+                        isBody = self.sr.isBody(tokenlist[index:])
                         if isBody[0]:
+                            self.__consumeBody(first_conditional_node, tokenlist[index:])
                             index = index + isBody[1]
                             token = tokenlist[index]
                             if token.tokenval == TokenVal.END.value:
+                                Node("END", parent = first_conditional_node, tokenval = token.tokenval,
+                                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                                 index = index + 1
                                 return True, index
                             else:
@@ -881,22 +969,30 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isSecondConditionalStatement(self, tokenlist=[]):
+    def __consumeSecondConditionalStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
+            second_conditional_node = Node("SECOND_CONDITIONAL_STMT", tokenval = "SECOND_CONDITIONAL_STMT", 
+            parent = node)
             if token.tokenval == TokenVal.IF.value:
+                Node("IF", parent = second_conditional_node, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(second_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
                     if token.tokenval == TokenVal.THEN.value:
-                        
+                        Node("THEN", parent = second_conditional_node, tokentype = token.tokentype,
+                        tokenval = token.tokenval, line = token.getNumberOfLine(), lexeme = token.lexeme)
                         index = index + 1
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.END.value:
+                            Node("END", parent = second_conditional_node, tokenval = token.tokenval,
+                            tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                             index = index + 1
                             return True, index
                         else:
@@ -918,36 +1014,51 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isThirdConditionalStatement(self, tokenlist=[]):
+    def __consumeThirdConditionalStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-            
+            third_conditional_node = Node("THIRD_CONDITIONAL_STMT", parent = node, tokenval = "THIRD_CONDITIONAL_STMT")
             if token.tokenval == TokenVal.IF.value:
+                Node("IF", parent = third_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(third_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.THEN.value:
+                        Node("THEN", parent = third_conditional_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
-                        isBody = self.__isBody(tokenlist[index:])
+                        isBody = self.sr.isBody(tokenlist[index:])
+                        #self.__consumeBody(tokenlist[index:])
                         
                         if isBody[0]:
+                            self.__consumeBody(third_conditional_node, tokenlist[index:])
                             index = index + isBody[1]
                             token = tokenlist[index]
 
                             if token.tokenval == TokenVal.ELSE.value:
+                                Node("ELSE", parent = third_conditional_node, tokenval = token.tokenval,
+                                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                                 index = index + 1
-                                isBody = self.__isBody(tokenlist[index:])
+                                
+                                isBody = self.sr.isBody(tokenlist[index:])
+                                #self.__consumeBody(tokenlist[index:])
 
                                 if isBody[0]:
+                                    self.__consumeBody(third_conditional_node, tokenlist[index:])
                                     index = index + isBody[1]
                                     token = tokenlist[index]
 
                                     if token.tokenval == TokenVal.END.value:
+                                        Node("END", parent = third_conditional_node, tokenval = token.tokenval,
+                                        tokentype = token.tokentype, lexeme = token.lexeme,
+                                        line = token.getNumberOfLine())
                                         index = index + 1
                                         return True, index
                                     else:
@@ -974,31 +1085,43 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isFourthConditionalStatement(self, tokenlist=[]):
+    def __consumeFourthConditionalStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
+            fourth_conditional_node = Node("FOURTH_CONDITIONAL_STMT", parent = node, tokenval = "FOURTH_CONDITIONAL_STMT")
             if token.tokenval == TokenVal.IF.value:
+                Node("IF", parent = fourth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(fourth_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.THEN.value:
+                        Node("THEN", parent = fourth_conditional_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         token = tokenlist[index]
 
                         if token.tokenval == TokenVal.ELSE.value:
+                            Node("ELSE", parent = fourth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                            lexeme = token.lexeme, line = token.getNumberOfLine())
                             index = index + 1
-                            isBody = self.__isBody(tokenlist[index:])
+                            isBody = self.sr.isBody(tokenlist[index:])
+                            #self.__consumeBody(tokenlist[index:])
 
                             if isBody[0]:
+                                self.__consumeBody(fourth_conditional_node, tokenlist[index:])
                                 index = index + isBody[1]
                                 token = tokenlist[index]
 
                                 if token.tokenval == TokenVal.END.value:
+                                    Node("END", parent = fourth_conditional_node, tokentype = token.tokentype,
+                                    tokenval = token.tokenval, lexeme = token.lexeme, line = token.getNumberOfLine())
                                     index = index + 1
                                     return True, index
                                 
@@ -1024,32 +1147,43 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isFifthConditionalStatement(self, tokenlist=[]):
+    def __consumeFifthConditionalStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-            
+            fifth_conditional_node = Node("FIFTH_CONDITIONAL_STMT", parent = node, tokenval = "FIFTH_CONDITIONAL_STMT")
             if token.tokenval == TokenVal.IF.value:
+                Node("IF", parent = fifth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(fifth_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.THEN.value:
+                        Node("THEN", parent = fifth_conditional_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
-                        isBody = self.__isBody(tokenlist[index:])
+                        isBody = self.sr.isBody(tokenlist[index:])
+                        #self.__consumeBody(tokenlist[index:])
 
                         if isBody[0]:
+                            self.__consumeBody(fifth_conditional_node, tokenlist[index:])
                             index = index + isBody[1]
                             token = tokenlist[index]
 
                             if token.tokenval == TokenVal.ELSE.value:
+                                Node("ELSE", parent = fifth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                                lexeme = token.lexeme, line = token.getNumberOfLine())
                                 index = index + 1
                                 token = tokenlist[index]
 
                                 if token.tokenval == TokenVal.END.value:
+                                    Node("END", parent = fifth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype, 
+                                    lexeme = token.lexeme, line = token.getNumberOfLine())
                                     index = index + 1
                                     return True, index
                                 else:
@@ -1074,28 +1208,37 @@ class syntax_scanner(object):
             return False, -1
 
 
-    def __isSixthConditionalStatement(self, tokenlist=[]):
+    def __consumeSixthConditionalStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-
+            sixth_conditional_node = Node("SIXTH_CONDITIONAL_STMT", parent = node, tokenval = "SIXTH_CONDITIONAL_STMT")
             if token.tokenval == TokenVal.IF.value:
+                Node("IF", parent = sixth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 #isExpression = self.isExpression(tokenlist[index:])
                 isExpression = self.sr.isExpression(tokenlist[index:])
                 if isExpression[0]:
+                    self.__consumeExpression(sixth_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.THEN.value:
+                        Node("THEN", parent = sixth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype, 
+                        lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         token = tokenlist[index]
 
                         if token.tokenval == TokenVal.ELSE.value:
+                            Node("ELSE", parent = sixth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype, 
+                            lexeme = token.lexeme, line = token.getNumberOfLine())
                             index = index + 1
                             token = tokenlist[index]
 
                             if token.tokenval == TokenVal.END.value:
+                                Node("END", parent = sixth_conditional_node, tokenval = token.tokenval, tokentype = token.tokentype, 
+                                lexeme = token.lexeme, line = token.getNumberOfLine())
                                 index = index + 1
                                 return True, index
                             else:
@@ -1119,31 +1262,45 @@ class syntax_scanner(object):
             return False, -1
 
    
-    def __isConditional(self, tokenlist):
-          
+    def __consumeConditional(self, node, tokenlist=[]):
+        print("aqui")
         try:
-            isFirstConditionalStatement = self.__isFirstConditionalStatement(tokenlist)
+            #isFirstConditionalStatement = self.__isFirstConditionalStatement(tokenlist)
+            conditional_node = Node("CONDITIONAL_STMT", parent = node, tokenval = "CONDITIONAL_STMT")
+
+            isFirstConditionalStatement = self.sr.isFirstConditionalStatement(tokenlist)
             if isFirstConditionalStatement[0]:
+                self.__consumeFirstConditionalStatement(conditional_node, tokenlist)
                 return isFirstConditionalStatement
             
-            isSecondConditionalStatement = self.__isSecondConditionalStatement(tokenlist)
+            #isSecondConditionalStatement = self.__isSecondConditionalStatement(tokenlist)
+            isSecondConditionalStatement = self.sr.isSecondConditionalStatement(tokenlist)
             if isSecondConditionalStatement[0]:
+                self.__consumeSecondConditionalStatement(conditional_node, tokenlist)
                 return isSecondConditionalStatement
             
-            isThirdConditionalStatement = self.__isThirdConditionalStatement(tokenlist)
+            #isThirdConditionalStatement = self.__isThirdConditionalStatement(tokenlist)
+            isThirdConditionalStatement = self.sr.isThirdConditionalStatement(tokenlist)
             if isThirdConditionalStatement[0]:
+                self.__consumeThirdConditionalStatement(conditional_node, tokenlist)
                 return isThirdConditionalStatement
 
-            isFourthConditionalStatement = self.__isFourthConditionalStatement(tokenlist)
+            #isFourthConditionalStatement = self.__isFourthConditionalStatement(tokenlist)
+            isFourthConditionalStatement = self.sr.isFourthConditionalStatement(tokenlist)
             if isFourthConditionalStatement[0]:
+                self.__consumeFourthConditionalStatement(conditional_node, tokenlist)
                 return isFourthConditionalStatement
 
-            isFifthConditionalStatement = self.__isFifthConditionalStatement(tokenlist)
+            #isFifthConditionalStatement = self.__isFifthConditionalStatement(tokenlist)
+            isFifthConditionalStatement = self.sr.isFifthConditionalStatement(tokenlist)
             if isFifthConditionalStatement[0]:
+                self.__consumeFifthConditionalStatement(conditional_node, tokenlist)
                 return isFifthConditionalStatement
             
-            isSixthConditionalStatement = self.__isSixthConditionalStatement(tokenlist)
+            #isSixthConditionalStatement = self.__isSixthConditionalStatement(tokenlist)
+            isSixthConditionalStatement = self.sr.isSixthConditionalStatement(tokenlist)
             if isSixthConditionalStatement[0]:
+                self.__consumeSixthConditionalStatement(conditional_node, tokenlist)
                 return isSixthConditionalStatement
             
 
@@ -1155,24 +1312,31 @@ class syntax_scanner(object):
 
     
     # foi realizado levantamento de erros
-    def __isRepeatWithBodyStatement(self, tokenlist=[]):
+    def __consumeRepeatWithBodyStatement(self, node, tokenlist=[]):
         try:
+            repeat_node = Node("REPEAT_WITH_BODY_STMT", parent = node, tokenval = "REPEAT_WITH_BODY_STMT")
             index = 0
             token = tokenlist[index]
 
             if token.tokenval == TokenVal.FOR.value:
+                Node("FOR", parent = repeat_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
-                isBody = self.__isBody(tokenlist[index:])
-
+                #isBody = self.__consumeBody(tokenlist[index:])
+                isBody = self.sr.isBody(tokenlist[index:])
                 if isBody[0]:
+                    self.__consumeBody(repeat_node, tokenlist[index:])
                     index = index + isBody[1]
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.UNTIL.value:
+                        Node("UNTIL", parent = repeat_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                        lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         #isExpression = self.isExpression(tokenlist[index:])
                         isExpression = self.sr.isExpression(tokenlist[index:])
                         if isExpression[0]:
+                            self.__consumeExpression(repeat_node, tokenlist[index:])
                             index = index + isExpression[1]
                             return True, index
                         else:
@@ -1199,20 +1363,25 @@ class syntax_scanner(object):
 
 
     # foi realizado levantamento de erros
-    def __isRepeatWithoutBodyStatement(self, tokenlist=[]):
+    def __consumeRepeatWithoutBodyStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-
+            repeat_node = Node("REPEAT_WITHOUT_BODY_STMT", parent =  node, tokenval = "REPEAT_WITHOUT_BODY_STMT")
             if token.tokenval == TokenVal.FOR.value:
+                Node("FOR", parent = repeat_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
                 
                 if token.tokenval == TokenVal.UNTIL.value:
+                    Node("UNTIL", parent = repeat_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                    lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     #isExpression = self.isExpression(tokenlist[index:])
                     isExpression = self.sr.isExpression(tokenlist[index:])
                     if isExpression[0]:
+                        self.__consumeExpression(repeat_node, tokenlist[index:])
                         index = index + isExpression[1]
                         return True, index
                     else:
@@ -1233,37 +1402,49 @@ class syntax_scanner(object):
 
 
     # foi realizado levantamento de erros
-    def __isRepeat(self, tokenlist=[]):
+    def __consumeRepeat(self, node, tokenlist=[]):
+        repeat_node = Node("REPEAT_STMT", parent = node, tokenval = "REPEAT_STMT")
         try:
-            isRepeatWithBodyStatement = self.__isRepeatWithBodyStatement(tokenlist)
+            #isRepeatWithBodyStatement = self.__isRepeatWithBodyStatement(tokenlist)
+            isRepeatWithBodyStatement = self.sr.isRepeatWithBodyStatement(tokenlist)
 
             if isRepeatWithBodyStatement[0]:
+                self.__consumeRepeatWithBodyStatement(repeat_node, tokenlist)
                 return isRepeatWithBodyStatement
             
-            isRepeatWithoutBodyStatement = self.__isRepeatWithoutBodyStatement(tokenlist)
+            #isRepeatWithoutBodyStatement = self.__isRepeatWithoutBodyStatement(tokenlist)
+            isRepeatWithoutBodyStatement = self.sr.isRepeatWithoutBodyStatement(tokenlist)
 
             if isRepeatWithoutBodyStatement[0]:
+                self.__consumeRepeatWithoutBodyStatement(repeat_node, tokenlist)
                 return isRepeatWithoutBodyStatement
             return False, -1
         except IndexError:
             return False, -1
 
     # foi realizado levantamento de erros
-    def __isParameterStatement(self, tokenlist=[]):
+    def __consumeParameterStatement(self, node, tokenlist=[]):
         try:
+            parameter_statement_node = Node("PARAMETER_STATEMENT_STMT", tokenval = "PARAMETER_STATEMENT_STMT", parent = node)
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
             index = 0
             token = tokenlist[index]
 
             if token.tokenval in types:
+                Node("TYPE", parent = parameter_statement_node, tokenval = token.tokenval, tokentype = token.tokentype, 
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
 
                 if token.tokenval == TokenVal.TWO_DOTS.value:
+                    Node("TWO_DOTS", parent = parameter_statement_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                    lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                        Node("ID", parent = parameter_statement_node, tokenval = token.tokenval, tokentype = token.tokentype, 
+                        lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         return True, index
                     else:
@@ -1280,18 +1461,26 @@ class syntax_scanner(object):
             return False, -1
 
     # foi realizado levantamento de erros
-    def __isUnidimensionalParameter(self, tokenlist=[]):
+    def __consumeUnidimensionalParameter(self, node, tokenlist=[]):
         try:
-            isParameterStatement = self.__isParameterStatement(tokenlist)
+            #isParameterStatement = self.__isParameterStatement(tokenlist)
+            unidimensional_node = Node("UNIDIMENSIONAL_PARAMETER_STMT", tokenval = "UNIDIMENSIONAL_PARAMETER_STMT",
+            parent = node)
+            isParameterStatement = self.sr.isParameterStatement(tokenlist)
             index = 0
             if isParameterStatement[0]:
+                self.__consumeParameterStatement(unidimensional_node, tokenlist)
                 index = index + isParameterStatement[1]
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_BRACKETS.value:
+                    Node("OPEN_BRACKETS", parent = unidimensional_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.CLOSE_BRACKETS.value:
+                        Node("CLOSE_BRACKETS", parent = unidimensional_node, tokenval = token.tokenval, 
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         return True, index
                     else:
@@ -1309,17 +1498,24 @@ class syntax_scanner(object):
     
 
     # foi realizado levantamento de erros
-    def __isBidimensionalParameter(self, tokenlist=[]):
+    def __consumeBidimensionalParameter(self, node, tokenlist=[]):
         try:
-            isUnidimensional = self.__isUnidimensionalParameter(tokenlist)
+            bidimensional_parameter_node = Node("BIDIMENSIONAL_PARAMETER_STMT", parent = node, tokenval = "BIDIMENSIONAL_PARAMETER_STMT")
+            #isUnidimensional = self.__isUnidimensionalParameter(tokenlist)
+            isUnidimensional = self.sr.isUnidimensionalParameter(tokenlist)
             if isUnidimensional[0]:
+                self.__consumeUnidimensionalParameter(bidimensional_parameter_node, tokenlist)
                 index = isUnidimensional[1]
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.OPEN_BRACKETS.value:
+                    Node("OPEN_BRACKETS", parent = bidimensional_parameter_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.CLOSE_BRACKETS.value:
+                        Node("CLOSE_BRACKETS", parent = bidimensional_parameter_node, tokenval = token.tokenval,
+                        tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         return True, index
                     else:
@@ -1335,18 +1531,25 @@ class syntax_scanner(object):
             return False, -1
     
     # foi realizado levantamento de erros
-    def __isParameter(self, tokenlist=[]):
+    def __consumeParameter(self, node, tokenlist=[]):
         try:
-            isBidimensionalParameter = self.__isBidimensionalParameter(tokenlist)
+            #isBidimensionalParameter = self.__isBidimensionalParameter(tokenlist)
+            parameter_node = Node("PARAMETER_STMT", tokenval = "PARAMETER_STMT", parent = node)
+            isBidimensionalParameter = self.sr.isBidimensionalParameter(tokenlist)
             if isBidimensionalParameter[0]:
+                self.__consumeBidimensionalParameter(parameter_node, tokenlist)
                 return isBidimensionalParameter
 
-            isUnidimensionalParameter = self.__isUnidimensionalParameter(tokenlist)
+            #isUnidimensionalParameter = self.__isUnidimensionalParameter(tokenlist)
+            isUnidimensionalParameter = self.sr.isUnidimensionalParameter(tokenlist)
             if isUnidimensionalParameter[0]:
+                self.__consumeUnidimensionalParameter(parameter_node, tokenlist)
                 return isUnidimensionalParameter
             
-            isParameterStatement = self.__isParameterStatement(tokenlist)
+            #isParameterStatement = self.__isParameterStatement(tokenlist)
+            isParameterStatement = self.sr.isParameterStatement(tokenlist)
             if isParameterStatement[0]:
+                self.__consumeParameterStatement(parameter_node, tokenlist)
                 return isParameterStatement
             
             return False, -1
@@ -1354,14 +1557,19 @@ class syntax_scanner(object):
             return False, -1
     
     # foi realizado levantamento de erros
-    def __isParameterListStatement(self, tokenlist=[]):
+    def __consumeParameterListStatement(self, node, tokenlist=[]):
         try:
+            parameter_list_node = Node("PARAMETER_LIST_STMT", parent = node, tokenval = "PARAMETER_LIST_STMT")
             index = 0
             token = tokenlist[index]
             if token.tokenval == TokenVal.COMMA.value:
+                Node("COMMA", parent = parameter_list_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
-                isParameter = self.__isParameter(tokenlist[index:])
+                #isParameter = self.__isParameter(tokenlist[index:])
+                isParameter = self.sr.isParameter(tokenlist[index:])
                 if isParameter[0]:
+                    self.__consumeParameter(parameter_list_node, tokenlist[index:])
                     index = index + isParameter[1]
                     return True, index
                 else:
@@ -1379,13 +1587,18 @@ class syntax_scanner(object):
         try:
             parameter_list_stmt = Node("PARAMETER_LIST_STMT", parent=node, tokenval="PARAMETER_LIST_STMT")
 
-            isParameter = self.__isParameter(tokenlist)
+            #isParameter = self.__Parameter(tokenlist)
+            isParameter = self.sr.isParameter(tokenlist)
             if isParameter[0]:
+                self.__consumeParameter(parameter_list_stmt, tokenlist)
                 index = isParameter[1]
-                isParameterStatement = self.__isParameterStatement(tokenlist[index:])
+                #isParameterStatement = self.__isParameterStatement(tokenlist[index:])
+                isParameterStatement  = self.sr.isParameterStatement(tokenlist[index:])
                 while isParameterStatement[0]:
-                    isParameterStatement = self.__isParameterListStatement(tokenlist[index:])
+                    #isParameterStatement = self.__isParameterListStatement(tokenlist[index:])
+                    isParameterStatement = self.sr.isParameterListStatement(tokenlist[index:])
                     if isParameterStatement[0]:
+                        self.__consumeParameterStatement(parameter_list_stmt, tokenlist[index:])
                         index = index + isParameterStatement[1]
                 return True, index
             else:
@@ -1422,13 +1635,16 @@ class syntax_scanner(object):
                             Node("CLOSE_PARENTHESES", parent=first_header_stmt, tokenval = token.tokenval,
                             tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                             index = index + 1
-                            isBody = self.__isBody(tokenlist[index:])
+                            #isBody = self.__isBody(tokenlist[index:])
+                            isBody = self.sr.isBody(tokenlist[index:])
                             # parei aqui
                             if isBody[0]:
+                                self.__consumeBody(first_header_stmt, tokenlist[index:])
                                 index = index + isBody[1]
                                 token = tokenlist[index]
-
                                 if token.tokenval == TokenVal.END.value:
+                                    Node("END", parent=first_header_stmt, tokenval = token.tokenval, tokentype = token.tokentype,
+                                    lexeme = token.lexeme, line = token.getNumberOfLine())
                                     index = index + 1
                                     return True, index
                                 else:
@@ -1451,28 +1667,38 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isSecondHeaderStatement(self, tokenlist=[]):
+    def __consumeSecondHeaderStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-
+            second_header_stmt = Node("SECOND_HEADER_STMT", parent=node, 
+            tokenval = "SECOND_HEADER_STMT")
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent=second_header_stmt, tokenval = token.tokenval,
+                tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
 
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent=second_header_stmt, tokenval = token.tokenval,
+                    tokentype = token.tokentype, line = token.getNumberOfLine(), lexeme = token.lexeme)
                     index = index + 1
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                        Node("CLOSE_PARENTHESES", parent=second_header_stmt, tokenval = token.tokenval,
+                        tokentype = token.tokentype, line = token.getNumberOfLine(), lexeme = token.lexeme)
                         index = index + 1
-                        isBody = self.__isBody(tokenlist[index:])
-
+                        
+                        isBody = self.sr.isBody(tokenlist[index:])
                         if isBody[0]:
+                            self.__consumeBody(second_header_stmt, tokenlist[index:])
                             index = index + isBody[1]
                             token = tokenlist[index]
 
                             if token.tokenval == TokenVal.END.value:
+                                Node("END", parent=second_header_stmt, tokentype = token.tokentype,
+                                tokenval = token.tokenval, lexeme = token.lexeme, line = token.getNumberOfLine())
                                 index = index + 1
                                 return True, index
                             else:
@@ -1493,27 +1719,37 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isThirdHeaderStatement(self, tokenlist=[]):
+    def __consumeThirdHeaderStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
+            third_header_node = Node("THIRD_HEADER_STMT", parent=node, tokenval="THIRD_HEADER_STMT")
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent=node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
 
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = third_header_node, tokenval = token.tokenval,
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfline())
                     index = index + 1
                     #isParameterList = self.__ParameterList(tokenlist[index:])
                     isParameterList = self.sr.isParameterList(tokenlist[index:])
                     if isParameterList[0]:
+                        self.__consumeParameterList(third_header_node, tokenlist[index:])
                         index = index + isParameterList[1]
                         token = tokenlist[index]
 
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                            Node("CLOSE_PARENTHESES", tokenval = token.tokenval, parent =  third_header_node, 
+                            lexeme = token.lexeme, tokentype = token.tokentype, line = token.getNumberOfLine())
                             index = index + 1
                             token = tokenlist[index]
 
                             if token.tokenval == TokenVal.END.value:
+                                Node("END", parent = third_header_node, tokenval = token.tokentype, tokentype = token.tokentype,
+                                lexeme = token.lexeme, line = token.getNumberOfLine())
                                 index = index + 1
                                 return True, index
                             else:
@@ -1534,24 +1770,33 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isFourthHeaderStatement(self, tokenlist=[]):
+    def __consumeFourthHeaderStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
-
+            fourth_header_node = Node("FOURTH_HEADER_STMT", parent =  node, 
+            tokenval = "FOURTH_HEADER_STMT")
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent = fourth_header_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine())
                 index = index + 1
                 token = tokenlist[index]
 
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
+                    Node("OPEN_PARENTHESES", parent = fourth_header_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                    lexeme = token.lexeme, line = token.getNumberOfLine())
                     index = index + 1
                     token = tokenlist[index]
 
                     if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
+                        Node("CLOSE_PARENTHESES", parent = fourth_header_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                        lexeme = token.lexeme, line = token.getNumberOfLine())
                         index = index + 1
                         token = tokenlist[index]
 
                         if token.tokenval == TokenVal.END.value:
+                            Node("END", parent = fourth_header_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                            line = token.getNumberOfLine(), lexeme = token.lexeme)
                             index = index + 1
                             return True, index
                         else:
@@ -1580,16 +1825,21 @@ class syntax_scanner(object):
                 self.__consumeFirstHeaderStatement(header_node, tokenlist)
                 return isFirstHeaderStatement
             
-            isSecondHeaderStatement = self.__isSecondHeaderStatement(tokenlist)
+            #isSecondHeaderStatement = self.__isSecondHeaderStatement(tokenlist)
+            isSecondHeaderStatement = self.sr.isSecondHeaderStatement(tokenlist)
             if isSecondHeaderStatement[0]:
+                self.__consumeSecondHeaderStatement(header_node, tokenlist)
                 return isSecondHeaderStatement
 
-            isThirdHeaderStatement = self.__isThirdHeaderStatement(tokenlist)
+            isThirdHeaderStatement = self.sr.isThirdHeaderStatement(tokenlist)
             if isThirdHeaderStatement[0]:
+                self.__consumeThirdHeaderStatement(header_node,tokenlist)
                 return isThirdHeaderStatement
             
-            isFourthHeaderStatement = self.__isFourthHeaderStatement(tokenlist)
+            #isFourthHeaderStatement = self.__isFourthHeaderStatement(tokenlist)
+            isFourthHeaderStatement = self.sr.isFourthHeaderStatement(tokenlist)
             if isFourthHeaderStatement[0]:
+                self.__consumeFourthHeaderStatement(header_node, tokenlist)
                 return isFourthHeaderStatement
             
             return False, -1
