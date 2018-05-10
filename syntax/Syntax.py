@@ -201,12 +201,15 @@ class syntax_scanner(object):
             return False, -1
 
     
-    def __isVarIndexStatement(self, node, tokenlist=[]):
+    def __consumeVarIndexStatement(self, node, tokenlist=[]):
         try:
             token = tokenlist[0]
             new_node = Node("VAR_INDEX_STMT", parent=node, tokenval="VAR_INDEX_STMT", number = self.node_number)
             self.node_number += 1
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
+                Node("ID", parent = new_node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
+                self.node_number += 1
                 index = 1
                 #isIndex = self.__isIndex(tokenlist[index:])
                 isIndex = self.sr.isIndex(tokenlist[index:])
@@ -257,7 +260,7 @@ class syntax_scanner(object):
         isVarIndexStatement = self.sr.isVarIndexStatement(tokenlist)
         isNegativeVar = self.sr.isNegativeVarStatement(tokenlist)
         if isVarIndexStatement[0]:
-            self.__isVarIndexStatement(var_node, tokenlist)
+            self.__consumeVarIndexStatement(var_node, tokenlist)
             return isVarIndexStatement
         
         elif token.tokenval == TokenVal.IDENTIFICATOR.value:
@@ -561,7 +564,7 @@ class syntax_scanner(object):
                     #isIndexStatement = self.__isIndexStatement(tokenlist[index:])
                     isIndexStatement = self.sr.isIndexStatement(tokenlist[index:])
                     if isIndexStatement[0]:
-                        self.__consumeIndexStatement(index_stmt, tokenlist)
+                        self.__consumeIndexStatement(index_stmt, tokenlist[index:])
                         index = index + isIndexStatement[1]
                 
                 return True, index
@@ -961,16 +964,20 @@ class syntax_scanner(object):
             return False, -1
     
     # foi realizado o levantamento de erros
-    def __isVarListStatement(self, tokenlist=[]):
+    def __consumeVarListStatement(self, node, tokenlist=[]):
         try:
             index = 0
             token = tokenlist[index]
 
             if token.tokenval == TokenVal.COMMA.value:
+                Node("COMMA", parent = node, tokenval = token.tokenval, tokentype = token.tokentype,
+                line = token.getNumberOfLine(), lexeme = token.lexeme, number = self.node_number)
+                self.node_number += 1
                 index = index + 1
                 #isVar = self.isVar(tokenlist[index:])
                 isVar = self.sr.isVar(tokenlist[index:])
                 if isVar[0]:
+                    self.__consumeVar(node, tokenlist[index:])
                     index = index + isVar[1]
                     return True, index
                 else:
@@ -993,10 +1000,12 @@ class syntax_scanner(object):
             if isVar[0]:
                 self.__consumeVar(new_node, tokenlist)
                 index = isVar[1]
-                isVarListStatement = self.__isVarListStatement(tokenlist[index:])
+                isVarListStatement = self.sr.isVarListStatement(tokenlist[index:])
                 while isVarListStatement[0]:
-                    isVarListStatement = self.__isVarListStatement(tokenlist[index:])
+                    #isVarListStatement = self.__isVarListStatement(tokenlist[index:])
+                    isVarListStatement = self.sr.isVarListStatement(tokenlist[index:])
                     if isVarListStatement[0]:
+                        self.__consumeVarListStatement(new_node, tokenlist[index:])
                         index = index + isVarListStatement[1]
 
                 return True, index
@@ -1013,10 +1022,16 @@ class syntax_scanner(object):
             token = tokenlist[index]
 
             if token.tokenval in types:
+                Node("TYPE", parent=node, tokenval = token.tokenval, tokentype = token.tokentype,
+                lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
+                self.node_number += 1
                 index = index + 1
                 token = tokenlist[index]
                 
                 if token.tokenval == TokenVal.TWO_DOTS.value:
+                    Node("TWO_DOTS", parent = node, tokenval = token.tokenval, tokentype = token.tokentype,
+                    lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
+                    self.node_number += 1
                     index = index + 1
                     #isVarList = self.__isVarList(tokenlist[index:])
                     isVarList = self.sr.isVarList(tokenlist[index:])
@@ -1024,6 +1039,11 @@ class syntax_scanner(object):
                         new_node = Node("VAR_DECLARE", parent=node, tokenval="VAR_DECLARE",
                         number = self.node_number)
                         self.node_number += 1
+
+                        for n in node.children:
+                            if (n.name == "TYPE") or (n.name == "TWO_DOTS"):
+                                n.parent = new_node
+
                         self.__consumeVarList(new_node, tokenlist[index:])
                         index = index + isVarList[1]
                         
