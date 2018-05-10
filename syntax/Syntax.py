@@ -431,18 +431,27 @@ class syntax_scanner(object):
 
     def __consumeLogicStatement(self, node, tokenlist=[]):
         try:
-            logic_node = Node("LOGIC_STATEMENT", tokanval = "LOGIC_STATEMENT", parent = node)
+            #logic_node = Node("LOGIC_STATEMENT", tokanval = "LOGIC_STATEMENT", parent = node)
             token = tokenlist[0]
             #isLogicOperator = self.__isLogicOperator(token)
             isLogicOperator = self.sr.isLogicOperator(token)
             if isLogicOperator:
-                operator_node = Node("LOGIC_OPERATOR", parent = logic_node, tokenval = token.tokenval, 
+                operator_node = Node("LOGIC_OPERATOR", parent = node, tokenval = token.tokenval, 
                 tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
+                #print(operator_node.parent.parent.tokenval)
+                
                 index = 1
                 #isSimpleExpression = self.__isSimpleExpression(tokenlist[index:])
+                
                 isSimpleExpression = self.sr.isSimpleExpression(tokenlist[index:])
                 if isSimpleExpression[0]:
+                    print("deu mano")
+                    for n in node.children:
+                        if n.tokenval == "SIMPLE_EXPRESSION_STMT":
+                            n.parent = operator_node
                     self.__consumeSimpleExpression(operator_node, tokenlist[index:])
+                   
+
                     return True, (index + isSimpleExpression[1])
                 else:
                     print("In line", token.getNumberOfLine())
