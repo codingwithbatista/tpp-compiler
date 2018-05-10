@@ -404,9 +404,15 @@ class syntax_scanner(object):
             simple_node = Node("SIMPLE_STATEMENT", tokenval = "SIMPLE_STATEMENT", parent = node)
             token = tokenlist[0]
             isRelationalOperator = self.sr.isRelationalOperator(token)
+            
             if isRelationalOperator:
+
                 relational_node = Node("RELATIONAL_OPERATOR", parent = simple_node, tokenval = token.tokenval, 
                 tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine())
+                #print(relational_node.parent.parent.tokenval,"1")    
+                for n in relational_node.parent.parent.children:
+                    if n.tokenval == "ADDITIVE_EXPRESSION_STMT":
+                        n.parent = relational_node
                 index = 1
                 isAdditiveExpression = self.sr.isAdditiveExpression(tokenlist[index:])
                 if isAdditiveExpression[0]:
@@ -2045,6 +2051,7 @@ class syntax_scanner(object):
         print("The ", statement, " statement got errors" )
 
 class syntax_process(object):
+    
     
     
     def nodenamefunc(self, node):
