@@ -6,6 +6,9 @@ from lexical.structure.token.TokenVal import TokenVal
 class syntax_rule(object):
 
 
+    def __init__(self):
+        self.errorFound = False
+
     
     def isNumber(self,token):
         number = [TokenVal.SCIENTIFIC_NOTATION.value, TokenVal.FLOAT_NUMBER.value
@@ -279,8 +282,10 @@ class syntax_rule(object):
                 if isMultiplicativeExpression[0]:
                     return True, (1 + isMultiplicativeExpression[1])
                 else:
-                    
-                    
+                    print("In line", token.getNumberOfLine())
+                    print("Error in additive expression")
+                    self.errorFound = True
+
 
                     return False, -1
             else:
@@ -317,7 +322,9 @@ class syntax_rule(object):
                     return True, (index + isAdditiveExpression[1])
                 else:
                     
-                    
+                    print("In line", token.getNumberOfLine())
+                    print("Erro in relational expression")
+                    self.errorFound = True
 
                     return False, -1
             else:
@@ -336,7 +343,9 @@ class syntax_rule(object):
                 if isSimpleExpression[0]:
                     return True, (index + isSimpleExpression[1])
                 else:
-                    
+                    print("In line", token.getNumberOfLine())
+                    print("Error in logic expression statement")
+                    self.errorFound = True
                     
 
                     return False, -1
@@ -410,13 +419,17 @@ class syntax_rule(object):
                         index = index + 1
                         return True, index
                     else:
+                        if self.errorFound == False:
+                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
 
                             
 
                         return False, -1
                 else:
-
-                        
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Index", token.getNumberOfLine())
+                        self.errorFound = True
 
                     return False, -1
             else:
@@ -439,7 +452,9 @@ class syntax_rule(object):
                         index = index + isExpression[1]
                         return True, index
                     else:
-
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Assignment", token.getNumberOfLine())
+                            self.errorFound = True
                             
 
                         return False, -1
@@ -467,17 +482,23 @@ class syntax_rule(object):
                             index = index + 1
                             return True, index
                         else:
-
+                            if self.errorFound == False:
+                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                             return False, -1
                     else:
-
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Variable", token.getNumberOfLine())
+                        self.errorFound = True
                             
 
                         return False, -1
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
+                    self.errorFound = True
                         
 
                     return False, -1
@@ -504,17 +525,23 @@ class syntax_rule(object):
                             index = index + 1
                             return True, index
                         else:
-
+                            if self.errorFound == False:
+                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                             return False, -1
                     else:
-
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Expression", token.getNumberOfLine())
+                            self.errorFound = True
                             
 
                         return False, -1                        
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -541,17 +568,23 @@ class syntax_rule(object):
                             index = index + 1
                             return True, index
                         else:
-
+                            if self.errorFound == False:
+                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                             return False, -1
                     else:
-
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Expression", token.getNumberOfLine())
+                            self.errorFound = True
                             
 
                         return False, -1
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -679,7 +712,9 @@ class syntax_rule(object):
                     index = index + isVar[1]
                     return True, index
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorFound("ID", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -724,8 +759,9 @@ class syntax_rule(object):
                         index = index + isVarList[1]
                         return True, index
                     else:
-
-                            
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Variable declarion", token.getNumberOfLine())
+                            self.errorFound = True  
 
                         return False, -1
                 else:
@@ -815,13 +851,15 @@ class syntax_rule(object):
                             
                             return False, -1
                     else:
-
-                                
-
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                         return False, -1
-                else:
 
-                        
+                else:
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True                        
 
                     return False, -1
             else:
@@ -851,13 +889,17 @@ class syntax_rule(object):
                         else:
                             return False, -1
                     else:
-
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                         return False, -1
                 else:
 
-                        
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True                        
 
                     return False, -1
 
@@ -908,12 +950,15 @@ class syntax_rule(object):
                         else:
                             return False, -1
                     else:
-
-                                
-
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True                       
                         return False, -1
+                                
                 else: 
-
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -958,12 +1003,16 @@ class syntax_rule(object):
                         else:
                             return False, -1
                     else:
-
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                         return False, -1
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -1008,12 +1057,15 @@ class syntax_rule(object):
                         else:
                             return False, -1
                     else:
-
-                                
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
 
                         return False, -1
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -1053,13 +1105,17 @@ class syntax_rule(object):
                         else:
                             return False, -1
                     else:
-
+                        if self.errorFound == False:
+                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                         return False, -1
                 else:
 
-                        
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
+                        self.errorFound = True                  
 
                     return False, -1
             else:
@@ -1125,20 +1181,23 @@ class syntax_rule(object):
                             index = index + isExpression[1]
                             return True, index
                         else:
-
-
+                            if self.errorFound == False:
+                                self.__printErrorStatement("Repeat", token.getNumberOfLine())
+                                self.errorFound = True
                                 
 
                             return False, -1
                             
                     else:
-
-                            
+                        if self.errorFound == False:
+                            self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True      
 
                         return False, -1
                 else:
-
-                        
+                    if self.errorFound == False:
+                        self.__printErrorStatement("Body", token.getNumberOfLine())
+                        self.errorFound = True
 
                     return False, -1
             else:
@@ -1165,13 +1224,15 @@ class syntax_rule(object):
                         index = index + isExpression[1]
                         return True, index
                     else:
-
-                            
+                        if self.errorFound == False:
+                            self.__printErrorStatement("Repeat", token.getNumberOfLine())
+                            self.errorFound = True  
 
                         return False, -1
                 else:
-
-                        
+                    if self.errorFound == False:
+                        self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -1216,10 +1277,12 @@ class syntax_rule(object):
                         index = index + 1
                         return True, index
                     else:
-
+                         if self.errorFound == False:
+                            self.__printErrorStatement("Parameter", token.getNumberOfLine())
+                            self.errorFound = True
                             
 
-                        return False, -1
+                         return False, -1
                 else:
                     return False, -1
             else:
@@ -1244,7 +1307,9 @@ class syntax_rule(object):
                         index = index + 1
                         return True, index
                     else:
-
+                        if self.errorFound == False:
+                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
                             
 
                         return False, -1
@@ -1272,7 +1337,9 @@ class syntax_rule(object):
                         index = index + 1
                         return True, index
                     else:
-
+                        if self.errorFound == False:
+                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
+                            self.errorFound = True
                             
 
                         return False, -1
@@ -1314,7 +1381,9 @@ class syntax_rule(object):
                     index = index + isParameter[1]
                     return True, index
                 else:
-
+                    if self.errorFound == False:
+                        self.__printErrorFound("TYPE", token.tokenval, token.getNumberOfLine())
+                        self.errorFound = True
                         
 
                     return False, -1
@@ -1370,8 +1439,10 @@ class syntax_rule(object):
                                     index = index + 1
                                     return True, index
                                 else:
-
-                                        
+                                    if self.errorFound == False:
+                                        print("Near the statement that begins near line", token.getNumberOfLine())
+                                        print("The statement needs an END token")
+                                        self.errorFound = True                                        
                                         
 
                                     return False, -1
@@ -1414,9 +1485,10 @@ class syntax_rule(object):
                                 index = index + 1
                                 return True, index
                             else:
-
-                                    
-                                    
+                                if self.errorFound == False:
+                                    print("Near the statement that begins near line", token.getNumberOfLine())
+                                    print("The statement needs an END token")
+                                    self.errorFound = True                                    
 
                                 return False, -1
                         else:
@@ -1456,7 +1528,10 @@ class syntax_rule(object):
                                 return True, index
                             else:
 
-                                    
+                                if self.errorFound == False:
+                                    print("Near the statement that begins near line", token.getNumberOfLine())
+                                    print("The statement needs an END token")
+                                    self.errorFound = True    
                                     
 
                                 return False, -1
@@ -1493,7 +1568,10 @@ class syntax_rule(object):
                             index = index + 1
                             return True, index
                         else:
-
+                            if self.errorFound == False:
+                                    print("Near the statement that begins near line", token.getNumberOfLine())
+                                    print("The statement needs an END token")
+                                    self.errorFound = True
                                     
                                     
 
@@ -1604,3 +1682,12 @@ class syntax_rule(object):
                 return False, -1
         except IndexError:
             return False, -1
+    
+    def __printErrorFound(self, expected=str, received=str, line=int):
+        print("In line", line)
+        print("Expected", expected, ", but got a ", received)
+
+    
+    def __printErrorStatement(self, statement=str, line=int):
+        print("Near line", line,":")
+        print("The ", statement, " statement got errors" )

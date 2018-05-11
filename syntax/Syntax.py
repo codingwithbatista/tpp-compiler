@@ -8,7 +8,7 @@ class syntax_scanner(object):
 
     def __init__(self):
         self.errorFound = False
-        self.current_node = None
+        #self.current_node = None
         self.sr = syntax_rule()
         self.node_number = 0
         
@@ -1527,7 +1527,6 @@ class syntax_scanner(object):
 
    
     def __consumeConditional(self, node, tokenlist=[]):
-        print("aqui")
         try:
             #isFirstConditionalStatement = self.__isFirstConditionalStatement(tokenlist)
             conditional_node = Node("CONDITIONAL_STMT", parent = node, tokenval = "CONDITIONAL_STMT",
@@ -2279,7 +2278,7 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def isAProgram(self, tokenlist=[]):
+    def consumeProgram(self, tokenlist=[]):
         self.st = Node("PROGRAM",parent=None,tokenval="PROGRAM", number = self.node_number)
         self.node_number += 1
         return self.__isDeclarationsList(tokenlist)
@@ -2313,20 +2312,23 @@ class syntax_process(object):
         return '--'
 
     def exec(self, tokenlist=[]):
-        sr = syntax_scanner()
-        process = sr.isAProgram(tokenlist)
+        scanner = syntax_scanner()
+        process = scanner.consumeProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
             print("successfull syntactic check")
+            DotExporter(scanner.st, graph="graph", nodenamefunc=self.nodenamefunc,
+            nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
+            edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
         
-        elif(len(tokenlist) > process[1] and process[1] > 0 and sr.errorFound == False):
-            line = tokenlist[process[1] + 1].getNumberOfLine()
+        elif(len(tokenlist) > process[1] and process[1] > 0 and scanner.sr.errorFound == False):
+            line = tokenlist[process[1]].getNumberOfLine()
             print("Error near the statement that begins near line", line)
             print("near the token", tokenlist[process[1]].tokenval)
         
         #print(RenderTree(sr.st))
-        DotExporter(sr.st, graph="graph", nodenamefunc=self.nodenamefunc,
-        nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
-        edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
+        #DotExporter(scanner.st, graph="graph", nodenamefunc=self.nodenamefunc,
+        #nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
+        #edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
         #print(sr.st.descendants[0])
         #r = Resolver("name")
         #print(r.get(sr.st,"DECLARATION_LIST"))
