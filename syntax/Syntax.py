@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from lexical.structure.token.TokenVal import TokenVal
 from lexical.structure.token.Token import token
 from syntax.Rules import syntax_rule
@@ -2120,11 +2121,11 @@ class syntax_process(object):
         process = scanner.consumeProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
             print("successfull syntax check")
-            DotExporter(scanner.syntax_tree, graph="graph", nodenamefunc=self.nodenamefunc,
-            nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
-            edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
+            return scanner.syntax_tree
+
         
         elif(len(tokenlist) > process[1] and process[1] > 0 and scanner.rule_scanner.errorFound == False):
             line = tokenlist[process[1]].getNumberOfLine()
             print("Error near the statement that begins near line", line)
             print("near the token", tokenlist[process[1]].tokenval)
+            return None

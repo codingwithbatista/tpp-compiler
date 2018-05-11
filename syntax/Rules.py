@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from lexical.structure.token.Token import token
 from lexical.structure.token.TokenType import TokenType
 from lexical.structure.token.TokenVal import TokenVal
