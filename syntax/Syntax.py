@@ -1,15 +1,13 @@
 from lexical.structure.token.TokenVal import TokenVal
 from lexical.structure.token.Token import token
 from syntax.Rules import syntax_rule
-from anytree import Node, RenderTree, PreOrderIter, Walker, Resolver
+from anytree import Node, Resolver
 from anytree.dotexport import DotExporter
 
 class syntax_scanner(object):
 
     def __init__(self):
-        self.errorFound = False
-        #self.current_node = None
-        self.sr = syntax_rule()
+        self.rule_scanner = syntax_rule()
         self.node_number = 0
         
 
@@ -21,35 +19,6 @@ class syntax_scanner(object):
         self.node_number += 1
         return (token.tokenval in number)
     
-
-    def __isOperator(self, token, tokenvalues=[]):
-        return (token.tokenval in tokenvalues)
-
-    
-    def __isSumOperator(self, token):
-        tokenvalues = [TokenVal.PLUS.value, TokenVal.MINUS.value]
-        return self.__isOperator(token, tokenvalues)
-    
-
-    def __isTimesOperator(self, token):
-        tokenvalues = [TokenVal.TIMES.value, TokenVal.DIVISION.value]
-        return self.__isOperator(token, tokenvalues)
-    
-
-    def __isRelationalOperator(self, token):
-        tokenvalues = [TokenVal.HIGHER.value, TokenVal.LESS.value,
-        TokenVal.HIGHER_EQUALS.value, TokenVal.LESS_EQUALS.value, TokenVal.LOGIC_EQUALS.value]
-        return self.__isOperator(token, tokenvalues)
-    
-
-    def __isLogicOperator(self, token):
-        tokenvalues = [TokenVal.LOGIC_AND.value, TokenVal.LOGIC_OR.value]
-        return self.__isOperator(token, tokenvalues)
-
-
-    def __isNotLogicOperator(self, token):
-        return self.__isOperator(token, [TokenVal.LOGIC_NOT.value])
-
 
     def __consumeFactorExpressionStatement(self, node, tokenlist):
         try:
@@ -63,8 +32,8 @@ class syntax_scanner(object):
                 number = self.node_number)
                 self.node_number +=  1    
                 index = 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+   
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(factor_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -99,7 +68,7 @@ class syntax_scanner(object):
                 self.node_number += 1
                 index = 1
                 token = tokenlist[index]
-                if self.sr.isNumber(token):
+                if self.rule_scanner.isNumber(token):
                     self.__consumeNumber(negative_node, token)
                     return True, 2
                 else:
@@ -122,7 +91,7 @@ class syntax_scanner(object):
                 self.node_number += 1
                 index = 1
                 token = tokenlist[index]
-                if self.sr.isNumber(token):
+                if self.rule_scanner.isNumber(token):
                     self.__consumeNumber(positive_node, token)
                     return True, 2
                 else:
@@ -138,11 +107,11 @@ class syntax_scanner(object):
             factor_node = Node("FACTOR", parent = node, tokenval = "FACTOR", number = self.node_number)
             self.node_number += 1 
             token = tokenlist[0]
-            isVar = self.sr.isVar(tokenlist)
-            isNegativeNumber = self.sr.IsNegativeNumber(tokenlist)
-            isPositiveNumber = self.sr.isPositiveNumber(tokenlist)
-            isFactorExpressionStatement = self.sr.isFactorExpressionStatement(tokenlist)
-            isCallFunction = self.sr.isCallFunction(tokenlist)
+            isVar = self.rule_scanner.isVar(tokenlist)
+            isNegativeNumber = self.rule_scanner.IsNegativeNumber(tokenlist)
+            isPositiveNumber = self.rule_scanner.isPositiveNumber(tokenlist)
+            isFactorExpressionStatement = self.rule_scanner.isFactorExpressionStatement(tokenlist)
+            isCallFunction = self.rule_scanner.isCallFunction(tokenlist)
                     
             if isFactorExpressionStatement[0]:
                 self.__consumeFactorExpressionStatement(factor_node, tokenlist)
@@ -156,7 +125,7 @@ class syntax_scanner(object):
                 self.__consumeVar(factor_node, tokenlist)
                 return isVar
 
-            elif self.sr.isNumber(token):
+            elif self.rule_scanner.isNumber(token):
                 self.__consumeNumber(factor_node, token)
                 return True, 1
             
@@ -178,14 +147,14 @@ class syntax_scanner(object):
             factor_node = Node("NOT_FACTOR", tokenval = "NOT_FACTOR", parent = node, number = self.node_number)
             self.node_number += 1
             token = tokenlist[0]
-            isNot = self.sr.isNotLogicOperator(token)
-            isFactor = self.sr.isFactor(tokenlist)
+            isNot = self.rule_scanner.isNotLogicOperator(token)
+            isFactor = self.rule_scanner.isFactor(tokenlist)
             if isNot:
                 Node("NOT", parent = factor_node, tokenval = token.tokenval, tokentype = token.tokentype, 
                 line = token.getNumberOfLine(), lexeme = token.lexeme, number = self.node_number)
                 self.node_number += 1
                 index = 1
-                isFactor = self.sr.isFactor(tokenlist[index:])
+                isFactor = self.rule_scanner.isFactor(tokenlist[index:])
                 if isFactor[0]:
                     self.__consumeFactor(factor_node, tokenlist[index:])
                     index = index + isFactor[1]
@@ -211,8 +180,8 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = 1
-                #isIndex = self.__isIndex(tokenlist[index:])
-                isIndex = self.sr.isIndex(tokenlist[index:])
+
+                isIndex = self.rule_scanner.isIndex(tokenlist[index:])
                 if isIndex[0]:
                     self.__consumeIndex(new_node, tokenlist[index:])
                     index = index + isIndex[1]
@@ -255,10 +224,9 @@ class syntax_scanner(object):
         token = tokenlist[0]
         var_node = Node("VAR", parent=node, tokenval = "VAR", number = self.node_number)
         self.node_number += 1
-        #isVarIndexStatement = self.__isVarIndexStatement(tokenlist)
-        #isNegativeVar = self.__isNegativeVarStatement(tokenlist)
-        isVarIndexStatement = self.sr.isVarIndexStatement(tokenlist)
-        isNegativeVar = self.sr.isNegativeVarStatement(tokenlist)
+
+        isVarIndexStatement = self.rule_scanner.isVarIndexStatement(tokenlist)
+        isNegativeVar = self.rule_scanner.isNegativeVarStatement(tokenlist)
         if isVarIndexStatement[0]:
             self.__consumeVarIndexStatement(var_node, tokenlist)
             return isVarIndexStatement
@@ -279,11 +247,11 @@ class syntax_scanner(object):
 
     def __consumeUnaryExpression(self, node, tokenlist=[]):
         try:
-            #isNotFactor = self.__isNotFactor(tokenlist)
-            isNotFactor = self.sr.isNotFactor(tokenlist)
+
+            isNotFactor = self.rule_scanner.isNotFactor(tokenlist)
             token = tokenlist[0]
-            #isSumOperator = self.__isSumOperator(token)
-            isSumOperator = self.sr.isSumOperator(token)
+
+            isSumOperator = self.rule_scanner.isSumOperator(token)
             unary_node = Node("UNARY_EXPRESSION", parent = node, tokenval = "UNARY_EXPRESSION",
             number = self.node_number)
             self.node_number += 1
@@ -292,7 +260,7 @@ class syntax_scanner(object):
                 return isNotFactor
 
             elif isSumOperator:
-                isNotFactor = self.sr.isNotFactor(tokenlist[1:])
+                isNotFactor = self.rule_scanner.isNotFactor(tokenlist[1:])
                 if isNotFactor[0]:
                     self.__consumeNotFactor(unary_node, tokenlist[1:])
                     return True, (1 + isNotFactor[1])
@@ -307,17 +275,17 @@ class syntax_scanner(object):
             mult_node = Node("MULTUPLICATIVE_EXPRESSION_STMT", parent = node, 
             tokenval = "MULTIPLICATIVE_EXPRESSION_STMT", number = self.node_number)
             self.node_number += 1
-            #isUnaryExpression = self.__isUnaryExpression(tokenlist)
-            isUnaryExpression = self.sr.isUnaryExpression(tokenlist)
+
+            isUnaryExpression = self.rule_scanner.isUnaryExpression(tokenlist)
 
             if isUnaryExpression[0]:
                 self.__consumeUnaryExpression(mult_node, tokenlist)
                 index = isUnaryExpression[1]
-                #isMultiplicativeStatement = self.__isMultiplicativeStatement(tokenlist[index:])
-                isMultiplicativeStatement = self.sr.isMultiplicativeStatement(tokenlist[index:])
+
+                isMultiplicativeStatement = self.rule_scanner.isMultiplicativeStatement(tokenlist[index:])
                 while isMultiplicativeStatement[0]:
-                    #isMultiplicativeStatement = self.__isMultiplicativeStatement(tokenlist[index:])
-                    isMultiplicativeStatement = self.sr.isMultiplicativeStatement(tokenlist[index:])
+
+                    isMultiplicativeStatement = self.rule_scanner.isMultiplicativeStatement(tokenlist[index:])
                     if isMultiplicativeStatement[0]:
                         self.__consumeMultiplicativeStatement(mult_node, tokenlist[index:])
                         index = index + isMultiplicativeStatement[1]
@@ -332,7 +300,7 @@ class syntax_scanner(object):
     def __consumeMultiplicativeStatement(self, node, tokenlist=[]):
         try:
             token = tokenlist[0]
-            if self.sr.isTimesOperator(token):
+            if self.rule_scanner.isTimesOperator(token):
                 children_nodes = node.children
                 operator_node = Node("TIMES_OPERATOR", tokenval = token.tokenval,
                 tokentype = token.tokentype, number = self.node_number,
@@ -341,7 +309,7 @@ class syntax_scanner(object):
                 for n in children_nodes:
                     n.parent = operator_node
                 operator_node.parent = node
-                isUnaryExpression = self.sr.isUnaryExpression(tokenlist[1:])
+                isUnaryExpression = self.rule_scanner.isUnaryExpression(tokenlist[1:])
                 if isUnaryExpression[0]:
                     self.__consumeUnaryExpression(operator_node, tokenlist[1:])
                     return True, (isUnaryExpression[1] + 1)
@@ -355,18 +323,16 @@ class syntax_scanner(object):
     
     def __consumeAdditiveExpression(self, node, tokenlist=[]):
         try:
-            # bug está aqui
-            
             add_node = Node("ADDITIVE_EXPRESSION_STMT", parent = node, number = self.node_number,
             tokenval = "ADDITIVE_EXPRESSION_STMT")
             self.node_number += 1
-            isMultiplicativeExpression = self.sr.isMultiplicativeExpression(tokenlist)
+            isMultiplicativeExpression = self.rule_scanner.isMultiplicativeExpression(tokenlist)
             if isMultiplicativeExpression[0]:
                 self.__consumeMultiplicativeExpression(add_node, tokenlist)
                 index = isMultiplicativeExpression[1]
-                isAdditiveStatement = self.sr.isAdditiveStatement(tokenlist[index:])
+                isAdditiveStatement = self.rule_scanner.isAdditiveStatement(tokenlist[index:])
                 while isAdditiveStatement[0]:
-                    isAdditiveStatement = self.sr.isAdditiveStatement(tokenlist[index:])
+                    isAdditiveStatement = self.rule_scanner.isAdditiveStatement(tokenlist[index:])
                     if isAdditiveStatement[0]:
                         self.__consumeAdditiveStatement(add_node, tokenlist[index:])
                         index = index + isAdditiveStatement[1]
@@ -379,16 +345,11 @@ class syntax_scanner(object):
 
     def __consumeAdditiveStatement(self, node, tokenlist=[]):
         try:
-            # VENDO SE O BUG NÃO TA AQUI
-            #print(node.tokenval)
-            
-            #children = node.children
             add_node = Node("ADDITIVE_STATEMENT", tokenval = "ADDITIVE_STATEMENT", number = self.node_number)
-            #children.parent = add_node
             self.node_number += 1
             add_node.parent = node
             token = tokenlist[0]
-            isSumOperator = self.sr.isSumOperator(token)
+            isSumOperator = self.rule_scanner.isSumOperator(token)
             
             if isSumOperator:
                 sum_node = Node("SUM_OPERATOR", parent = add_node, tokenval = token.tokenval, tokentype = token.tokentype,
@@ -397,16 +358,11 @@ class syntax_scanner(object):
                 for n in node.children:
                     if n.tokenval == "MULTIPLICATIVE_EXPRESSION_STMT":
                         n.parent = sum_node
-                #print(n.tokenval)
-                #isMultiplicativeExpression = self.__isMultiplicativeExpression(tokenlist[1:])
-                isMultiplicativeExpression = self.sr.isMultiplicativeExpression(tokenlist[1:])
+                isMultiplicativeExpression = self.rule_scanner.isMultiplicativeExpression(tokenlist[1:])
                 if isMultiplicativeExpression[0]:
                     self.__consumeMultiplicativeExpression(sum_node, tokenlist[1:])
                     return True, (1 + isMultiplicativeExpression[1])
                 else:
-                    print("In line", token.getNumberOfLine())
-                    print("Error in additive expression")
-                    self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -419,14 +375,14 @@ class syntax_scanner(object):
             simple_node = Node("SIMPLE_EXPRESSION_STMT", parent = node, tokenval = "SIMPLE_EXPRESSION_STMT",
             number = self.node_number)
             self.node_number += 1
-            #isAdditiveExpression = self.__isAdditiveExpression(tokenlist)
-            isAdditiveExpression = self.sr.isAdditiveExpression(tokenlist)
+
+            isAdditiveExpression = self.rule_scanner.isAdditiveExpression(tokenlist)
             if isAdditiveExpression[0]:
                 self.__consumeAdditiveExpression(simple_node, tokenlist)
                 index = isAdditiveExpression[1]
-                isSimpleStatement = self.sr.isSimpleStatement(tokenlist[index:])
+                isSimpleStatement = self.rule_scanner.isSimpleStatement(tokenlist[index:])
                 while isSimpleStatement[0]:
-                    isSimpleStatement = self.sr.isSimpleStatement(tokenlist[index:])
+                    isSimpleStatement = self.rule_scanner.isSimpleStatement(tokenlist[index:])
                     if isSimpleStatement[0]:
                         self.__consumeSimpleStatement(simple_node, tokenlist[index:])
                         index = index + isSimpleStatement[1]
@@ -443,7 +399,7 @@ class syntax_scanner(object):
             number = self.node_number)
             self.node_number += 1
             token = tokenlist[0]
-            isRelationalOperator = self.sr.isRelationalOperator(token)
+            isRelationalOperator = self.rule_scanner.isRelationalOperator(token)
             
             if isRelationalOperator:
 
@@ -451,19 +407,16 @@ class syntax_scanner(object):
                 tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine(),
                 number = self.node_number)
                 self.node_number += 1
-                #print(relational_node.parent.parent.tokenval,"1")    
+  
                 for n in relational_node.parent.parent.children:
                     if n.tokenval == "ADDITIVE_EXPRESSION_STMT":
                         n.parent = relational_node
                 index = 1
-                isAdditiveExpression = self.sr.isAdditiveExpression(tokenlist[index:])
+                isAdditiveExpression = self.rule_scanner.isAdditiveExpression(tokenlist[index:])
                 if isAdditiveExpression[0]:
                     self.__consumeAdditiveExpression(relational_node, tokenlist[index:])
                     return True, (index + isAdditiveExpression[1])
                 else:
-                    print("In line", token.getNumberOfLine())
-                    print("Erro in relational expression")
-                    self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -473,33 +426,25 @@ class syntax_scanner(object):
 
     def __consumeLogicStatement(self, node, tokenlist=[]):
         try:
-            #logic_node = Node("LOGIC_STATEMENT", tokanval = "LOGIC_STATEMENT", parent = node)
+   
             token = tokenlist[0]
-            #isLogicOperator = self.__isLogicOperator(token)
-            isLogicOperator = self.sr.isLogicOperator(token)
+            isLogicOperator = self.rule_scanner.isLogicOperator(token)
             if isLogicOperator:
                 operator_node = Node("LOGIC_OPERATOR", parent = node, tokenval = token.tokenval, 
                 tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine(),
                 number = self.node_number)
                 self.node_number += 1 
-                #print(operator_node.parent.parent.tokenval)
-                
+
                 index = 1
-                #isSimpleExpression = self.__isSimpleExpression(tokenlist[index:])
-                
-                isSimpleExpression = self.sr.isSimpleExpression(tokenlist[index:])
+                isSimpleExpression = self.rule_scanner.isSimpleExpression(tokenlist[index:])
                 if isSimpleExpression[0]:
                     for n in node.children:
                         if n.tokenval == "SIMPLE_EXPRESSION_STMT":
                             n.parent = operator_node
                     self.__consumeSimpleExpression(operator_node, tokenlist[index:])
                    
-
                     return True, (index + isSimpleExpression[1])
                 else:
-                    print("In line", token.getNumberOfLine())
-                    print("Error in logic expression statement")
-                    self.errorFound = True
                     return False, -1
             else:
                 return False,-1
@@ -512,13 +457,13 @@ class syntax_scanner(object):
             logic_node  = Node("LOGIC_EXPRESSION_STMT", parent = node, tokenval = "LOGIC_EXPRESSION_STMT",
             number = self.node_number)
             self.node_number += 1
-            isSimpleExpression = self.sr.isSimpleExpression(tokenlist)
+            isSimpleExpression = self.rule_scanner.isSimpleExpression(tokenlist)
             if isSimpleExpression[0]:
                 self.__consumeSimpleExpression(logic_node, tokenlist)
                 index = isSimpleExpression[1]
-                isLogicStatement = self.sr.isLogicStatement(tokenlist[index:])
+                isLogicStatement = self.rule_scanner.isLogicStatement(tokenlist[index:])
                 while isLogicStatement[0]:
-                    isLogicStatement = self.sr.isLogicStatement(tokenlist[index:])
+                    isLogicStatement = self.rule_scanner.isLogicStatement(tokenlist[index:])
                     if isLogicStatement[0]:
                         self.__consumeLogicStatement(logic_node, tokenlist[index:])
                         index = index + isLogicStatement[1]
@@ -528,15 +473,15 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
     
-    ####### << continuar a partir daqui >> #########
+
     def __consumeExpression(self, node, tokenlist=[]):
         try:
             exp_node = Node("EXPRESSION", parent=node, tokenval="EXPRESSION", number = self.node_number)
             self.node_number += 1
-            #isLogicExpression = self.__isLogicExpression(tokenlist)
-            isLogicExpression = self.sr.isLogicExpression(tokenlist)
-            #isAssignment = self.__isAssignment(tokenlist)
-            isAssignment = self.sr.isAssignment(tokenlist)
+
+            isLogicExpression = self.rule_scanner.isLogicExpression(tokenlist)
+
+            isAssignment = self.rule_scanner.isAssignment(tokenlist)
             if isAssignment[0]:
                 self.__consumeAssignment(exp_node, tokenlist)
                 return isAssignment
@@ -550,19 +495,19 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def __consumeIndex(self, node, tokenlist=[]):
         try:
-            #isIndexStatement = self.__isIndexStatement(tokenlist)
-            isIndexStatement = self.sr.isIndexStatement(tokenlist)
+
+            isIndexStatement = self.rule_scanner.isIndexStatement(tokenlist)
             index = 0
             if isIndexStatement[0]:            
-                #self.__consumeIndexStatement(tokenlist)
+ 
                 index_stmt = Node("INDEX_STMT", tokenval = "INDEX_STMT", parent=node, number = self.node_number)
                 self.node_number += 1
                 while isIndexStatement[0]:
-                    #isIndexStatement = self.__isIndexStatement(tokenlist[index:])
-                    isIndexStatement = self.sr.isIndexStatement(tokenlist[index:])
+
+                    isIndexStatement = self.rule_scanner.isIndexStatement(tokenlist[index:])
                     if isIndexStatement[0]:
                         self.__consumeIndexStatement(index_stmt, tokenlist[index:])
                         index = index + isIndexStatement[1]
@@ -573,7 +518,7 @@ class syntax_scanner(object):
         except:
             return False, -1
     
-    # feito levantamento de erros
+
     def __consumeIndexStatement(self, node, tokenlist=[]):
         try:
             token = tokenlist[0]
@@ -585,8 +530,8 @@ class syntax_scanner(object):
                 number = self.node_number)
                 self.node_number += 1
                 index = 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(new_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -613,16 +558,16 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def __consumeAssignment(self, node, tokenlist=[]):
         try:
             assign_node = Node("ASSIGNMENT_STMT", tokenval="ASSIGNMENT_STMT", parent=node,
             number = self.node_number)
             self.node_number += 1
-            isVar = self.sr.isVar(tokenlist)
+            isVar = self.rule_scanner.isVar(tokenlist)
 
             if isVar[0]:
-                #self.__consumeVar(assign_node, tokenlist)
+
                 index = isVar[1]
                 token = tokenlist[index]
                 if token.tokenval == TokenVal.ASSIGNMENT.value:
@@ -631,8 +576,8 @@ class syntax_scanner(object):
                     line = token.getNumberOfLine(), number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    #isExpression = self.isExpression(tokenlist[index:])
-                    isExpression = self.sr.isExpression(tokenlist[index:])
+
+                    isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         self.__consumeVar(signal_node, tokenlist)
                         self.__consumeExpression(signal_node, tokenlist[index:])
@@ -651,7 +596,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def __consumeRead(self, node, tokenlist=[]):
         try:
             read_node = Node("READ_STMT", tokenval = "READ_STMT", parent = node, number = self.node_number)
@@ -668,7 +613,7 @@ class syntax_scanner(object):
                     lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                     self.node_number += 1
                     index = 2
-                    isVar = self.sr.isVar(tokenlist[index:])
+                    isVar = self.rule_scanner.isVar(tokenlist[index:])
                     if isVar[0]:
                         self.__consumeVar(read_node, tokenlist[index:])
                         index = index + isVar[1]
@@ -700,9 +645,9 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+ 
     def __consumeWrite(self, node, tokenlist=[]):
-        # continua aqui 3
+
         try:
             index = 0
             token = tokenlist[index]
@@ -721,8 +666,8 @@ class syntax_scanner(object):
                     number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    #isExpression = self.isExpression(tokenlist[index:])
-                    isExpression = self.sr.isExpression(tokenlist[index:])
+
+                    isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         self.__consumeExpression(write_node, tokenlist[index:])
                         index = index + isExpression[1]
@@ -754,7 +699,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def __consumeReturn(self, node, tokenlist=[]):
         try:
             index = 0
@@ -773,8 +718,8 @@ class syntax_scanner(object):
                     lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                     self.node_number += 1 
                     index = index + 1
-                    #isExpression = self.isExpression(tokenlist[index:])
-                    isExpression = self.sr.isExpression(tokenlist[index:])
+
+                    isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         self.__consumeExpression(tokenlist[index:])
                         index = index + isExpression[1]
@@ -818,8 +763,8 @@ class syntax_scanner(object):
                 number = self.node_number)
                 self.node_number += 1
                 index = 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(argument_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -834,20 +779,20 @@ class syntax_scanner(object):
 
     def __consumeArgumentList(self, node, tokenlist=[]):
         try:
-            #isExpression = self.isExpression(tokenlist)
+
             argument_list_node = Node("ARGUMENT_LIST_STMT", tokenval = "ARGUMENT_LIST_STMT", parent = node,
             number = self.node_number)
             self.node_number += 1
-            isExpression = self.sr.isExpression(tokenlist)
+            isExpression = self.rule_scanner.isExpression(tokenlist)
             if isExpression[0]:
                 self.__consumeExpression(argument_list_node, tokenlist)
                 index = isExpression[1]
-                #isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
-                isArgumentStatement = self.sr.isArgumentStatement(tokenlist[index:])
+
+                isArgumentStatement = self.rule_scanner.isArgumentStatement(tokenlist[index:])
                 if isArgumentStatement[0]:
                     while isArgumentStatement[0]:
-                        #isArgumentStatement = self.__isArgumentStatement(tokenlist[index:])
-                        isArgumentStatement = self.sr.isArgumentStatement(tokenlist[index:])
+
+                        isArgumentStatement = self.rule_scanner.isArgumentStatement(tokenlist[index:])
                         if isArgumentStatement[0]:
                             self.__consumeArgumentStatement(argument_list_node, tokenlist[index:])
                             index = index + isArgumentStatement[1]
@@ -917,8 +862,8 @@ class syntax_scanner(object):
                     number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    #isArgumentList = self.__isArgumentList(tokenlist[index:])
-                    isArgumentList = self.sr.isArgumentList(tokenlist[index:])
+
+                    isArgumentList = self.rule_scanner.isArgumentList(tokenlist[index:])
                     if isArgumentList[0]:
                         self.__consumeArgumentList(call_function_node, tokenlist[index:])
                         index = index + isArgumentList[1]
@@ -947,12 +892,12 @@ class syntax_scanner(object):
             call_function_node = Node("CALL_FUNCTION_STMT", tokenval = "CALL_FUNCTION_STMT", parent = node,
             number = self.node_number)
             self.node_number += 1
-            isCallFunctionWithoutArgumentsStatement = self.sr.isCallFunctionWithoutArgumentsStatement(tokenlist)
+            isCallFunctionWithoutArgumentsStatement = self.rule_scanner.isCallFunctionWithoutArgumentsStatement(tokenlist)
             if isCallFunctionWithoutArgumentsStatement[0]:
                 self.__consumeCallFunctionWithoutArgumentsStatement(call_function_node, tokenlist)
                 return isCallFunctionWithoutArgumentsStatement
               
-            isCallFunctionWithArgumentsStatement = self.sr.isCallFunctionWithArgumentsStatement(tokenlist)
+            isCallFunctionWithArgumentsStatement = self.rule_scanner.isCallFunctionWithArgumentsStatement(tokenlist)
             
             if isCallFunctionWithArgumentsStatement[0]:
                 self.__consumeCallFunctionWithArgumentsStatement(call_function_node, tokenlist)
@@ -963,7 +908,7 @@ class syntax_scanner(object):
         except:
             return False, -1
     
-    # foi realizado o levantamento de erros
+
     def __consumeVarListStatement(self, node, tokenlist=[]):
         try:
             index = 0
@@ -974,8 +919,8 @@ class syntax_scanner(object):
                 line = token.getNumberOfLine(), lexeme = token.lexeme, number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isVar = self.isVar(tokenlist[index:])
-                isVar = self.sr.isVar(tokenlist[index:])
+
+                isVar = self.rule_scanner.isVar(tokenlist[index:])
                 if isVar[0]:
                     self.__consumeVar(node, tokenlist[index:])
                     index = index + isVar[1]
@@ -990,20 +935,20 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # foi realizado o levantamento de erros
+
     def __consumeVarList(self, node, tokenlist=[]):
         try:
-            #isVar = self.isVar(tokenlist)
-            isVar = self.sr.isVar(tokenlist)
+
+            isVar = self.rule_scanner.isVar(tokenlist)
             new_node = Node("VAR_LIST", tokenval="VAR_LIST", parent = node, number = self.node_number)
             self.node_number += 1
             if isVar[0]:
                 self.__consumeVar(new_node, tokenlist)
                 index = isVar[1]
-                isVarListStatement = self.sr.isVarListStatement(tokenlist[index:])
+                isVarListStatement = self.rule_scanner.isVarListStatement(tokenlist[index:])
                 while isVarListStatement[0]:
-                    #isVarListStatement = self.__isVarListStatement(tokenlist[index:])
-                    isVarListStatement = self.sr.isVarListStatement(tokenlist[index:])
+   
+                    isVarListStatement = self.rule_scanner.isVarListStatement(tokenlist[index:])
                     if isVarListStatement[0]:
                         self.__consumeVarListStatement(new_node, tokenlist[index:])
                         index = index + isVarListStatement[1]
@@ -1014,7 +959,7 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def __consumeVarDeclare(self, node, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
@@ -1033,8 +978,8 @@ class syntax_scanner(object):
                     lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    #isVarList = self.__isVarList(tokenlist[index:])
-                    isVarList = self.sr.isVarList(tokenlist[index:])
+
+                    isVarList = self.rule_scanner.isVarList(tokenlist[index:])
                     if isVarList[0]:
                         new_node = Node("VAR_DECLARE", parent=node, tokenval="VAR_DECLARE",
                         number = self.node_number)
@@ -1067,48 +1012,48 @@ class syntax_scanner(object):
         try:
             action_node = Node("ACTION_STMT", parent = node, tokenval = "ACTION_STMT", number = self.node_number)
             self.node_number += 1
-            isVarDeclare = self.sr.isVarDeclare(tokenlist)
+            isVarDeclare = self.rule_scanner.isVarDeclare(tokenlist)
             if isVarDeclare[0]:
                 self.__consumeVarDeclare(action_node,tokenlist)
                 return isVarDeclare
             
             
-            isRead = self.sr.isRead(tokenlist)
+            isRead = self.rule_scanner.isRead(tokenlist)
             if isRead[0]:
                 self.__consumeRead(action_node, tokenlist)
                 return isRead
             
-            #isWrite = self.__isWrite(tokenlist)
-            isWrite = self.sr.isWrite(tokenlist)
+
+            isWrite = self.rule_scanner.isWrite(tokenlist)
             if isWrite[0]:
                 self.__consumeWrite(action_node, tokenlist)
                 return isWrite
             
-            #isReturn = self.__isReturn(tokenlist)
-            isReturn = self.sr.isReturn(tokenlist)
+
+            isReturn = self.rule_scanner.isReturn(tokenlist)
             if isReturn[0]:
                 self.__consumeReturn(action_node, tokenlist)
                 return isReturn
                 
            
-            isConditional = self.sr.isConditional(tokenlist)
+            isConditional = self.rule_scanner.isConditional(tokenlist)
             if isConditional[0]:
                 self.__consumeConditional(action_node, tokenlist)
                 return isConditional
             
-            #isRepeat = self.__isRepeat(tokenlist)
-            isRepeat = self.sr.isRepeat(tokenlist)
+
+            isRepeat = self.rule_scanner.isRepeat(tokenlist)
             if isRepeat[0]:
                 self.__consumeRepeat(action_node, tokenlist)
                 return isRepeat
 
-            #isExpression = self.isExpression(tokenlist)
-            isExpression = self.sr.isExpression(tokenlist)
+
+            isExpression = self.rule_scanner.isExpression(tokenlist)
             if isExpression[0]:
                 self.__consumeExpression(action_node, tokenlist)
                 return isExpression
 
-            #self.errorHandler.errorActionStatement()
+
             return False, -1
         except IndexError:
             return False, -1
@@ -1118,15 +1063,13 @@ class syntax_scanner(object):
         try:
             body_node = Node("BODY_STMT", parent=node, tokenval="BODY_STMT", number = self.node_number)
             self.node_number += 1
-            #isAction = self.__isAction(tokenlist)
-            isAction = self.sr.isAction(tokenlist)
+
+            isAction = self.rule_scanner.isAction(tokenlist)
             if isAction[0]:
-                # parei aqui 2
-                
-                #index = isAction[1]
+
                 index = 0
                 while isAction[0]:
-                    isAction = self.sr.isAction(tokenlist[index:])
+                    isAction = self.rule_scanner.isAction(tokenlist[index:])
                     if isAction[0]:
                         self.__consumeAction(body_node, tokenlist[index:])
                         index = index + isAction[1]
@@ -1150,8 +1093,8 @@ class syntax_scanner(object):
                 number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
 
                 if isExpression[0]:
                     self.__consumeExpression(first_conditional_node, tokenlist[index:])
@@ -1163,8 +1106,8 @@ class syntax_scanner(object):
                         number = self.node_number)
                         self.node_number += 1
                         index = index + 1
-                        #isBody = self.__consumeBody(tokenlist[index:])
-                        isBody = self.sr.isBody(tokenlist[index:])
+ 
+                        isBody = self.rule_scanner.isBody(tokenlist[index:])
                         if isBody[0]:
                             self.__consumeBody(first_conditional_node, tokenlist[index:])
                             index = index + isBody[1]
@@ -1182,14 +1125,8 @@ class syntax_scanner(object):
                             
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1210,8 +1147,8 @@ class syntax_scanner(object):
                 number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(second_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -1232,17 +1169,10 @@ class syntax_scanner(object):
                             return True, index
                         else:
                             return False, -1
-                    else:
-                        if self.errorFound == False:
-                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True                        
+                    else:                       
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
-
             else:
                 return False, -1
         except:
@@ -1261,8 +1191,8 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(third_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -1274,8 +1204,7 @@ class syntax_scanner(object):
                         number = self.node_number)
                         self.node_number += 1
                         index = index + 1
-                        isBody = self.sr.isBody(tokenlist[index:])
-                        #self.__consumeBody(tokenlist[index:])
+                        isBody = self.rule_scanner.isBody(tokenlist[index:])
                         
                         if isBody[0]:
                             self.__consumeBody(third_conditional_node, tokenlist[index:])
@@ -1289,8 +1218,7 @@ class syntax_scanner(object):
                                 self.node_number += 1
                                 index = index + 1
                                 
-                                isBody = self.sr.isBody(tokenlist[index:])
-                                #self.__consumeBody(tokenlist[index:])
+                                isBody = self.rule_scanner.isBody(tokenlist[index:])
 
                                 if isBody[0]:
                                     self.__consumeBody(third_conditional_node, tokenlist[index:])
@@ -1312,15 +1240,9 @@ class syntax_scanner(object):
                                 return False, -1
                         else:
                             return False, -1
-                    else:
-                        if self.errorFound == False:
-                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True                       
+                    else:                    
                         return False, -1
                 else: 
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1340,8 +1262,8 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(fourth_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -1360,8 +1282,7 @@ class syntax_scanner(object):
                             lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                             self.node_number += 1
                             index = index + 1
-                            isBody = self.sr.isBody(tokenlist[index:])
-                            #self.__consumeBody(tokenlist[index:])
+                            isBody = self.rule_scanner.isBody(tokenlist[index:])
 
                             if isBody[0]:
                                 self.__consumeBody(fourth_conditional_node, tokenlist[index:])
@@ -1383,14 +1304,8 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1410,8 +1325,8 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(fifth_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -1423,8 +1338,8 @@ class syntax_scanner(object):
                         number = self.node_number)
                         self.node_number += 1
                         index = index + 1
-                        isBody = self.sr.isBody(tokenlist[index:])
-                        #self.__consumeBody(tokenlist[index:])
+                        isBody = self.rule_scanner.isBody(tokenlist[index:])
+
 
                         if isBody[0]:
                             self.__consumeBody(fifth_conditional_node, tokenlist[index:])
@@ -1451,14 +1366,10 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
+
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
-                        self.errorFound = True
+
                     return False, -1
             else:
                 return False, -1
@@ -1478,8 +1389,8 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isExpression = self.isExpression(tokenlist[index:])
-                isExpression = self.sr.isExpression(tokenlist[index:])
+
+                isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                 if isExpression[0]:
                     self.__consumeExpression(sixth_conditional_node, tokenlist[index:])
                     index = index + isExpression[1]
@@ -1511,14 +1422,10 @@ class syntax_scanner(object):
                         else:
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                                self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
+
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Conditional", token.getNumberOfLine())
-                        self.errorFound = True
+
                     return False, -1
             else:
                 return False, -1
@@ -1528,55 +1435,46 @@ class syntax_scanner(object):
    
     def __consumeConditional(self, node, tokenlist=[]):
         try:
-            #isFirstConditionalStatement = self.__isFirstConditionalStatement(tokenlist)
+
             conditional_node = Node("CONDITIONAL_STMT", parent = node, tokenval = "CONDITIONAL_STMT",
             number = self.node_number)
             self.node_number += 1
 
-            isFirstConditionalStatement = self.sr.isFirstConditionalStatement(tokenlist)
+            isFirstConditionalStatement = self.rule_scanner.isFirstConditionalStatement(tokenlist)
             if isFirstConditionalStatement[0]:
                 self.__consumeFirstConditionalStatement(conditional_node, tokenlist)
                 return isFirstConditionalStatement
             
-            #isSecondConditionalStatement = self.__isSecondConditionalStatement(tokenlist)
-            isSecondConditionalStatement = self.sr.isSecondConditionalStatement(tokenlist)
+            isSecondConditionalStatement = self.rule_scanner.isSecondConditionalStatement(tokenlist)
             if isSecondConditionalStatement[0]:
                 self.__consumeSecondConditionalStatement(conditional_node, tokenlist)
                 return isSecondConditionalStatement
             
-            #isThirdConditionalStatement = self.__isThirdConditionalStatement(tokenlist)
-            isThirdConditionalStatement = self.sr.isThirdConditionalStatement(tokenlist)
+            isThirdConditionalStatement = self.rule_scanner.isThirdConditionalStatement(tokenlist)
             if isThirdConditionalStatement[0]:
                 self.__consumeThirdConditionalStatement(conditional_node, tokenlist)
                 return isThirdConditionalStatement
 
-            #isFourthConditionalStatement = self.__isFourthConditionalStatement(tokenlist)
-            isFourthConditionalStatement = self.sr.isFourthConditionalStatement(tokenlist)
+            isFourthConditionalStatement = self.rule_scanner.isFourthConditionalStatement(tokenlist)
             if isFourthConditionalStatement[0]:
                 self.__consumeFourthConditionalStatement(conditional_node, tokenlist)
                 return isFourthConditionalStatement
 
-            #isFifthConditionalStatement = self.__isFifthConditionalStatement(tokenlist)
-            isFifthConditionalStatement = self.sr.isFifthConditionalStatement(tokenlist)
+            isFifthConditionalStatement = self.rule_scanner.isFifthConditionalStatement(tokenlist)
             if isFifthConditionalStatement[0]:
                 self.__consumeFifthConditionalStatement(conditional_node, tokenlist)
                 return isFifthConditionalStatement
             
-            #isSixthConditionalStatement = self.__isSixthConditionalStatement(tokenlist)
-            isSixthConditionalStatement = self.sr.isSixthConditionalStatement(tokenlist)
+            isSixthConditionalStatement = self.rule_scanner.isSixthConditionalStatement(tokenlist)
             if isSixthConditionalStatement[0]:
                 self.__consumeSixthConditionalStatement(conditional_node, tokenlist)
                 return isSixthConditionalStatement
             
-
             return False, -1
         except IndexError:
             return False, -1
 
 
-
-    
-    # foi realizado levantamento de erros
     def __consumeRepeatWithBodyStatement(self, node, tokenlist=[]):
         try:
             repeat_node = Node("REPEAT_WITH_BODY_STMT", parent = node, tokenval = "REPEAT_WITH_BODY_STMT",
@@ -1590,8 +1488,8 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isBody = self.__consumeBody(tokenlist[index:])
-                isBody = self.sr.isBody(tokenlist[index:])
+
+                isBody = self.rule_scanner.isBody(tokenlist[index:])
                 if isBody[0]:
                     self.__consumeBody(repeat_node, tokenlist[index:])
                     index = index + isBody[1]
@@ -1602,8 +1500,8 @@ class syntax_scanner(object):
                         lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                         self.node_number += 1
                         index = index + 1
-                        #isExpression = self.isExpression(tokenlist[index:])
-                        isExpression = self.sr.isExpression(tokenlist[index:])
+
+                        isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                         if isExpression[0]:
                             self.__consumeExpression(repeat_node, tokenlist[index:])
                             index = index + isExpression[1]
@@ -1631,7 +1529,6 @@ class syntax_scanner(object):
             return False, -1
 
 
-    # foi realizado levantamento de erros
     def __consumeRepeatWithoutBodyStatement(self, node, tokenlist=[]):
         try:
             index = 0
@@ -1651,22 +1548,15 @@ class syntax_scanner(object):
                     lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    #isExpression = self.isExpression(tokenlist[index:])
-                    isExpression = self.sr.isExpression(tokenlist[index:])
+
+                    isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                     if isExpression[0]:
                         self.__consumeExpression(repeat_node, tokenlist[index:])
                         index = index + isExpression[1]
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Repeat", token.getNumberOfLine())
-                            self.errorFound = True
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        print("aqui")
-                        self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -1674,20 +1564,18 @@ class syntax_scanner(object):
             return False, -1
 
 
-    # foi realizado levantamento de erros
     def __consumeRepeat(self, node, tokenlist=[]):
         repeat_node = Node("REPEAT_STMT", parent = node, tokenval = "REPEAT_STMT", number = self.node_number)
         self.node_number += 1
         try:
-            #isRepeatWithBodyStatement = self.__isRepeatWithBodyStatement(tokenlist)
-            isRepeatWithBodyStatement = self.sr.isRepeatWithBodyStatement(tokenlist)
+
+            isRepeatWithBodyStatement = self.rule_scanner.isRepeatWithBodyStatement(tokenlist)
 
             if isRepeatWithBodyStatement[0]:
                 self.__consumeRepeatWithBodyStatement(repeat_node, tokenlist)
                 return isRepeatWithBodyStatement
             
-            #isRepeatWithoutBodyStatement = self.__isRepeatWithoutBodyStatement(tokenlist)
-            isRepeatWithoutBodyStatement = self.sr.isRepeatWithoutBodyStatement(tokenlist)
+            isRepeatWithoutBodyStatement = self.rule_scanner.isRepeatWithoutBodyStatement(tokenlist)
 
             if isRepeatWithoutBodyStatement[0]:
                 self.__consumeRepeatWithoutBodyStatement(repeat_node, tokenlist)
@@ -1696,12 +1584,9 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def __consumeParameterStatement(self, node, tokenlist=[]):
         try:
-            #for n in node.children:
-            #    if n.tokenval == "PARAMETER_STMT":
-            #        father = n
             print(node.tokenval)
             parameter_statement_node = Node("PARAMETER_STATEMENT_STMT", tokenval = "PARAMETER_STATEMENT_STMT", parent = node,
             number = self.node_number)
@@ -1743,14 +1628,14 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def __consumeUnidimensionalParameter(self, node, tokenlist=[]):
         try:
-            #isParameterStatement = self.__isParameterStatement(tokenlist)
+
             unidimensional_node = Node("UNIDIMENSIONAL_PARAMETER_STMT", tokenval = "UNIDIMENSIONAL_PARAMETER_STMT",
             parent = node, number = self.node_number)
             self.node_number += 1
-            isParameterStatement = self.sr.isParameterStatement(tokenlist)
+            isParameterStatement = self.rule_scanner.isParameterStatement(tokenlist)
             index = 0
             if isParameterStatement[0]:
                 self.__consumeParameterStatement(unidimensional_node, tokenlist)
@@ -1785,14 +1670,13 @@ class syntax_scanner(object):
             return False, -1
     
 
-    # foi realizado levantamento de erros
     def __consumeBidimensionalParameter(self, node, tokenlist=[]):
         try:
             bidimensional_parameter_node = Node("BIDIMENSIONAL_PARAMETER_STMT", parent = node, tokenval = "BIDIMENSIONAL_PARAMETER_STMT",
             number = self.node_number)
             self.node_number += 1
-            #isUnidimensional = self.__isUnidimensionalParameter(tokenlist)
-            isUnidimensional = self.sr.isUnidimensionalParameter(tokenlist)
+
+            isUnidimensional = self.rule_scanner.isUnidimensionalParameter(tokenlist)
             if isUnidimensional[0]:
                 self.__consumeUnidimensionalParameter(bidimensional_parameter_node, tokenlist)
                 index = isUnidimensional[1]
@@ -1824,26 +1708,23 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
     
-    # foi realizado levantamento de erros
+
     def __consumeParameter(self, node, tokenlist=[]):
         try:
-            #isBidimensionalParameter = self.__isBidimensionalParameter(tokenlist)
             parameter_node = Node("PARAMETER_STMT", tokenval = "PARAMETER_STMT", parent = node,
             number = self.node_number)
             self.node_number += 1
-            isBidimensionalParameter = self.sr.isBidimensionalParameter(tokenlist)
+            isBidimensionalParameter = self.rule_scanner.isBidimensionalParameter(tokenlist)
             if isBidimensionalParameter[0]:
                 self.__consumeBidimensionalParameter(parameter_node, tokenlist)
                 return isBidimensionalParameter
 
-            #isUnidimensionalParameter = self.__isUnidimensionalParameter(tokenlist)
-            isUnidimensionalParameter = self.sr.isUnidimensionalParameter(tokenlist)
+            isUnidimensionalParameter = self.rule_scanner.isUnidimensionalParameter(tokenlist)
             if isUnidimensionalParameter[0]:
                 self.__consumeUnidimensionalParameter(parameter_node, tokenlist)
                 return isUnidimensionalParameter
             
-            #isParameterStatement = self.__isParameterStatement(tokenlist)
-            isParameterStatement = self.sr.isParameterStatement(tokenlist)
+            isParameterStatement = self.rule_scanner.isParameterStatement(tokenlist)
             if isParameterStatement[0]:
                 self.__consumeParameterStatement(parameter_node, tokenlist)
                 return isParameterStatement
@@ -1852,7 +1733,7 @@ class syntax_scanner(object):
         except:
             return False, -1
     
-    # foi realizado levantamento de erros
+
     def __consumeParameterListStatement(self, node, tokenlist=[]):
         try:
             
@@ -1866,41 +1747,39 @@ class syntax_scanner(object):
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isParameter = self.__isParameter(tokenlist[index:])
-                isParameter = self.sr.isParameter(tokenlist[index:])
-                print(tokenlist[index].lexeme)
+
+                isParameter = self.rule_scanner.isParameter(tokenlist[index:])
+
                 if isParameter[0]:
-                    print("huehue")
+
                     self.__consumeParameter(parameter_list_node, tokenlist[index:])
                     index = index + isParameter[1]
                     return True, index
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorFound("TYPE", token.tokenval, token.getNumberOfLine())
-                        self.errorFound = True
+
                     return False, -1
             else:
                 return False, -1
         except:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def __consumeParameterList(self, node, tokenlist=[]):
         try:
             parameter_list_stmt = Node("PARAMETER_LIST_STMT", parent=node, tokenval="PARAMETER_LIST_STMT",
             number = self.node_number)
             self.node_number += 1
 
-            #isParameter = self.__Parameter(tokenlist)
-            isParameter = self.sr.isParameter(tokenlist)
+ 
+            isParameter = self.rule_scanner.isParameter(tokenlist)
             if isParameter[0]:
                 self.__consumeParameter(parameter_list_stmt, tokenlist)
                 index = isParameter[1]
-                #isParameterStatement = self.__isParameterStatement(tokenlist[index:])
-                isParameterStatement  = self.sr.isParameterStatement(tokenlist[index:])
+
+                isParameterStatement  = self.rule_scanner.isParameterStatement(tokenlist[index:])
                 while isParameterStatement[0]:
-                    #isParameterStatement = self.__isParameterListStatement(tokenlist[index:])
-                    isParameterStatement = self.sr.isParameterListStatement(tokenlist[index:])
+
+                    isParameterStatement = self.rule_scanner.isParameterListStatement(tokenlist[index:])
                     if isParameterStatement[0]:
                         self.__consumeParameterListStatement(parameter_list_stmt, tokenlist[index:])
                         index = index + isParameterStatement[1]
@@ -1932,8 +1811,7 @@ class syntax_scanner(object):
                     number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    isParameterList = self.sr.isParameterList(tokenlist[index:])
-                    #isParameterList = self.__isParameterList(tokenlist[index:])
+                    isParameterList = self.rule_scanner.isParameterList(tokenlist[index:])
                     
                     if isParameterList[0]:
                         self.__consumeParameterList(first_header_stmt, tokenlist[index:])
@@ -1946,9 +1824,9 @@ class syntax_scanner(object):
                             number = self.node_number)
                             self.node_number += 1
                             index = index + 1
-                            #isBody = self.__isBody(tokenlist[index:])
-                            isBody = self.sr.isBody(tokenlist[index:])
-                            # parei aqui
+
+                            isBody = self.rule_scanner.isBody(tokenlist[index:])
+
                             if isBody[0]:
                                 self.__consumeBody(first_header_stmt, tokenlist[index:])
                                 index = index + isBody[1]
@@ -1960,10 +1838,6 @@ class syntax_scanner(object):
                                     index = index + 1
                                     return True, index
                                 else:
-                                    if self.errorFound == False:
-                                        print("Near the statement that begins near line", token.getNumberOfLine())
-                                        print("The statement needs an END token")
-                                        self.errorFound = True
                                     return False, -1
                             else:
                                 return False, -1
@@ -2009,7 +1883,7 @@ class syntax_scanner(object):
                         self.node_number += 1
                         index = index + 1
                         
-                        isBody = self.sr.isBody(tokenlist[index:])
+                        isBody = self.rule_scanner.isBody(tokenlist[index:])
                         if isBody[0]:
                             self.__consumeBody(second_header_stmt, tokenlist[index:])
                             index = index + isBody[1]
@@ -2023,10 +1897,6 @@ class syntax_scanner(object):
                                 index = index + 1
                                 return True, index
                             else:
-                                if self.errorFound == False:
-                                    print("Near the statement that begins near line", token.getNumberOfLine())
-                                    print("The statement needs an END token")
-                                    self.errorFound = True
                                 return False, -1
                         else:
                             return False, -1
@@ -2060,8 +1930,8 @@ class syntax_scanner(object):
                     number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-                    #isParameterList = self.__ParameterList(tokenlist[index:])
-                    isParameterList = self.sr.isParameterList(tokenlist[index:])
+
+                    isParameterList = self.rule_scanner.isParameterList(tokenlist[index:])
                     if isParameterList[0]:
                         self.__consumeParameterList(third_header_node, tokenlist[index:])
                         index = index + isParameterList[1]
@@ -2082,10 +1952,6 @@ class syntax_scanner(object):
                                 index = index + 1
                                 return True, index
                             else:
-                                if self.errorFound == False:
-                                    print("Near the statement that begins near line", token.getNumberOfLine())
-                                    print("The statement needs an END token")
-                                    self.errorFound = True
                                 return False, -1
                         else:
                             return False, -1
@@ -2134,10 +2000,6 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            if self.errorFound == False:
-                                    print("Near the statement that begins near line", token.getNumberOfLine())
-                                    print("The statement needs an END token")
-                                    self.errorFound = True
                             return False, -1
                     else:
                         return False, -1
@@ -2153,26 +2015,26 @@ class syntax_scanner(object):
         try:
             header_node = Node("HEADER", parent=node, tokenval = "HEADER", number = self.node_number)
             self.node_number += 1
-            #isFirstHeaderStatement = self.__isFirstHeaderStatement(tokenlist)
-            isFirstHeaderStatement = self.sr.isFirstHeaderStatement(tokenlist)
+
+            isFirstHeaderStatement = self.rule_scanner.isFirstHeaderStatement(tokenlist)
             if isFirstHeaderStatement[0]:
-                # parei aqui
+
                 self.__consumeFirstHeaderStatement(header_node, tokenlist)
                 return isFirstHeaderStatement
             
-            #isSecondHeaderStatement = self.__isSecondHeaderStatement(tokenlist)
-            isSecondHeaderStatement = self.sr.isSecondHeaderStatement(tokenlist)
+
+            isSecondHeaderStatement = self.rule_scanner.isSecondHeaderStatement(tokenlist)
             if isSecondHeaderStatement[0]:
                 self.__consumeSecondHeaderStatement(header_node, tokenlist)
                 return isSecondHeaderStatement
 
-            isThirdHeaderStatement = self.sr.isThirdHeaderStatement(tokenlist)
+            isThirdHeaderStatement = self.rule_scanner.isThirdHeaderStatement(tokenlist)
             if isThirdHeaderStatement[0]:
                 self.__consumeThirdHeaderStatement(header_node,tokenlist)
                 return isThirdHeaderStatement
             
-            #isFourthHeaderStatement = self.__isFourthHeaderStatement(tokenlist)
-            isFourthHeaderStatement = self.sr.isFourthHeaderStatement(tokenlist)
+
+            isFourthHeaderStatement = self.rule_scanner.isFourthHeaderStatement(tokenlist)
             if isFourthHeaderStatement[0]:
                 self.__consumeFourthHeaderStatement(header_node, tokenlist)
                 return isFourthHeaderStatement
@@ -2188,19 +2050,19 @@ class syntax_scanner(object):
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
             index = 0
             token = tokenlist[index]
-            #isHeader = self.__isHeader(tokenlist)
+
             func_dcl = Node("FUNCTION_DECLARATION", tokenval="FUNCTION_DECLARATION", parent=node,
             number = self.node_number)
             self.node_number += 1
-            isHeader = self.sr.isHeader(tokenlist)
+            isHeader = self.rule_scanner.isHeader(tokenlist)
             if token.tokenval in types:
                 Node("TYPE", parent=func_dcl, tokenval = token.tokenval,
                 tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine(),
                 number = self.node_number)
                 self.node_number += 1
                 index = index + 1
-                #isHeader = self.__isHeader(tokenlist[index:])
-                isHeader = self.sr.isHeader(tokenlist[index:])
+
+                isHeader = self.rule_scanner.isHeader(tokenlist[index:])
                 if isHeader[0]:
                     self.__consumeHeader(func_dcl, tokenlist[index:])
                     index = index + isHeader[1]
@@ -2219,34 +2081,34 @@ class syntax_scanner(object):
         except IndexError:
             return False, -1
     
-    # levantamento de erros realizado
+
     def __consumeVarInitialization(self, node, tokenlist=[]):
         try:
             var_initialization = Node("VAR_INITIALIZATION", parent=node, tokenval="VAR_INITIALIZATION",
             number = self.node_number)
             self.node_number += 1
             self.__consumeAssignment(var_initialization, tokenlist)
-            #return self.__Assignment(tokenlist)
-            return self.sr.isAssignment(tokenlist)
+
+            return self.rule_scanner.isAssignment(tokenlist)
         except IndexError:
             return False, -1
 
 
     def __consumeDeclaration(self, tokenlist=[]):
         try:
-            isVarDeclare = self.sr.isVarDeclare(tokenlist)
-            r = Resolver("name")
-            node = r.get(self.st, "DECLARATION_LIST")
+            isVarDeclare = self.rule_scanner.isVarDeclare(tokenlist)
+            resolver = Resolver("name")
+            node = resolver.get(self.syntax_tree, "DECLARATION_LIST")
             if isVarDeclare[0]:
                 self.__consumeVarDeclare(node, tokenlist)
                 return isVarDeclare
 
-            isVarInitialization = self.sr.isVarInitialization(tokenlist)
+            isVarInitialization = self.rule_scanner.isVarInitialization(tokenlist)
             if isVarInitialization[0]:
                 self.__consumeVarInitialization(node, tokenlist)
                 return isVarInitialization
             
-            isFunctionDeclaration = self.sr.isFunctionDeclaration(tokenlist)
+            isFunctionDeclaration = self.rule_scanner.isFunctionDeclaration(tokenlist)
             if isFunctionDeclaration[0]:
                 self.__consumeFunctionDeclaration(node,tokenlist)
                 return isFunctionDeclaration
@@ -2256,16 +2118,16 @@ class syntax_scanner(object):
             return False, -1
     
 
-    def __isDeclarationsList(self, tokenlist=[]):
+    def __consumeDeclarationsList(self, tokenlist=[]):
         try:
-            isDeclaration = self.sr.isDeclaration(tokenlist)
+            isDeclaration = self.rule_scanner.isDeclaration(tokenlist)
             if isDeclaration[0]:
-                Node("DECLARATION_LIST", parent=self.st, tokenval="DECLARATION_LIST",
+                Node("DECLARATION_LIST", parent=self.syntax_tree, tokenval="DECLARATION_LIST",
                 number = self.node_number)
                 self.node_number += 1
                 index = 0
                 while isDeclaration[0]:
-                    isDeclaration = self.sr.isDeclaration(tokenlist[index:])
+                    isDeclaration = self.rule_scanner.isDeclaration(tokenlist[index:])
                     if isDeclaration[0]:
                         self.__consumeDeclaration(tokenlist[index:])
                         index = index + isDeclaration[1] 
@@ -2279,9 +2141,9 @@ class syntax_scanner(object):
     
 
     def consumeProgram(self, tokenlist=[]):
-        self.st = Node("PROGRAM",parent=None,tokenval="PROGRAM", number = self.node_number)
+        self.syntax_tree = Node("PROGRAM",parent=None,tokenval="PROGRAM", number = self.node_number)
         self.node_number += 1
-        return self.__isDeclarationsList(tokenlist)
+        return self.__consumeDeclarationsList(tokenlist)
 
 
     def __printErrorFound(self, expected=str, received=str, line=int):
@@ -2316,19 +2178,11 @@ class syntax_process(object):
         process = scanner.consumeProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
             print("successfull syntactic check")
-            DotExporter(scanner.st, graph="graph", nodenamefunc=self.nodenamefunc,
+            DotExporter(scanner.syntax_tree, graph="graph", nodenamefunc=self.nodenamefunc,
             nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
             edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
         
-        elif(len(tokenlist) > process[1] and process[1] > 0 and scanner.sr.errorFound == False):
+        elif(len(tokenlist) > process[1] and process[1] > 0 and scanner.rule_scanner.errorFound == False):
             line = tokenlist[process[1]].getNumberOfLine()
             print("Error near the statement that begins near line", line)
             print("near the token", tokenlist[process[1]].tokenval)
-        
-        #print(RenderTree(sr.st))
-        #DotExporter(scanner.st, graph="graph", nodenamefunc=self.nodenamefunc,
-        #nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
-        #edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
-        #print(sr.st.descendants[0])
-        #r = Resolver("name")
-        #print(r.get(sr.st,"DECLARATION_LIST"))
