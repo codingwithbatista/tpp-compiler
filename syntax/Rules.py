@@ -388,7 +388,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def isIndex(self, tokenlist=[]):
         try:
             isIndexStatement = self.isIndexStatement(tokenlist)
@@ -405,7 +405,7 @@ class syntax_rule(object):
         except:
             return False, -1
     
-    # feito levantamento de erros
+
     def isIndexStatement(self, tokenlist=[]):
         try:
             token = tokenlist[0]
@@ -422,9 +422,6 @@ class syntax_rule(object):
                         if self.errorFound == False:
                             self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
                             self.errorFound = True
-
-                            
-
                         return False, -1
                 else:
                     if self.errorFound == False:
@@ -437,7 +434,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def isAssignment(self, tokenlist=[]):
         try:
             isVar = self.isVar(tokenlist)
@@ -456,7 +453,6 @@ class syntax_rule(object):
                             self.__printErrorStatement("Assignment", token.getNumberOfLine())
                             self.errorFound = True
                             
-
                         return False, -1
                 else:
                     return False, -1
@@ -465,7 +461,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def isRead(self, tokenlist=[]):
         try:
             token = tokenlist[0]
@@ -507,7 +503,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def isWrite(self, tokenlist=[]):
         try:
             index = 0
@@ -529,7 +525,6 @@ class syntax_rule(object):
                                 self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
                                 self.errorFound = True
                                 
-
                             return False, -1
                     else:
                         if self.errorFound == False:
@@ -550,7 +545,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # feito levantamento de erros
+
     def isReturn(self, tokenlist=[]):
         try:
             index = 0
@@ -572,21 +567,18 @@ class syntax_rule(object):
                                 self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
                                 self.errorFound = True
                                 
-
                             return False, -1
                     else:
                         if self.errorFound == False:
                             self.__printErrorStatement("Expression", token.getNumberOfLine())
                             self.errorFound = True
                             
-
                         return False, -1
                 else:
                     if self.errorFound == False:
                         self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
                         self.errorFound = True
                         
-
                     return False, -1
             else:
                 return False, -1
@@ -699,7 +691,7 @@ class syntax_rule(object):
         except:
             return False, -1
     
-    # foi realizado o levantamento de erros
+
     def isVarListStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -716,14 +708,13 @@ class syntax_rule(object):
                         self.__printErrorFound("ID", token.tokenval, token.getNumberOfLine())
                         self.errorFound = True
                         
-
                     return False, -1
             else:
                 return False, -1
         except IndexError:
             return False, -1
 
-    # foi realizado o levantamento de erros
+
     def isVarList(self, tokenlist=[]):
         try:
             isVar = self.isVar(tokenlist)
@@ -741,7 +732,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def isVarDeclare(self, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
@@ -803,7 +794,6 @@ class syntax_rule(object):
             if isExpression[0]:
                 return isExpression
 
-            #self.errorHandler.errorActionStatement()
             return False, -1
         except IndexError:
             return False, -1
@@ -891,8 +881,7 @@ class syntax_rule(object):
                     else:
                         if self.errorFound == False:
                                 self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
-                                
+                                self.errorFound = True                              
 
                         return False, -1
                 else:
@@ -960,7 +949,6 @@ class syntax_rule(object):
                         self.__printErrorStatement("Conditional", token.getNumberOfLine())
                         self.errorFound = True
                         
-
                     return False, -1
             else:
                 return False, -1
@@ -1005,8 +993,7 @@ class syntax_rule(object):
                     else:
                         if self.errorFound == False:
                                 self.__printErrorFound("então", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
-                                
+                                self.errorFound = True                                
 
                         return False, -1
                 else:
@@ -1014,7 +1001,6 @@ class syntax_rule(object):
                         self.__printErrorStatement("Conditional", token.getNumberOfLine())
                         self.errorFound = True
                         
-
                     return False, -1
             else:
                 return False, -1
@@ -1157,9 +1143,6 @@ class syntax_rule(object):
             return False, -1
 
 
-
-    
-    # foi realizado levantamento de erros
     def isRepeatWithBodyStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -1185,7 +1168,6 @@ class syntax_rule(object):
                                 self.__printErrorStatement("Repeat", token.getNumberOfLine())
                                 self.errorFound = True
                                 
-
                             return False, -1
                             
                     else:
@@ -1206,7 +1188,6 @@ class syntax_rule(object):
             return False, -1
 
 
-    # foi realizado levantamento de erros
     def isRepeatWithoutBodyStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -1234,7 +1215,6 @@ class syntax_rule(object):
                         self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
                         self.errorFound = True
                         
-
                     return False, -1
             else:
                 return False, -1
@@ -1242,7 +1222,6 @@ class syntax_rule(object):
             return False, -1
 
 
-    # foi realizado levantamento de erros
     def isRepeat(self, tokenlist=[]):
         try:
             isRepeatWithBodyStatement = self.isRepeatWithBodyStatement(tokenlist)
@@ -1258,7 +1237,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def isParameterStatement(self, tokenlist=[]):
         try:
             types = [TokenVal.INTEGER_TYPE.value, TokenVal.FLOAT_TYPE.value]
@@ -1281,7 +1260,6 @@ class syntax_rule(object):
                             self.__printErrorStatement("Parameter", token.getNumberOfLine())
                             self.errorFound = True
                             
-
                          return False, -1
                 else:
                     return False, -1
@@ -1291,7 +1269,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def isUnidimensionalParameter(self, tokenlist=[]):
         try:
             isParameterStatement = self.isParameterStatement(tokenlist)
@@ -1311,7 +1289,6 @@ class syntax_rule(object):
                             self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
                             self.errorFound = True
                             
-
                         return False, -1
 
                 else:
@@ -1322,7 +1299,6 @@ class syntax_rule(object):
             return False, -1
     
 
-    # foi realizado levantamento de erros
     def isBidimensionalParameter(self, tokenlist=[]):
         try:
             isUnidimensional = self.isUnidimensionalParameter(tokenlist)
@@ -1350,7 +1326,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
     
-    # foi realizado levantamento de erros
+
     def isParameter(self, tokenlist=[]):
         try:
             isBidimensionalParameter = self.isBidimensionalParameter(tokenlist)
@@ -1369,7 +1345,7 @@ class syntax_rule(object):
         except:
             return False, -1
     
-    # foi realizado levantamento de erros
+
     def isParameterListStatement(self, tokenlist=[]):
         try:
             index = 0
@@ -1385,14 +1361,13 @@ class syntax_rule(object):
                         self.__printErrorFound("TYPE", token.tokenval, token.getNumberOfLine())
                         self.errorFound = True
                         
-
                     return False, -1
             else:
                 return False, -1
         except:
             return False, -1
 
-    # foi realizado levantamento de erros
+
     def isParameterList(self, tokenlist=[]):
         try:
             isParameter = self.isParameter(tokenlist)
@@ -1635,7 +1610,7 @@ class syntax_rule(object):
         except IndexError:
             return False, -1
     
-    # levantamento de erros realizado
+
     def isVarInitialization(self, tokenlist=[]):
         try:
             return self.isAssignment(tokenlist)

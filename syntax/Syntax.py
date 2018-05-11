@@ -544,14 +544,8 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
-                            self.errorFound = True
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Index", token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -585,9 +579,6 @@ class syntax_scanner(object):
                         index = index + isExpression[1]
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Assignment", token.getNumberOfLine())
-                            self.errorFound = True
                         return False, -1
                 else:
                     return False, -1
@@ -626,19 +617,13 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            if self.errorFound == False:
-                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
+
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Variable", token.getNumberOfLine())
-                        self.errorFound = True
+
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
-                    self.errorFound = True
+
                     return False, -1
             else:
                 return False, -1
@@ -680,19 +665,11 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            if self.errorFound == False:
-                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Expression", token.getNumberOfLine())
-                            self.errorFound = True
+
                         return False, -1                        
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -731,19 +708,13 @@ class syntax_scanner(object):
                             index = index + 1
                             return True, index
                         else:
-                            if self.errorFound == False:
-                                self.__printErrorFound(")", token.tokenval, token.getNumberOfLine())
-                                self.errorFound = True
+
                             return False, -1
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Expression", token.getNumberOfLine())
-                            self.errorFound = True
+
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorFound("(", token.tokenval, token.getNumberOfLine())
-                        self.errorFound = True
+
                     return False, -1
             else:
                 return False, -1
@@ -926,9 +897,6 @@ class syntax_scanner(object):
                     index = index + isVar[1]
                     return True, index
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorFound("ID", token.tokenval, token.getNumberOfLine())
-                        self.errorFound = True
                     return False, -1
             else:
                 return False, -1
@@ -995,9 +963,7 @@ class syntax_scanner(object):
                         
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Variable declarion", token.getNumberOfLine())
-                            self.errorFound = True
+
                         return False, -1
                 else:
                     return False, -1
@@ -1508,20 +1474,13 @@ class syntax_scanner(object):
                             return True, index
                         else:
 
-                            if self.errorFound == False:
-                                self.__printErrorStatement("Repeat", token.getNumberOfLine())
-                                self.errorFound = True
                             return False, -1
                             
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorFound("até", token.tokenval, token.getNumberOfLine())
-                            self.errorFound = True
+
                         return False, -1
                 else:
-                    if self.errorFound == False:
-                        self.__printErrorStatement("Body", token.getNumberOfLine())
-                        self.errorFound = True
+
                     return False, -1
             else:
                 return False, -1
@@ -1587,7 +1546,6 @@ class syntax_scanner(object):
 
     def __consumeParameterStatement(self, node, tokenlist=[]):
         try:
-            print(node.tokenval)
             parameter_statement_node = Node("PARAMETER_STATEMENT_STMT", tokenval = "PARAMETER_STATEMENT_STMT", parent = node,
             number = self.node_number)
             self.node_number += 1
@@ -1616,9 +1574,7 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorStatement("Parameter", token.getNumberOfLine())
-                            self.errorFound = True
+
                         return False, -1
                 else:
                     return False, -1
@@ -1657,9 +1613,7 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
-                            self.errorFound = True
+
                         return False, -1
 
                 else:
@@ -1697,9 +1651,6 @@ class syntax_scanner(object):
                         index = index + 1
                         return True, index
                     else:
-                        if self.errorFound == False:
-                            self.__printErrorFound("]", token.tokenval, token.getNumberOfLine())
-                            self.errorFound = True
                         return False, -1
                 else:
                     return False, -1
@@ -2146,15 +2097,6 @@ class syntax_scanner(object):
         return self.__consumeDeclarationsList(tokenlist)
 
 
-    def __printErrorFound(self, expected=str, received=str, line=int):
-        print("In line", line)
-        print("Expected", expected, ", but got a ", received)
-
-    
-    def __printErrorStatement(self, statement=str, line=int):
-        print("Near line", line,":")
-        print("The ", statement, " statement got errors" )
-
 class syntax_process(object):
     
     
@@ -2177,7 +2119,7 @@ class syntax_process(object):
         scanner = syntax_scanner()
         process = scanner.consumeProgram(tokenlist)
         if process[0] == True and (len(tokenlist) == int(process[1])):
-            print("successfull syntactic check")
+            print("successfull syntax check")
             DotExporter(scanner.syntax_tree, graph="graph", nodenamefunc=self.nodenamefunc,
             nodeattrfunc=lambda node: "shape=box", edgeattrfunc=self.edgeattrfunc,
             edgetypefunc=self.edgetypefunc).to_dotfile("tree.dot")
