@@ -699,7 +699,7 @@ class syntax_scanner(object):
 
                     isExpression = self.rule_scanner.isExpression(tokenlist[index:])
                     if isExpression[0]:
-                        self.__consumeExpression(tokenlist[index:])
+                        self.__consumeExpression(return_node, tokenlist[index:])
                         index = index + isExpression[1]
                         token = tokenlist[index]
                         if token.tokenval == TokenVal.CLOSE_PARENTHESES.value:
