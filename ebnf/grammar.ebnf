@@ -1,0 +1,35 @@
+program::= declarationList
+declarationList ::= declarationList declaration || declaration
+declaration ::= variableDeclaration || variableInitialization || functionDeclaration
+variableDeclaration ::= type ':' variableList
+variableInitialization ::= assignment
+variableList ::= variableList ',' variable || variable
+variable ::= ID || ID index
+index ::= index '[' expression ']' || '[' expression ']'
+type ::= INTEIRO || FLUTUANTE
+functionDeclaration ::= type header || header
+header ::= ID '(' parameterList ')' body FIM
+parameterList ::= parameterList ',' parameter || parameter || empty
+parameter ::= type ':' ID || parameter '[' ']'
+body ::= body action || empty
+action ::= expression || variableDeclaration || if || repeat || read || write || return || error
+if ::= SE expression ENTÃO body FIM || SE expression ENTÃO body SENÃO body FIM
+repeat ::= REPITA body ATÉ expression
+assingment ::= variable ':=' expression
+read ::= LEIA '('variable')'
+write ::= ESCREVA '(' expression ')'
+return ::= RETORNA '(' expression ')'
+expression ::= logicExpression || assignment
+logicExpression ::= simpleExpression || logicExpression logicOperator simpleExpression
+simpleExpression ::= additiveExpression || simpleExpression relationalOperator additiveExpression
+additiveExpression ::= multiplicativeExpression || additiveExpression sumOperator multiplicativeExpression
+multiplicativeExpression ::= unaryExpression || multiplicativeExpression timesOperator unaryExpression
+unaryExpression ::= factor || sumOperator factor || notOperator factor
+relationalOperator ::= '<' || '>' || '=' || '<=' || '>='
+sumOperator ::= '+' || '-'
+timesOperator ::=  '*' || '/'
+logicOperator ::= '&&' || '||'
+factor ::= '(' expression ')' || variable || callFunction || number
+number ::= NUM_INTEIRO || NUM_PONTO_FLUTUANTE || NUM_NOTAÇÃO_CIENTÍFICA
+callFunction ::= ID '(' argumentList ')' 
+argumentList ::= argumentList ',' expression || expression || empty

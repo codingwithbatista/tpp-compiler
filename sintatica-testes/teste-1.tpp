@@ -1,6 +1,10 @@
 inteiro: n
-flutuante: a[10]
-n := 2
+inteiro: b
+
+inteiro fat( flutuante: a, inteiro: b)
+    a:= 10.5
+fim
+
 inteiro fatorial(inteiro: n)
     inteiro: fat
     se n > 0 então {não calcula se n > 0}
@@ -18,6 +22,5 @@ fim
 inteiro principal()
     leia(n)
     escreva(fatorial(n))
-    retorna(0)
+    escreva(fat(1,1))
 fim
-

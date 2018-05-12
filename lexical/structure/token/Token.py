@@ -1,11 +1,21 @@
 class token(object):
 
     
-    def __init__(self, tokentype, tokenval, lexeme):
+    def __init__(self, tokentype=None, tokenval=None, lexeme=None):
         self.tokentype = tokentype
         self.tokenval = tokenval
         self.lexeme = lexeme
+        self.__setTerminal()
 
+
+    def __setTerminal(self):
+        if self.tokentype == None:
+            self.terminal = False
+        else:
+            self.terminal = True
+
+    def getTerminal(self):
+        return self.terminal
     
     def setNumberOfLine(self,  numberOfLine):
         self.numberOfLine = int(numberOfLine)

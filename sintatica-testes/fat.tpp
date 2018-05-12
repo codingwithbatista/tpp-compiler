@@ -1,6 +1,5 @@
 inteiro: n
-flutuante: a[10]
-n := 2
+
 inteiro fatorial(inteiro: n)
     inteiro: fat
     se n > 0 então {não calcula se n > 0}
@@ -21,3 +20,20 @@ inteiro principal()
     retorna(0)
 fim
 
+1.32e110
+
+1.32E-110
+
+-1.32e110
+
++1.32e110
+
+(1++2)
++2
+
+-3
+{}
+
+{
+    saf
+}
