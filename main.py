@@ -5,7 +5,7 @@ from lexical.ScanLex import scanlex
 from lexical.structure.token.Token import token
 from syntax.Syntax import syntax_process
 from render.Render import tree_render
-
+from semantic.Semantic import semantic_module
 
 
 def printToken(token, option):
@@ -23,10 +23,14 @@ def printTokenList(option, tokenlist=[]):
 
 def main():
     lex = scanlex(sys.argv[1])
-    analise = sys.argv[2]
+    #analise = sys.argv[2]
     tokenlist = lex.getTokenListProcess()
+    syntax = syntax_process()
+    syntax_tree = syntax.exec(tokenlist)
+    sm = semantic_module(syntax_tree)
+    #sm.walking_syntaxtree()    
 
-    if analise == "lexical":
+    '''if analise == "lexical":
         out_type = sys.argv[3]
         if (out_type != "txt") and (out_type != "csv"):
             print("Output file format is invalid. Please choose between txt or csv.")
@@ -62,7 +66,7 @@ def main():
 
 
     else:
-        print("Invalid analise option")
+        print("Invalid analise option")'''
         
 
 
