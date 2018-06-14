@@ -16,11 +16,11 @@ fim
 
 inteiro principal()
     leia(n)
-    escreva(fatorial(n))
+    escreve(fatorial(n))
     retorna(0)
 fim
 
-1.32e110
+{1.32e110
 
 1.32E-110
 
@@ -36,4 +36,4 @@ fim
 
 {
     saf
-}
+}}
