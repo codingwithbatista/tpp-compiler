@@ -273,7 +273,7 @@ class syntax_scanner(object):
 
     def __consumeMultiplicativeExpression(self, node, tokenlist=[]):
         try:
-            mult_node = Node("MULTUPLICATIVE_EXPRESSION_STMT", parent = node, 
+            mult_node = Node("MULTIPLICATIVE_EXPRESSION_STMT", parent = node, 
             tokenval = "MULTIPLICATIVE_EXPRESSION_STMT", number = self.node_number)
             self.node_number += 1
 
