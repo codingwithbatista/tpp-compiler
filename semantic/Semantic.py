@@ -1,4 +1,4 @@
-from anytree import Node, PreOrderIter
+from anytree import Node, PreOrderIter, PostOrderIter
 
 
 class semantic_module(object):
@@ -6,161 +6,168 @@ class semantic_module(object):
     def __init__(self, syntax_tree=Node):
         self.syntax_tree = syntax_tree
         self.table = []
-        self.scope_definition()
-        self.declare_previous_verification()
-        self.print_simbol_table()
-        self.verify_semantic_errors()
+        self.defineScopes()
+        self.defineDataTypes()
+        self.printTree()
+        self.printVariableDefinedTable()
+        self.verifyVariableNotDeclared()
+        self.verifyVariableUses()
+        self.verifyVariableAlreadyDefined()
+        #self.scope_definition()
+        #self.declare_previous_verification()
+        #self.print_simbol_table()
+        #self.verify_semantic_errors()
 
     def printNode(self, node):
         if hasattr(node, 'lexeme'):
-                print(node.name, node.lexeme, node.tokenval, node.scope)
-        else:
-            print(node.name, node.scope)
+            if hasattr(node, 'data_type'):
+                if hasattr(node, 'op_type'):
+                    print("name:",node.name,"|", "lexeme:",node.lexeme,"|", "tokenval:",node.tokenval,"|", "scope:",node.scope,"|", "data_type:",node.data_type,"|",
+                    "op_type:", node.op_type)
+                else:
+                    print("name:",node.name,"|", "lexeme:",node.lexeme,"|", "tokenval:",node.tokenval,"|", "scope:",node.scope,"|", "data_type:",node.data_type)
 
-
-    def __defineScopeNode(self, node=Node, scope=str):
-        for n in PreOrderIter(node):
-            n.scope = scope
-
-
-    def scope_definition(self):
-        scope = "GLOBAL"
-        local_scope_number = 1
-        pre_scope = False
-        for node in PreOrderIter(self.syntax_tree):
-            if node.name == "FUNCTION_DECLARATION":
-                scope = "func" + str(local_scope_number)
-                node.scope = scope
-                local_scope_number += 1
-            
-            elif node.name == "CONDITIONAL_STMT":
-                if hasattr(node, 'scope') == False:
-                    scope = scope + ".conditional"
-                    node.scope = scope
-            
-            elif node.name == "REPEAT_STMT":
-                if hasattr(node, 'scope') == False:
-                    scope = scope + ".repeat"
-                    node.scope = scope
-            
-            elif node.name == "IF":
-                if hasattr(node, 'scope') == False:
-                    scope = scope + ".if"
-                    node.scope = scope
-            
-            elif node.name == "UNTIL":
-                if hasattr(node, 'scope') == False:
-                    node.scope = scope
-                    pre_scope = True
-
-            elif node.name == "ELSE":
-                if hasattr(node, 'scope') == False:
-                    finalIndex = scope.rfind("if")
-                    scope = scope[:finalIndex]
-                    scope = scope + "else"
-                    node.scope = scope
-            
-            elif node.name == "END":
-                if hasattr(node, 'scope') == False:
-                    node.scope = scope
-                    finalIndex = scope.rfind(".")
-                    scope = scope[:finalIndex]
-
-            elif node.name == "EXPRESSION" and pre_scope:
-                if hasattr(node, 'scope') == False:
-                    node.scope = scope
-                    finalIndex = scope.rfind(".")
-                    self.__defineScopeNode(node, scope)
-                    scope = scope[:finalIndex]
-                    pre_scope = False
-                
             else:
-                if hasattr(node, 'scope') == False:
-                    node.scope = scope
+                print("name:",node.name,"|", "lexeme:",node.lexeme,"|", "tokenval:",node.tokenval,"|", "scope:",node.scope)
+        else:
+            print("name:",node.name,"|", "scope:",node.scope)
 
 
-    def declareVariable_annotation_table(self, node=Node):
-        scope = node.scope
-        type_operation = "VAR_DECLARATION"
-        for n in PreOrderIter(node):
-            if n.name == "TYPE":
-                data_type = n.tokenval
-            elif n.name == "ID":
-                variable = n.lexeme
-                line = n.line
-                self.table.append([type_operation, scope, data_type, variable, line])
-
-    
-    def declareFunction_annotation_table(self, node=Node):
-        scope = node.scope
-        type_operation = "FUNC_DECLARATION"
-        for n in PreOrderIter(node, maxlevel=4):
-            if n.name == "TYPE":
-                func_type = n.tokenval
-            elif n.name == "ID":
-                func = n.lexeme
-                line = n.line
-                self.table.append([type_operation, scope, func_type, func, line])
-
-
-
-    def declare_previous_verification(self):
-        for node in PreOrderIter(self.syntax_tree):
-            if node.name == "VAR_DECLARE":
-                self.declareVariable_annotation_table(node)
-            
-            elif node.name == "FUNCTION_DECLARATION":
-                self.declareFunction_annotation_table(node)
-
-    
-    def verify_variable_declared(self):
-        for node in PreOrderIter(self.syntax_tree):
-            if node.name == "VAR":
-                findVarDeclaration = False
-                var_node = node.children[0]
-
-                for line in self.table:
-                    if hasattr(var_node, 'lexeme'):
-                        if ((line[0] == "VAR_DECLARATION") and (line[3] == var_node.lexeme) and
-                        ((line[1] in var_node.scope) or (line[1] == "GLOBAL"))):
-                            findVarDeclaration = True
-                if findVarDeclaration == False:
-                    self.print_error_non_declared_var(var_node)
-
-    
-    def verify_function_declared(self):
-        for node in PreOrderIter(self.syntax_tree):
-            if node.name  == "CALL_FUNCTION_STMT":
-                findFunctionDeclaration = False
-                id_nome_func_node = node.children[0]
-                id_nome_func_node = id_nome_func_node.children[0]
-
-                for line in self.table:
-                    if hasattr(id_nome_func_node, 'lexeme'):
-                        if((line[0] == "FUNC_DECLARATION") and (line[3] == id_nome_func_node.lexeme)):
-                            findFunctionDeclaration = True
-                if findFunctionDeclaration == False:
-                    self.print_error_non_declared_function(id_nome_func_node)
-
-
-    def verify_semantic_errors(self):
-        self.verify_variable_declared()
-        self.verify_function_declared()
-
-
-    def walking_syntaxtree(self):
+    def printTree(self):
         for node in PreOrderIter(self.syntax_tree):
             self.printNode(node)
 
-    def print_simbol_table(self):
-        for line in self.table:
+
+    def printVariableDefinedTable(self):
+        for line in self.definedVariableTable:
             print(line)
 
-    def print_error_non_declared_var(self, node=Node):
-        print("In line ", node.line, ": variable '", node.lexeme,
-        "' is not declared previously.", sep="")
+    def defineScopes(self):
+        scope = ""
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "PROGRAM":
+                scope= "global"
+                node.scope = scope
+            
+            elif node.name == "FUNCTION_DECLARATION":
+                scope_name = node.children[1].children[0].children[0].lexeme
+                scope = scope + ".fnc_" + scope_name
+                node.scope = scope
+            
+            elif node.name == "CONDITIONAL_STMT":
+                scope = scope + ".conditional"
+                node.scope = scope
+
+            elif node.name == "IF":
+                scope = scope + ".if"
+                node.scope = scope
+            
+            elif node.name == "ELSE":
+                finalIndex = scope.rfind(".if")
+                scope = scope[:finalIndex]
+                scope = scope + ".else"
+                node.scope = scope
+            
+            elif node.name == "REPEAT_STMT":
+                scope = scope + ".for"
+                node.scope = scope
+
+            elif node.name == "END":
+                if node.parent.parent.name == "CONDITIONAL_STMT":
+                    finalIndex = scope.rfind(".conditional")
+                else:
+                    finalIndex = scope.rfind(".")
+                
+                scope = scope[:finalIndex]
+                node.scope = scope
+
+            else:
+                node.scope = scope
     
 
-    def print_error_non_declared_function(self, node=Node):
-        print("In line", node.line, ": function '", node.lexeme,
-        "' is not declared previously.", sep="")
+    def createDefinedVariableTable(self):
+        table = []
+        for node in PreOrderIter(self.syntax_tree):
+            try:
+                if node.op_type == "declaration" or node.op_type == "fnc_parameter":
+                    table.append([node.number, node.scope, node.data_type, node.tokenval, node.lexeme, node.line, node.op_type])
+            except AttributeError:
+                pass
+
+        self.definedVariableTable = table
+
+    
+    def delegateDataTypeToVarList(self, data_type=str, varListNode=Node):
+        for node in PreOrderIter(varListNode):
+            node.data_type = data_type
+            node.op_type = "declaration"
+
+
+    def delegateDataTypeToParameterFunction(self, data_type=str, varParameterNode=Node):
+        varParameterNode.data_type = data_type
+        varParameterNode.op_type = "fnc_parameter"
+    
+    def delegateDataTypeToDeclaredVariable(self, varNode):
+        for line in self.definedVariableTable:
+            if (line[1] in varNode.scope) and  (line[4] == varNode.lexeme):
+                varNode.data_type = line[2]
+
+
+
+    def defineDataTypes(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "VAR_DECLARE":
+                data_type = node.children[0].lexeme
+                self.delegateDataTypeToVarList(data_type, node.children[2])
+            elif node.name == "PARAMETER_STATEMENT_STMT":
+                data_type = node.children[0].lexeme
+                self.delegateDataTypeToParameterFunction(data_type, node.children[2])
+
+        self.createDefinedVariableTable()
+
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "ID" and node.parent.parent.name != "VAR_LIST" and node.parent.name != "PARAMETER_STATEMENT_STMT":
+                self.delegateDataTypeToDeclaredVariable(node)
+
+    
+    def isDeclaredVariable(self, nodeVar):
+        if hasattr(nodeVar, 'data_type'):  
+            return True
+        return False
+
+    
+    def verifyVariableNotDeclared(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "VAR":
+                isDeclaredVar = self.isDeclaredVariable(node.children[0])
+                if isDeclaredVar == False:
+                    print("In line ", node.children[0].line,":\n", "variable '", node.children[0].lexeme,"' is not declared", sep="")
+
+
+    def isUsedVariable(self, line_variableDefinition):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "VAR" and node.parent.name != "VAR_LIST":
+                varNode = node.children[0]
+                if line_variableDefinition[1] in varNode.scope and line_variableDefinition[4] == varNode.lexeme:
+                    return True
+        return False
+
+
+    def verifyVariableUses(self):
+        for line in self.definedVariableTable:
+            isUsed = self.isUsedVariable(line)
+            if isUsed == False:
+                print("In line ", line[5],":\n", "the variable '", line[4],"' is declared and unused", sep="")
+
+
+    def verifyVariableAlreadyDefined(self):
+        size = len(self.definedVariableTable)
+        for i in range(size):
+            for j in range(i+1, size):
+                if (self.definedVariableTable[i][1] == self.definedVariableTable[i+1][1] and
+                self.definedVariableTable[i][4]  == self.definedVariableTable[i+1][4]):
+                    print("Variable '", self.definedVariableTable[i][4],"' is declared more than one time. See line ",
+                    self.definedVariableTable[i][5]," and ",self.definedVariableTable[i+1][5], sep="")
+
+
+        
