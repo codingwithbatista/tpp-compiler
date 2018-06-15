@@ -23,21 +23,20 @@ def printTokenList(option, tokenlist=[]):
 
 def main():
     lex = scanlex(sys.argv[1])
-    #analise = sys.argv[2]
-    tokenlist = lex.getTokenListProcess()
-    syntax = syntax_process()
-    syntax_tree = syntax.exec(tokenlist)
-    sm = semantic_module(syntax_tree)
+    analise = sys.argv[2]
+    
+    #sm = semantic_module(syntax_tree)
     #sm.walking_syntaxtree()    
 
-    '''if analise == "lexical":
+    if analise == "lexical":
         out_type = sys.argv[3]
         if (out_type != "txt") and (out_type != "csv"):
             print("Output file format is invalid. Please choose between txt or csv.")
         else:
-            printTokenList(out_type, tokenlist)
-    
+            pass
+            #printTokenList(out_type, tokenlist)
     elif analise == "syntax":
+        tokenlist = lex.getTokenListProcess()
         syntax = syntax_process()
         syntax_tree = syntax.exec(tokenlist)
         if syntax_tree is not None:
@@ -63,10 +62,15 @@ def main():
                     render.renderTXT(syntax_tree)
                 else:
                     print("too few arguments.")
+    elif analise == "semantic":
+        tokenlist = lex.getTokenListProcess()
+        syntax = syntax_process()
+        syntax_tree = syntax.exec(tokenlist)
+        sm = semantic_module(syntax_tree)
 
 
     else:
-        print("Invalid analise option")'''
+        print("Invalid analise option")
         
 
 
