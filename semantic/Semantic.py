@@ -8,11 +8,13 @@ class semantic_module(object):
         self.table = []
         self.defineScopes()
         self.defineDataTypes()
-        self.printTree()
+        
         self.printVariableDefinedTable()
         self.verifyVariableNotDeclared()
         self.verifyVariableUses()
         self.verifyVariableAlreadyDefined()
+        self.defineExpressionDataType()
+        self.printTree()
         #self.scope_definition()
         #self.declare_previous_verification()
         #self.print_simbol_table()
@@ -116,12 +118,15 @@ class semantic_module(object):
 
     def defineDataTypes(self):
         for node in PreOrderIter(self.syntax_tree):
-            if node.name == "VAR_DECLARE":
+            if node.name == "VAR_DECLARE" and node.children[2].children[0].children[0].name != "VAR_INDEX_STMT":
                 data_type = node.children[0].lexeme
                 self.delegateDataTypeToVarList(data_type, node.children[2])
             elif node.name == "PARAMETER_STATEMENT_STMT":
                 data_type = node.children[0].lexeme
                 self.delegateDataTypeToParameterFunction(data_type, node.children[2])
+            #elif node.name == "VAR_INDEX_STMT":
+
+            #    data_type = node.parent.parent.parent.children[0]
 
         self.createDefinedVariableTable()
 
@@ -138,7 +143,8 @@ class semantic_module(object):
     
     def verifyVariableNotDeclared(self):
         for node in PreOrderIter(self.syntax_tree):
-            if node.name == "VAR":
+            if node.name == "VAR" and node.children[0].name != "VAR_INDEX_STMT":
+                
                 isDeclaredVar = self.isDeclaredVariable(node.children[0])
                 if isDeclaredVar == False:
                     print("In line ", node.children[0].line,":\n", "variable '", node.children[0].lexeme,"' is not declared", sep="")
@@ -146,7 +152,7 @@ class semantic_module(object):
 
     def isUsedVariable(self, line_variableDefinition):
         for node in PreOrderIter(self.syntax_tree):
-            if node.name == "VAR" and node.parent.name != "VAR_LIST":
+            if node.name == "VAR" and node.parent.name != "VAR_LIST" and node.children[0].name != "VAR_INDEX_STMT":
                 varNode = node.children[0]
                 if line_variableDefinition[1] in varNode.scope and line_variableDefinition[4] == varNode.lexeme:
                     return True
@@ -168,6 +174,33 @@ class semantic_module(object):
                 self.definedVariableTable[i][4]  == self.definedVariableTable[i+1][4]):
                     print("Variable '", self.definedVariableTable[i][4],"' is declared more than one time. See line ",
                     self.definedVariableTable[i][5]," and ",self.definedVariableTable[i+1][5], sep="")
+    
+    def defineExpressionDataType(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "SUM_OPERATOR":
+                node.data_type = self.defineSumDataType(node)
+                print(node.data_type)
+    
+
+    def defineSumDataType(self, sumNode=Node):
+        childA = sumNode.children[0]
+        childB = sumNode.children[1]
+        data_typeA = ""
+        for node in PreOrderIter(childA):
+            if node.name == "ID":
+                data_typeA = node.data_type
+        
+        for node in PreOrderIter(childB):
+            if node.name == "ID":
+                data_typeB = node.data_type
+        
+        if(data_typeA == "flutuante" or data_typeB == "flutuante"):
+            sum_datatype = "flutuante"
+        else:
+            sum_datatype = "inteiro"
+        
+        return sum_datatype
+
 
 
         
