@@ -1688,7 +1688,7 @@ class syntax_scanner(object):
 
     def __consumeParameterListStatement(self, node, tokenlist=[]):
         try:
-            
+            print("printoso")
             parameter_list_node = Node("PARAMETER_LIST_STMT", parent = node, tokenval = "PARAMETER_LIST_STMT",
             number = self.node_number)
             self.node_number += 1
@@ -1718,6 +1718,8 @@ class syntax_scanner(object):
 
     def __consumeParameterList(self, node, tokenlist=[]):
         try:
+            print("aqui")
+            print(node)
             parameter_list_stmt = Node("PARAMETER_LIST_STMT", parent=node, tokenval="PARAMETER_LIST_STMT",
             number = self.node_number)
             self.node_number += 1
@@ -1866,25 +1868,27 @@ class syntax_scanner(object):
         try:
             index = 0
             token = tokenlist[index]
+            # erro está aqui
             third_header_node = Node("THIRD_HEADER_STMT", parent=node, tokenval="THIRD_HEADER_STMT",
             number = self.node_number)
             self.node_number += 1
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
-                Node("ID", parent=node, tokenval = token.tokenval, tokentype = token.tokentype,
+                Node("ID", parent=third_header_node, tokenval = token.tokenval, tokentype = token.tokentype,
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
                 token = tokenlist[index]
-
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     Node("OPEN_PARENTHESES", parent = third_header_node, tokenval = token.tokenval,
-                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfline(),
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine(),
                     number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-
+                    token = tokenlist[index]
+                    print(token.tokenval, token.tokentype, token.lexeme)
                     isParameterList = self.rule_scanner.isParameterList(tokenlist[index:])
                     if isParameterList[0]:
+                        print("com sal")
                         self.__consumeParameterList(third_header_node, tokenlist[index:])
                         index = index + isParameterList[1]
                         token = tokenlist[index]
