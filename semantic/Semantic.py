@@ -64,9 +64,14 @@ class semantic_module(object):
                 node.scope = scope
             
             elif node.name == "FUNCTION_DECLARATION":
-                scope_name = node.children[1].children[0].children[0].lexeme
-                scope = scope + ".fnc_" + scope_name
-                node.scope = scope
+                try:
+                    scope_name = node.children[1].children[0].children[0].lexeme
+                    scope = scope + ".fnc_" + scope_name
+                    node.scope = scope
+                except IndexError:
+                    scope_name = node.children[0].children[0].children[0].lexeme
+                    scope = scope + ".fnc_" + scope_name
+                    node.scope = scope
             
             elif node.name == "CONDITIONAL_STMT":
                 scope = scope + ".conditional"
@@ -238,17 +243,25 @@ class semantic_module(object):
                     return_type = node.children[0].lexeme
                 else:
                     return_type = "vazio"
-                if node.children[1].children[0].children[0].name == "ID":
-                    function_name = node.children[1].children[0].children[0].lexeme
-                    scope = node.children[1].children[0].children[0].scope
-                table.append([function_name, scope, return_type])
+                try:
+                    if node.children[1].children[0].children[0].name == "ID":
+                        function_name = node.children[1].children[0].children[0].lexeme
+                        scope = node.children[1].children[0].children[0].scope
+                        table.append([function_name, scope, return_type])
+                except IndexError:
+                    if node.children[0].children[0].children[0].name == "ID":
+                        function_name = node.children[0].children[0].children[0].lexeme
+                        scope = node.children[0].children[0].children[0].scope
+                        table.append([function_name, scope, return_type])
         self.declaredFunctions = table
 
     def verifyReturnType(self):
         for line in self.declaredFunctions:
             hasReturn = self.functionHasReturnType(line)
             if hasReturn[0] == False and line[2] != "vazio":
-                print("deu aqui sem retorno")
+                print("Semantic Error in function '", line[0], "':\nFunction returns vazio, but should returns ",
+                 line[2])
+                
             elif hasReturn[0] == True and line[2] != hasReturn[1]:
                 print("Semantic Error in function '", line[0],"':\n", 
                 "In line ", hasReturn[2], ", fuction should return ", line[2], " but it returns ",
