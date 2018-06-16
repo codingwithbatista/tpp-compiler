@@ -8,13 +8,14 @@ class semantic_module(object):
         self.table = []
         self.defineScopes()
         self.defineDataTypes()
-        
+        self.defineNumberDataType()
         self.printVariableDefinedTable()
         self.verifyVariableNotDeclared()
         self.verifyVariableUses()
         self.verifyVariableAlreadyDefined()
         self.defineExpressionDataType()
         self.printTree()
+        self.verifyTypeAssignment()
         #self.scope_definition()
         #self.declare_previous_verification()
         #self.print_simbol_table()
@@ -32,7 +33,10 @@ class semantic_module(object):
             else:
                 print("name:",node.name,"|", "lexeme:",node.lexeme,"|", "tokenval:",node.tokenval,"|", "scope:",node.scope)
         else:
-            print("name:",node.name,"|", "scope:",node.scope)
+            if hasattr(node, "data_type"):
+                print("name:",node.name,"|", "scope:",node.scope, "|", "data_type:", node.data_type)    
+            else:
+                print("name:",node.name,"|", "scope:",node.scope)
 
 
     def printTree(self):
@@ -175,31 +179,50 @@ class semantic_module(object):
                     print("Variable '", self.definedVariableTable[i][4],"' is declared more than one time. See line ",
                     self.definedVariableTable[i][5]," and ",self.definedVariableTable[i+1][5], sep="")
     
+        
+    def defineNumberDataType(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "NUMBER":
+                if node.tokenval == "NUMERO_INTEIRO":
+                    node.data_type = "inteiro"
+                elif node.tokenval == "NUMERO_FLUTUANTE":
+                    node.data_type = "flutuante"
+    
+    
     def defineExpressionDataType(self):
         for node in PreOrderIter(self.syntax_tree):
-            if node.name == "SUM_OPERATOR":
-                node.data_type = self.defineSumDataType(node)
-                print(node.data_type)
+            if node.name == "TIMES_OPERATOR" or node.name == "SUM_OPERATOR":
+                node.data_type = self.verifyExpressionChildDataType(node)
+        
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "EXPRESSION":
+                node.data_type = self.verifyExpressionChildDataType(node)
     
 
-    def defineSumDataType(self, sumNode=Node):
-        childA = sumNode.children[0]
-        childB = sumNode.children[1]
-        data_typeA = ""
-        for node in PreOrderIter(childA):
-            if node.name == "ID":
-                data_typeA = node.data_type
-        
-        for node in PreOrderIter(childB):
-            if node.name == "ID":
-                data_typeB = node.data_type
-        
-        if(data_typeA == "flutuante" or data_typeB == "flutuante"):
-            sum_datatype = "flutuante"
-        else:
-            sum_datatype = "inteiro"
-        
-        return sum_datatype
+    def verifyExpressionChildDataType(self, op_node=Node):
+        for node in PreOrderIter(op_node):
+            if hasattr(node, "data_type"):
+                if node.data_type == "flutuante":
+                    return "flutuante"
+                elif node.data_type == "inteiro":
+                    data_type = "inteiro"
+        return data_type
+
+
+    def verifyTypeAssignment(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "ASSIGNMENT":
+                left = self.verifyExpressionChildDataType(node.children[0])
+                right = self.verifyExpressionChildDataType(node.children[1])
+                if (left == "inteiro" and right == "flutuante"):
+                    print("warning: casting to inteiro, in line ", node.line, ":\nvariable '", node.children[0].children[0].lexeme,
+                    "' is inteiro, but it receives flutuante data type.", sep="")
+                elif (left == "flutuante" and right == "inteiro"):
+                    print("warning: casting to flutuante, in line ", node.line, ":\nvariable '", node.children[0].children[0].lexeme,
+                    "' is flutuante, but it receives inteiro data type.", sep="")
+    
+    def verifyReturnType(self):
+        pass
 
 
 
