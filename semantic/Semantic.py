@@ -13,11 +13,12 @@ class semantic_module(object):
         self.verifyVariableNotDeclared()
         self.verifyVariableUses()
         self.verifyVariableAlreadyDefined()
+        self.createDeclaredFunctionsTable()
+        self.call_function_annotation()
         self.defineExpressionDataType()
         #self.printTree()
         self.verifyTypeAssignment()
-        self.createDeclaredFunctionsTable()
-        self.printFunctionsDefinedTable()
+        #self.printFunctionsDefinedTable()
         self.verifyReturnType()
         #self.scope_definition()
         #self.declare_previous_verification()
@@ -219,6 +220,7 @@ class semantic_module(object):
                     return "flutuante"
                 elif node.data_type == "inteiro":
                     data_type = "inteiro"
+        
         return data_type
 
 
@@ -277,6 +279,28 @@ class semantic_module(object):
                 return True, node.children[2].data_type, node.children[0].line
         
         return False, "vazio"
+    
+    def functionIsDeclared(self, node=Node):
+        if node.name == "CALL_FUNCTION_STMT":
+            func_name = node.children[0].children[0].lexeme
+            for line in self.declaredFunctions:
+                scope = "global.fnc_" + func_name
+                if scope == line[1]:
+                    return True, line[2]
+        
+        return False, -1
+
+
+
+    def call_function_annotation(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                isDeclared = self.functionIsDeclared(node)
+                if isDeclared[0]:
+                    node.data_type = isDeclared[1]
+                else:
+                    print("declara essa porra meu")
+
 
 
 
