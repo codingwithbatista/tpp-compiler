@@ -20,6 +20,7 @@ class semantic_module(object):
         self.verifyTypeAssignment()
         #self.printFunctionsDefinedTable()
         self.verifyReturnType()
+        self.verifyUnusedFunctions()
         #self.scope_definition()
         #self.declare_previous_verification()
         #self.print_simbol_table()
@@ -303,6 +304,24 @@ class semantic_module(object):
                     func_node = node.children[0].children[0]
                     print("In line ", func_node.line, ":\nThe function '", func_node.lexeme,"' is not declared"
                     ,sep="")
+    
+
+    def isUsedFunction(self, lineDeclaredFuntion):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                funcName_node = node.children[0].children[0]
+                if funcName_node.lexeme == lineDeclaredFuntion[0]:
+                    return True
+        return False
+
+    def verifyUnusedFunctions(self):
+        for line in self.declaredFunctions:
+            isUsed = self.isUsedFunction(line)
+            if isUsed == False and line[0] != "principal":
+                print("Warning:\nFunction '", line[0],"' was declared, but unused.", sep="")
+
+
+
 
 
 
