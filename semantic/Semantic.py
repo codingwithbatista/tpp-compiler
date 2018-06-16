@@ -21,6 +21,7 @@ class semantic_module(object):
         self.printFunctionsDefinedTable()
         self.verifyReturnType()
         self.verifyUnusedFunctions()
+        self.verifyNumberOfFunctionsParameters()
         #self.scope_definition()
         #self.declare_previous_verification()
         #self.print_simbol_table()
@@ -175,6 +176,7 @@ class semantic_module(object):
                 varNode = node.children[0]
                 if line_variableDefinition[1] in varNode.scope and line_variableDefinition[4] == varNode.lexeme:
                     return True
+        
         return False
 
 
@@ -289,7 +291,7 @@ class semantic_module(object):
             for line in self.declaredFunctions:
                 scope = "global.fnc_" + func_name
                 if scope == line[1]:
-                    return True, line[2]
+                    return True, line[2], line[0], line[3]
         
         return False, -1
 
@@ -330,6 +332,34 @@ class semantic_module(object):
                 count += 1
         
         return count
+    
+
+    def getNumberOfCallParameters(self, callNode=Node):
+        parameters = []
+        for n in PreOrderIter(callNode):
+            if n.name == "EXPRESSION":
+                parameters.append(n.data_type)
+        
+        return len(parameters), parameters
+
+
+    def verifyNumberOfFunctionsParameters(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                isDeclared = self.functionIsDeclared(node)
+                if isDeclared[0]:
+                    numberOfParameters = isDeclared[3]
+                    func_name = isDeclared[2]
+                    numberOfCallParameters = self.getNumberOfCallParameters(node)[0]
+                    line = node.children[0].children[0].line
+                    if numberOfCallParameters != numberOfParameters:
+                        print("Semantic error:\n","In line ", line,", the function '", func_name,
+                        "' expect ", numberOfParameters,", but it receives ", numberOfCallParameters,
+                        sep="")
+                    
+                    
+
+
 
 
 
