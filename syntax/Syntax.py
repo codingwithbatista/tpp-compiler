@@ -1688,7 +1688,6 @@ class syntax_scanner(object):
 
     def __consumeParameterListStatement(self, node, tokenlist=[]):
         try:
-            print("printoso")
             parameter_list_node = Node("PARAMETER_LIST_STMT", parent = node, tokenval = "PARAMETER_LIST_STMT",
             number = self.node_number)
             self.node_number += 1
@@ -1718,8 +1717,6 @@ class syntax_scanner(object):
 
     def __consumeParameterList(self, node, tokenlist=[]):
         try:
-            print("aqui")
-            print(node)
             parameter_list_stmt = Node("PARAMETER_LIST_STMT", parent=node, tokenval="PARAMETER_LIST_STMT",
             number = self.node_number)
             self.node_number += 1
@@ -1885,10 +1882,8 @@ class syntax_scanner(object):
                     self.node_number += 1
                     index = index + 1
                     token = tokenlist[index]
-                    print(token.tokenval, token.tokentype, token.lexeme)
                     isParameterList = self.rule_scanner.isParameterList(tokenlist[index:])
                     if isParameterList[0]:
-                        print("com sal")
                         self.__consumeParameterList(third_header_node, tokenlist[index:])
                         index = index + isParameterList[1]
                         token = tokenlist[index]
