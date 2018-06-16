@@ -188,10 +188,10 @@ class semantic_module(object):
         size = len(self.definedVariableTable)
         for i in range(size):
             for j in range(i+1, size):
-                if (self.definedVariableTable[i][1] == self.definedVariableTable[i+1][1] and
-                self.definedVariableTable[i][4]  == self.definedVariableTable[i+1][4]):
+                if (self.definedVariableTable[i][1] == self.definedVariableTable[j][1] and
+                self.definedVariableTable[i][4]  == self.definedVariableTable[j][4]):
                     print("Variable '", self.definedVariableTable[i][4],"' is declared more than one time. See line ",
-                    self.definedVariableTable[i][5]," and ",self.definedVariableTable[i+1][5], sep="")
+                    self.definedVariableTable[i][5]," and ",self.definedVariableTable[j][5], sep="")
     
         
     def defineNumberDataType(self):
@@ -221,6 +221,7 @@ class semantic_module(object):
                 elif node.data_type == "inteiro":
                     data_type = "inteiro"
         
+        data_type = "not_defined"
         return data_type
 
 
@@ -260,11 +261,11 @@ class semantic_module(object):
     def verifyReturnType(self):
         for line in self.declaredFunctions:
             hasReturn = self.functionHasReturnType(line)
-            if hasReturn[0] == False and line[2] != "vazio":
+            if hasReturn[0] == False and line[2] != "vazio" and hasReturn[1] != "not_defined":
                 print("Semantic Error in function '", line[0], "':\nFunction returns vazio, but should returns ",
-                 line[2])
+                 line[2], sep="")
                 
-            elif hasReturn[0] == True and line[2] != hasReturn[1]:
+            elif hasReturn[0] == True and line[2] != hasReturn[1] and hasReturn[1] != "not_defined":
                 print("Semantic Error in function '", line[0],"':\n", 
                 "In line ", hasReturn[2], ", fuction should return ", line[2], " but it returns ",
                 hasReturn[1],  sep="")
@@ -299,7 +300,9 @@ class semantic_module(object):
                 if isDeclared[0]:
                     node.data_type = isDeclared[1]
                 else:
-                    print("declara essa porra meu")
+                    func_node = node.children[0].children[0]
+                    print("In line ", func_node.line, ":\nThe function '", func_node.lexeme,"' is not declared"
+                    ,sep="")
 
 
 
