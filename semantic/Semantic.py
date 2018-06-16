@@ -9,13 +9,16 @@ class semantic_module(object):
         self.defineScopes()
         self.defineDataTypes()
         self.defineNumberDataType()
-        self.printVariableDefinedTable()
+        #self.printVariableDefinedTable()
         self.verifyVariableNotDeclared()
         self.verifyVariableUses()
         self.verifyVariableAlreadyDefined()
         self.defineExpressionDataType()
-        self.printTree()
+        #self.printTree()
         self.verifyTypeAssignment()
+        self.createDeclaredFunctionsTable()
+        self.printFunctionsDefinedTable()
+        self.verifyReturnType()
         #self.scope_definition()
         #self.declare_previous_verification()
         #self.print_simbol_table()
@@ -46,6 +49,11 @@ class semantic_module(object):
 
     def printVariableDefinedTable(self):
         for line in self.definedVariableTable:
+            print(line)
+
+
+    def printFunctionsDefinedTable(self):
+        for line in self.declaredFunctions:
             print(line)
 
     def defineScopes(self):
@@ -221,8 +229,41 @@ class semantic_module(object):
                     print("warning: casting to flutuante, in line ", node.line, ":\nvariable '", node.children[0].children[0].lexeme,
                     "' is flutuante, but it receives inteiro data type.", sep="")
     
+
+    def createDeclaredFunctionsTable(self):
+        table = []
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "FUNCTION_DECLARATION":
+                if node.children[0].name == "TYPE":
+                    return_type = node.children[0].lexeme
+                else:
+                    return_type = "vazio"
+                if node.children[1].children[0].children[0].name == "ID":
+                    function_name = node.children[1].children[0].children[0].lexeme
+                    scope = node.children[1].children[0].children[0].scope
+                table.append([function_name, scope, return_type])
+        self.declaredFunctions = table
+
     def verifyReturnType(self):
-        pass
+        for line in self.declaredFunctions:
+            hasReturn = self.functionHasReturnType(line)
+            if hasReturn[0] == False and line[2] != "vazio":
+                print("deu aqui sem retorno")
+            elif hasReturn[0] == True and line[2] != hasReturn[1]:
+                print("Semantic Error in function '", line[0],"':\n", 
+                "In line ", hasReturn[2], ", fuction should return ", line[2], " but it returns ",
+                hasReturn[1],  sep="")
+            
+
+    
+
+    def functionHasReturnType(self, functionDeclareLine=[]):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "RETURN_STMT" and node.scope == functionDeclareLine[1]:
+
+                return True, node.children[2].data_type, node.children[0].line
+        
+        return False, "vazio"
 
 
 
