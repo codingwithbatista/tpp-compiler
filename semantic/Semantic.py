@@ -18,7 +18,7 @@ class semantic_module(object):
         self.defineExpressionDataType()
         #self.printTree()
         self.verifyTypeAssignment()
-        #self.printFunctionsDefinedTable()
+        self.printFunctionsDefinedTable()
         self.verifyReturnType()
         self.verifyUnusedFunctions()
         #self.scope_definition()
@@ -243,6 +243,7 @@ class semantic_module(object):
         table = []
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "FUNCTION_DECLARATION":
+                numberOfParameters = self.getNumberOfFunctionsParameters(node)
                 if node.children[0].name == "TYPE":
                     return_type = node.children[0].lexeme
                 else:
@@ -251,12 +252,12 @@ class semantic_module(object):
                     if node.children[1].children[0].children[0].name == "ID":
                         function_name = node.children[1].children[0].children[0].lexeme
                         scope = node.children[1].children[0].children[0].scope
-                        table.append([function_name, scope, return_type])
+                        table.append([function_name, scope, return_type, numberOfParameters])
                 except IndexError:
                     if node.children[0].children[0].children[0].name == "ID":
                         function_name = node.children[0].children[0].children[0].lexeme
                         scope = node.children[0].children[0].children[0].scope
-                        table.append([function_name, scope, return_type])
+                        table.append([function_name, scope, return_type, numberOfParameters])
         self.declaredFunctions = table
 
     def verifyReturnType(self):
@@ -314,11 +315,23 @@ class semantic_module(object):
                     return True
         return False
 
+  
     def verifyUnusedFunctions(self):
         for line in self.declaredFunctions:
             isUsed = self.isUsedFunction(line)
             if isUsed == False and line[0] != "principal":
                 print("Warning:\nFunction '", line[0],"' was declared, but unused.", sep="")
+    
+
+    def getNumberOfFunctionsParameters(self, node=Node):
+        count = 0
+        for n in PreOrderIter(node):
+            if n.name == "PARAMETER_STATEMENT_STMT":
+                count += 1
+        
+        return count
+
+
 
 
 
