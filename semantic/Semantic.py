@@ -194,6 +194,7 @@ class semantic_module(object):
         
         return False
 
+    
     def warningUnusedVars(self):
         for symbol in self.SymbolTable:
             if symbol[0] == "var_declare":
@@ -202,7 +203,54 @@ class semantic_module(object):
                     print("===== WARNING =====\nthe declared variable '", symbol[2],"' is unused"
                     ,sep="")
 
-    
+
+    def hasIndexError(self):
+        hasError = False
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "INDEX":
+                for i in PreOrderIter(node):
+                    if hasattr(i, 'data_type') and hasattr(i, 'line'):
+                        if i.data_type == "flutuante":
+                            print("===== Error =====\n", "In line ", i.line, ", index cannot be flutuante",
+                            sep="" )
+                            hasError = True
+        return hasError
+
+
+    def hasReturnError(self):
+        hasError = False
+        for symbol in self.SymbolTable:
+            if symbol[0] == "func_declare":
+                hasReturn = False
+                for node in PreOrderIter(self.syntax_tree):
+                    if node.name == "RETURN_STMT":
+                        returnNode = node.children[2]
+                        data_type = returnNode.data_type
+                        scope = returnNode.scope
+                        if data_type != symbol[1] and scope == symbol[3]:
+                            hasReturn = True
+                            hasError = True
+                            print("===== ERROR =====\nIn function ", symbol[2]," (line ",
+                            node.children[0].line,") : it returns ",data_type,
+                            ", but should return ", symbol[1], sep="")
+                if symbol[1] != "vazio" and hasReturn == False:
+                    hasError = True
+                    print("===== ERROR =====\nIn function ", symbol[2], ": it returns vazio, but should return ",
+                     symbol[1], sep="")
+                for node in PreOrderIter(self.syntax_tree):
+                    if node.name == "RETURN_STMT":
+                        returnNode = node.children[2]
+                        data_type = returnNode.data_type
+                        scope = returnNode.scope
+                        if data_type != symbol[1] and symbol[3] in scope:
+                            hasError = True
+                            print("===== ERROR =====\nIn function ", symbol[2]," (line ",
+                            node.children[0].line,") : it returns ",data_type,
+                            ", but should return ", symbol[1], sep="")
+
+        return hasError
+
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -221,8 +269,10 @@ class semantic_module(object):
         for node in PostOrderIter(self.syntax_tree):
             if node.name == "EXPRESSION":
                 self.annotateExpressionTypes(node)
-        self.warningCastingTypes()
+        self.hasIndexError()
+        self.hasReturnError()
         self.isMainDeclared()
+        self.warningCastingTypes()
         self.warningUnusedVars()
         
 
