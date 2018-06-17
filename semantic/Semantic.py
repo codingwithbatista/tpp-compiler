@@ -10,7 +10,7 @@ class semantic_module(object):
         self.walking()
         #self.printTree()
         self.printTable(self.SymbolTable)
-        
+    
 
     def printNode(self, node):
         if hasattr(node, 'lexeme'):
@@ -232,8 +232,9 @@ class semantic_module(object):
                         returnNode = node.children[2]
                         data_type = returnNode.data_type
                         scope = returnNode.scope
-                        if data_type != symbol[1] and scope == symbol[3]:
+                        if scope == symbol[3]:
                             hasReturn = True
+                        if data_type != symbol[1] and scope == symbol[3]:
                             hasError = True
                             print("===== ERROR =====\nIn function ", symbol[2]," (line ",
                             node.children[0].line,") : it returns ",data_type,
@@ -264,14 +265,15 @@ class semantic_module(object):
                 for symbol in self.SymbolTable:
                     funcNameNode = node.children[0].children[0]
                     if (symbol[0] == "func_declare" and symbol[2] == funcNameNode.lexeme
-                    and symbol[3] == "global"):
+                    and symbol[3] == "global.fnc_" + funcNameNode.lexeme):
                         defined = True
                 if defined == False:
                     line = funcNameNode.line
                     funcName = funcNameNode.lexeme
-                    hasError = False
+                    hasError = True
                     print("===== ERROR =====\nIn line ", line, ": function '",funcName,
                     "' wasn't defined", sep="")
+        return hasError
 
                     
 
