@@ -308,6 +308,22 @@ class semantic_module(object):
                         "' is defined in line ", symbol[i][4], " already", sep="")
 
 
+    def hasErrorUndefinedVariable(self):
+        hasError = False
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "VAR" and node.parent.name == "FACTOR":
+                defined = False
+                nodeVar = node.children[0]
+                for symbol in self.SymbolTable:
+                    if symbol[0] == "var_declare" or symbol[0] == "parameter_func":
+                        if symbol[2] == nodeVar.lexeme and symbol[3] in nodeVar.scope:
+                            defined = True
+                if defined == False:
+                    hasError = True
+                    print("===== ERROR =====\nIn line ", nodeVar.line, " variable '", nodeVar.lexeme,
+                    "' isn't declared previously", sep="" )
+        return hasError
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -330,6 +346,7 @@ class semantic_module(object):
         self.hasReturnError()
         self.hasUndeclaredFunction()
         self.hasErrorNumberParametersCallFunction()
+        self.hasErrorUndefinedVariable()
         self.isMainDeclared()
         self.warningCastingTypes()
         self.warningUnusedVars()
