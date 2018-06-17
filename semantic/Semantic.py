@@ -8,7 +8,7 @@ class semantic_module(object):
         self.SymbolTable = []
         self.defineScopes()
         self.walking()
-        self.printTree()
+        #self.printTree()
         self.printTable(self.SymbolTable)
         
 
@@ -97,12 +97,29 @@ class semantic_module(object):
                 variables.append(["var_declare",data_type,n.lexeme, n.scope, n.line])
         for v in variables:
             self.SymbolTable.append(v)
+    
+   
+    def addParameterSymbolTable(self, node=Node):
+        parameters = []
+        for n in PreOrderIter(node):
+            if n.name == "PARAMETER_STATEMENT_STMT":
+                for p in PreOrderIter(n):
+                    if p.name == "TYPE":
+                        data_type = p.lexeme
+                    elif p.name == "ID":
+                        p.data_type = data_type
+                        scope = p.scope
+                        lexeme = p.lexeme
+                        line = p.line
+                parameters.append(["parameter_func", data_type, lexeme, scope, line])
+        for p in parameters:
+            self.SymbolTable.append(p)
 
 
     def annotateVarTypes(self, varNode=Node):
         node = varNode.children[0]
         for line in self.SymbolTable:
-            if line[0] == "var_declare":
+            if line[0] == "var_declare" or line[0] == "parameter_func":
                 if node.lexeme == line[2] and line[3] in node.scope:
                     node.data_type = line[1]
 
@@ -126,6 +143,36 @@ class semantic_module(object):
                     print("===== WARNING =====\nIn line ", leftNode.line, " variable '", leftNode.lexeme,
                     "is ", leftNode.data_type, ", but received ", rightNode.data_type)
 
+          
+    def addFunctionDeclaredSymbolTable(self, node=Node):
+        functions = []
+        for node in PreOrderIter(node):
+            if node.name == "FUNCTION_DECLARATION":
+                if node.children[0].name == "TYPE":
+                    data_type = node.children[0].lexeme
+                    headerNode = node.children[1].children[0].children[0]
+                else:
+                    data_type = "vazio"
+                    headerNode = node.children[0].children[0].children[0]
+                if headerNode.name == "ID":
+                    func_name = headerNode.lexeme
+                    line = headerNode.line
+                    scope = headerNode.scope
+                    functions.append(["func_declare",data_type, func_name, scope, line])
+    
+        for f in functions:
+            self.SymbolTable.append(f)
+
+
+    def isMainDeclared(self):
+        for line in self.SymbolTable:
+            if line[0] == "func_declare" and line[2] == "principal":
+                return True
+        
+        print("===== ERROR =====\n", "principal function was not declared", sep="")
+        return False
+
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -136,11 +183,17 @@ class semantic_module(object):
                 node.data_type = "flutuante"
             elif node.name == "VAR" and node.parent.name != "VAR_LIST":
                 self.annotateVarTypes(node)
-        
+            elif node.name == "PARAMETER_LIST_STMT":
+                self.addParameterSymbolTable(node)
+            elif node.name == "FUNCTION_DECLARATION":
+                self.addFunctionDeclaredSymbolTable(node)
+
         for node in PostOrderIter(self.syntax_tree):
             if node.name == "EXPRESSION":
                 self.annotateExpressionTypes(node)
         self.warningCastingTypes()
+        self.isMainDeclared()
+
 
         
 
