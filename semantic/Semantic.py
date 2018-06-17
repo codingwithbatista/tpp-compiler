@@ -9,7 +9,7 @@ class semantic_module(object):
         self.defineScopes()
         self.walking()
         #self.printTree()
-        self.printTable(self.SymbolTable)
+        #self.printTable(self.SymbolTable)
     
 
     def printNode(self, node):
@@ -111,9 +111,10 @@ class semantic_module(object):
                         scope = p.scope
                         lexeme = p.lexeme
                         line = p.line
-                parameters.append(["parameter_func", data_type, lexeme, scope, line])
+                        parameters.append(["parameter_func", data_type, lexeme, scope, line])
         for p in parameters:
-            self.SymbolTable.append(p)
+            if p not in self.SymbolTable:
+                self.SymbolTable.append(p)
 
 
     def annotateVarTypes(self, varNode=Node):
@@ -276,6 +277,25 @@ class semantic_module(object):
         return hasError
 
                     
+    def hasErrorNumberParametersCallFunction(self):
+        hasError = False
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                funcNameNode = node.children[0].children[0]
+                parameterNumber = 0
+                for symbol in self.SymbolTable:
+                    funcScope = "global.fnc_" + funcNameNode.lexeme
+                    if symbol[0] == "parameter_func" and symbol[3] == funcScope:
+                        parameterNumber += 1
+                callParameterNumber = 0
+                for n in PreOrderIter(node):
+                    if n.name == "EXPRESSION":
+                        callParameterNumber += 1
+                if callParameterNumber != parameterNumber:
+                    hasError = True
+                    print("===== ERROR =====\nIn call function '", funcNameNode.lexeme,"': function expect ", parameterNumber,
+                    " parameters, but received ", callParameterNumber, sep="")
+        return hasError
 
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
@@ -298,6 +318,7 @@ class semantic_module(object):
         self.hasIndexError()
         self.hasReturnError()
         self.hasUndeclaredFunction()
+        self.hasErrorNumberParametersCallFunction()
         self.isMainDeclared()
         self.warningCastingTypes()
         self.warningUnusedVars()
