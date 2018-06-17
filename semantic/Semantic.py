@@ -256,6 +256,25 @@ class semantic_module(object):
         return hasError
 
 
+    def hasUndeclaredFunction(self):
+        hasError = False
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                defined = False
+                for symbol in self.SymbolTable:
+                    funcNameNode = node.children[0].children[0]
+                    if (symbol[0] == "func_declare" and symbol[2] == funcNameNode.lexeme
+                    and symbol[3] == "global"):
+                        defined = True
+                if defined == False:
+                    line = funcNameNode.line
+                    funcName = funcNameNode.lexeme
+                    hasError = False
+                    print("===== ERROR =====\nIn line ", line, ": function '",funcName,
+                    "' wasn't defined", sep="")
+
+                    
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -276,6 +295,7 @@ class semantic_module(object):
                 self.annotateExpressionTypes(node)
         self.hasIndexError()
         self.hasReturnError()
+        self.hasUndeclaredFunction()
         self.isMainDeclared()
         self.warningCastingTypes()
         self.warningUnusedVars()
