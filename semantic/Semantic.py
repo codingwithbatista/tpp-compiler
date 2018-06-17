@@ -9,7 +9,7 @@ class semantic_module(object):
         self.defineScopes()
         self.walking()
         #self.printTree()
-        #self.printTable(self.SymbolTable)
+        self.printTable(self.SymbolTable)
     
 
     def printNode(self, node):
@@ -151,7 +151,7 @@ class semantic_module(object):
                     rightNode = node.children[1]
                     if leftNode.data_type != rightNode.data_type:
                         print("===== WARNING =====\nIn line ", leftNode.line, " variable '", leftNode.lexeme,
-                        "is ", leftNode.data_type, ", but received ", rightNode.data_type)
+                        "' is ", leftNode.data_type, ", but received ", rightNode.data_type, sep="")
         except AttributeError:
             pass
 
@@ -297,6 +297,17 @@ class semantic_module(object):
                     " parameters, but received ", callParameterNumber, sep="")
         return hasError
 
+
+    def warningVariableDeclaredMoreThanOneTime(self):
+        symbol = self.SymbolTable
+        for i in range(len(self.SymbolTable)):
+            for j in range(i+1, len(self.SymbolTable)):
+                if symbol[i][0] == symbol[j][0] and symbol[i][0] == "var_declare":
+                    if symbol[i][2] == symbol[j][2] and symbol[i][3] == symbol[j][3]:
+                        print("===== WARNING =====\nIn line ", symbol[j][4], ": variable '", symbol[i][2],
+                        "' is defined in line ", symbol[i][4], " already", sep="")
+
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -322,6 +333,7 @@ class semantic_module(object):
         self.isMainDeclared()
         self.warningCastingTypes()
         self.warningUnusedVars()
+        self.warningVariableDeclaredMoreThanOneTime()
         
 
 
