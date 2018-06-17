@@ -120,7 +120,12 @@ class semantic_module(object):
         node = varNode.children[0]
         for line in self.SymbolTable:
             if line[0] == "var_declare" or line[0] == "parameter_func":
-                if node.lexeme == line[2] and line[3] in node.scope:
+                if node.name == "VAR_INDEX_STMT":
+                    varNode = node.children[0]
+                    if varNode.lexeme == line[2] and line[3] in node.scope:
+                        varNode.data_type = line[1]
+
+                elif node.lexeme == line[2] and line[3] in node.scope:
                     node.data_type = line[1]
 
 
@@ -135,13 +140,19 @@ class semantic_module(object):
     
     
     def warningCastingTypes(self):
-        for node in PreOrderIter(self.syntax_tree):
-            if node.name == "ASSIGNMENT":
-                leftNode = node.children[0].children[0]
-                rightNode = node.children[1]
-                if leftNode.data_type != rightNode.data_type:
-                    print("===== WARNING =====\nIn line ", leftNode.line, " variable '", leftNode.lexeme,
-                    "is ", leftNode.data_type, ", but received ", rightNode.data_type)
+        try: 
+            for node in PreOrderIter(self.syntax_tree):
+                if node.name == "ASSIGNMENT":
+                    if node.children[0].children[0] == "VAR_INDEX_STMT":
+                        leftNode = node.children[0].children[0].children[0]
+                    else:
+                        leftNode = node.children[0].children[0]
+                    rightNode = node.children[1]
+                    if leftNode.data_type != rightNode.data_type:
+                        print("===== WARNING =====\nIn line ", leftNode.line, " variable '", leftNode.lexeme,
+                        "is ", leftNode.data_type, ", but received ", rightNode.data_type)
+        except AttributeError:
+            pass
 
           
     def addFunctionDeclaredSymbolTable(self, node=Node):
@@ -173,6 +184,25 @@ class semantic_module(object):
         return False
 
 
+    def isVarUnused(self, varSymbolTable=[]):
+        for node in PreOrderIter(self.syntax_tree):
+            if (node.name == "VAR" and node.parent.name != "VAR_LIST" 
+            and node.children[0].name != "VAR_INDEX_STMT"):
+                varNode = node.children[0]
+                if varSymbolTable[3] in varNode.scope and varSymbolTable[2] == varNode.lexeme:
+                    return True
+        
+        return False
+
+    def warningUnusedVars(self):
+        for symbol in self.SymbolTable:
+            if symbol[0] == "var_declare":
+                isUsed = self.isVarUnused(symbol)
+                if isUsed == False:
+                    print("===== WARNING =====\nthe declared variable '", symbol[2],"' is unused"
+                    ,sep="")
+
+    
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -193,6 +223,8 @@ class semantic_module(object):
                 self.annotateExpressionTypes(node)
         self.warningCastingTypes()
         self.isMainDeclared()
+        self.warningUnusedVars()
+        
 
 
         
