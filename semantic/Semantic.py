@@ -253,7 +253,7 @@ class semantic_module(object):
                         returnNode = node.children[2]
                         data_type = returnNode.data_type
                         scope = returnNode.scope
-                        if data_type != symbol[1] and symbol[3] in scope:
+                        if data_type != symbol[1] and symbol[3] in scope and hasError == False:
                             hasError = True
                             print("===== ERROR =====\nIn function ", symbol[2]," (line ",
                             node.children[0].line,") : it returns ",data_type,
@@ -331,20 +331,27 @@ class semantic_module(object):
     
     def warningNonInitializedVariable(self):
         initializedVars = []
-        for node in PreOrderIter(self.syntax_tree):
-            if node.name == "VAR" and node.parent.name == "ASSIGNMENT":
-                nodeVar = node.children[0]
-                initializedVars.append([nodeVar.data_type, nodeVar.lexeme, nodeVar.scope])
-            elif node.name == "VAR" and node.parent.name == "FACTOR":
-                nodeElement = node.children[0]
-                initialized = False
-                for var in initializedVars:
-                    if (nodeElement.lexeme == var[1] and  nodeElement.data_type == var[0]
-                    and var[2] in nodeElement.scope):
-                        initialized = True
-                if initialized == False:
-                    print("===== WARNING =====\nIn line ", nodeElement.line,": variable '",
-                    nodeElement.lexeme,"' wasn't initilized before", sep="")
+        try:
+            for node in PreOrderIter(self.syntax_tree):
+                if node.name == "VAR" and node.parent.name == "ASSIGNMENT":
+                    nodeVar = node.children[0]
+                    initializedVars.append([nodeVar.data_type, nodeVar.lexeme, nodeVar.scope])
+                elif node.name == "PARAMETER_STATEMENT_STMT":
+                    nodeVar = node.children[2]
+                    initializedVars.append([nodeVar.data_type, nodeVar.lexeme, nodeVar.scope])
+                elif node.name == "VAR" and node.parent.name == "FACTOR":
+                    nodeElement = node.children[0]
+                    initialized = False
+                    for var in initializedVars:
+                        if (nodeElement.lexeme == var[1] and  nodeElement.data_type == var[0]
+                        and var[2] in nodeElement.scope):
+                            initialized = True
+                    if initialized == False:
+                        print("===== WARNING =====\nIn line ", nodeElement.line,": variable '",
+                        nodeElement.lexeme,"' wasn't initilized before", sep="")
+        except AttributeError:
+            pass
+
 
 
     def hasCallMainError(self):
@@ -361,6 +368,21 @@ class semantic_module(object):
                     ": a recursive call to principal function was made.", sep="")
         return hasError
     
+
+    def warningUnusedDefinedFunction(self):
+        for symbol in self.SymbolTable:
+            if symbol[0] == "func_declare" and symbol[2] != "principal":
+                warning = True
+                for node in PreOrderIter(self.syntax_tree):
+                    if node.name == "CALL_FUNCTION_STMT":
+                        funcNameNode = node.children[0].children[0]
+                        if (symbol[3] in funcNameNode.scope and symbol[2] == funcNameNode.lexeme
+                        and symbol[2] != "principal"):
+                            warning = False
+                if warning == True:
+                    print("===== WARNING =====\nFunction '", symbol[2], "' was define in line ", symbol[4],
+                    ", but it's unused", sep="")
+
 
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
@@ -391,6 +413,7 @@ class semantic_module(object):
         self.warningVariableDeclaredMoreThanOneTime()
         self.warningNonInitializedVariable()
         self.hasCallMainError()
+        self.warningUnusedDefinedFunction()
         
 
 
