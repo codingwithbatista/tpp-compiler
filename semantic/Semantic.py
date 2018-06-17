@@ -191,6 +191,11 @@ class semantic_module(object):
                 varNode = node.children[0]
                 if varSymbolTable[3] in varNode.scope and varSymbolTable[2] == varNode.lexeme:
                     return True
+            elif(node.name == "VAR" and node.parent.name != "VAR_LIST"
+            and node.children[0].name == "VAR_INDEX_STMT"):
+                varNode = node.children[0].children[0]
+                if varSymbolTable[3] in varNode.scope and varSymbolTable[2] == varNode.lexeme:
+                    return True
         
         return False
 
@@ -211,7 +216,7 @@ class semantic_module(object):
                 for i in PreOrderIter(node):
                     if hasattr(i, 'data_type') and hasattr(i, 'line'):
                         if i.data_type == "flutuante":
-                            print("===== Error =====\n", "In line ", i.line, ", index cannot be flutuante",
+                            print("===== ERROR =====\n", "In line ", i.line, ", index cannot be flutuante",
                             sep="" )
                             hasError = True
         return hasError
