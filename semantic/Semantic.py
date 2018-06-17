@@ -324,6 +324,26 @@ class semantic_module(object):
                     "' isn't declared previously", sep="" )
         return hasError
 
+    
+    def warningNonInitializedVariable(self):
+        initializedVars = []
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "VAR" and node.parent.name == "ASSIGNMENT":
+                nodeVar = node.children[0]
+                initializedVars.append([nodeVar.data_type, nodeVar.lexeme, nodeVar.scope])
+            elif node.name == "VAR" and node.parent.name == "FACTOR":
+                nodeElement = node.children[0]
+                initialized = False
+                for var in initializedVars:
+                    if (nodeElement.lexeme == var[1] and  nodeElement.data_type == var[0]
+                    and var[2] in nodeElement.scope):
+                        initialized = True
+                if initialized == False:
+                    print("===== WARNING =====\nIn line ", nodeElement.line,": variable '",
+                    nodeElement.lexeme,"' wasn't initilized before", sep="")
+
+                
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -351,6 +371,7 @@ class semantic_module(object):
         self.warningCastingTypes()
         self.warningUnusedVars()
         self.warningVariableDeclaredMoreThanOneTime()
+        self.warningNonInitializedVariable()
         
 
 
