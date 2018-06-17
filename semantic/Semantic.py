@@ -346,7 +346,21 @@ class semantic_module(object):
                     print("===== WARNING =====\nIn line ", nodeElement.line,": variable '",
                     nodeElement.lexeme,"' wasn't initilized before", sep="")
 
-                
+
+    def hasCallMainError(self):
+        hasError = False
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                callNode = node.children[0].children[0]
+                if callNode.lexeme == "principal" and "global.fnc_principal" not in callNode.scope:
+                    print("===== ERROR =====\nIn line ", callNode.line,
+                    ": a call to principal function was made. It cannot be made.", sep="")
+                    hasError = True
+                elif callNode.lexeme == "principal" and "global.fnc_principal" in callNode.scope:
+                    print("===== WARNING =====\nIn line ", callNode.line,
+                    ": a recursive call to principal function was made.", sep="")
+        return hasError
+    
 
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
@@ -376,6 +390,7 @@ class semantic_module(object):
         self.warningUnusedVars()
         self.warningVariableDeclaredMoreThanOneTime()
         self.warningNonInitializedVariable()
+        self.hasCallMainError()
         
 
 
