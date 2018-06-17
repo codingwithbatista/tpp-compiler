@@ -152,6 +152,7 @@ class semantic_module(object):
                     if leftNode.data_type != rightNode.data_type:
                         print("===== WARNING =====\nIn line ", leftNode.line, " variable '", leftNode.lexeme,
                         "' is ", leftNode.data_type, ", but received ", rightNode.data_type, sep="")
+                        print("The variable value will be casted to", leftNode.data_type)
         except AttributeError:
             pass
 
@@ -231,8 +232,11 @@ class semantic_module(object):
                 for node in PreOrderIter(self.syntax_tree):
                     if node.name == "RETURN_STMT":
                         returnNode = node.children[2]
-                        data_type = returnNode.data_type
-                        scope = returnNode.scope
+                        if hasattr(returnNode, "data_type"):
+                            data_type = returnNode.data_type
+                            scope = returnNode.scope
+                        else:
+                            return hasError
                         if scope == symbol[3]:
                             hasReturn = True
                         if data_type != symbol[1] and scope == symbol[3]:
