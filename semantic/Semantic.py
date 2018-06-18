@@ -132,6 +132,13 @@ class semantic_module(object):
 
     def annotateExpressionTypes(self, exprNode=Node):
         for node in PreOrderIter(exprNode):
+            if node.name == "CALL_FUNCTION_STMT":
+                func_name = node.children[0].children[0].lexeme
+                for symbol in self.SymbolTable:
+                    if symbol[0] == "func_declare" and func_name == symbol[2]:
+                        exprNode.data_type = symbol[1]
+                        return 
+        for node in PreOrderIter(exprNode):
             if hasattr(node, 'data_type'):
                 if node.data_type == "flutuante":
                     exprNode.data_type = "flutuante"
@@ -226,6 +233,7 @@ class semantic_module(object):
 
     def hasReturnError(self):
         hasError = False
+        errorMessages = []
         for symbol in self.SymbolTable:
             if symbol[0] == "func_declare":
                 hasReturn = False
@@ -246,18 +254,28 @@ class semantic_module(object):
                             ", but should return ", symbol[1], sep="")
                 if symbol[1] != "vazio" and hasReturn == False:
                     hasError = True
-                    print("===== ERROR =====\nIn function ", symbol[2], ": it returns vazio, but should return ",
-                     symbol[1], sep="")
+                    message = ("===== ERROR =====\nIn function " + symbol[2] + 
+                    ": it returns vazio, but should return " + symbol[1])
+                    if message not in errorMessages:
+                        errorMessages.append(message)
+                        print(message)
+                    '''print("===== ERROR =====\nIn function ", symbol[2], ": it returns vazio, but should return ",
+                     symbol[1], sep="")'''
                 for node in PreOrderIter(self.syntax_tree):
                     if node.name == "RETURN_STMT":
                         returnNode = node.children[2]
                         data_type = returnNode.data_type
                         scope = returnNode.scope
-                        if data_type != symbol[1] and symbol[3] in scope and hasError == False:
+                        if data_type != symbol[1] and symbol[3] in scope and symbol[3] != scope:
                             hasError = True
-                            print("===== ERROR =====\nIn function ", symbol[2]," (line ",
+                            message = ("===== ERROR =====\nIn function " + symbol[2] + " (line " +
+                            str(node.children[0].line) + ") : it returns " + data_type +", but should return " + symbol[1])
+                            if message not in errorMessages:
+                                print(message)
+                                errorMessages.append(message)
+                            '''print("===== ERROR =====\nIn function ", symbol[2]," (line ",
                             node.children[0].line,") : it returns ",data_type,
-                            ", but should return ", symbol[1], sep="")
+                            ", but should return ", symbol[1], sep="")'''
 
         return hasError
 
@@ -286,19 +304,25 @@ class semantic_module(object):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "CALL_FUNCTION_STMT":
                 funcNameNode = node.children[0].children[0]
+                line = node.children[0].children[0].line
                 parameterNumber = 0
                 for symbol in self.SymbolTable:
                     funcScope = "global.fnc_" + funcNameNode.lexeme
                     if symbol[0] == "parameter_func" and symbol[3] == funcScope:
                         parameterNumber += 1
                 callParameterNumber = 0
-                for n in PreOrderIter(node):
+                if node.children[0].name == "CALL_FUNCTION_WITH_ARGUMENTS_STMT":
+                    callParameterNumber = len(node.children[0].children[2].children)
+                    
+                '''for n in PreOrderIter(n2):
                     if n.name == "EXPRESSION":
                         callParameterNumber += 1
+                    if n.name == "CALL_FUNCTION_STMT":
+                        break'''
                 if callParameterNumber != parameterNumber:
                     hasError = True
                     print("===== ERROR =====\nIn call function '", funcNameNode.lexeme,"': function expect ", parameterNumber,
-                    " parameters, but received ", callParameterNumber, sep="")
+                    " parameters, but received ", callParameterNumber,". See line ", line, sep="")
         return hasError
 
 
@@ -399,16 +423,24 @@ class semantic_module(object):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "CALL_FUNCTION_STMT":
                 func_name = node.children[0].children[0].lexeme
+                line = node.children[0].children[0].line
                 call_parameters = []
-                for n in PreOrderIter(node):
+                if node.children[0].name == "CALL_FUNCTION_WITH_ARGUMENTS_STMT":
+                    argNode = node.children[0].children[2]
+                    call_parameters.append(argNode.children[0].data_type)
+                    for n in argNode.children:
+                        if n.name == "ARGUMENT_STATEMENT_STMT":
+                            call_parameters.append(n.children[1].data_type)
+                '''for n in PreOrderIter(node, maxlevel=5):
                     if n.name == "EXPRESSION":
                         call_parameters.append(n.data_type)
+                        print(call_parameters)'''
                 
                 for symbol in self.SymbolTable:
                     if (symbol[0] == "func_declare" and symbol[2] == func_name):
                         if symbol[5] != call_parameters:
                             print("===== WARNING =====\nIn call function '", func_name,"', it's expected ",
-                            symbol[5],", but received ", call_parameters, sep="")
+                            symbol[5],", but received ", call_parameters,". See line ", line, sep="")
 
 
     def walking(self):
