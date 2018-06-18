@@ -376,12 +376,39 @@ class semantic_module(object):
                 for node in PreOrderIter(self.syntax_tree):
                     if node.name == "CALL_FUNCTION_STMT":
                         funcNameNode = node.children[0].children[0]
-                        if (symbol[3] in funcNameNode.scope and symbol[2] == funcNameNode.lexeme
-                        and symbol[2] != "principal"):
+                        if (symbol[2] == funcNameNode.lexeme):
                             warning = False
                 if warning == True:
                     print("===== WARNING =====\nFunction '", symbol[2], "' was define in line ", symbol[4],
                     ", but it's unused", sep="")
+
+
+    def warningParameterTypes(self):
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "HEADER":
+                func_name = node.children[0].children[0].lexeme
+                scope = node.children[0].children[0].scope
+                parameters = []
+                for n in PreOrderIter(node):
+                    if n.name == "TYPE" and n.parent.name == "PARAMETER_STATEMENT_STMT":
+                        parameters.append(n.lexeme)
+                for symbol in self.SymbolTable:
+                    if (symbol[0] == "func_declare" and symbol[2] == func_name and
+                    scope == symbol[3]):
+                        symbol.append(parameters)
+        for node in PreOrderIter(self.syntax_tree):
+            if node.name == "CALL_FUNCTION_STMT":
+                func_name = node.children[0].children[0].lexeme
+                call_parameters = []
+                for n in PreOrderIter(node):
+                    if n.name == "EXPRESSION":
+                        call_parameters.append(n.data_type)
+                
+                for symbol in self.SymbolTable:
+                    if (symbol[0] == "func_declare" and symbol[2] == func_name):
+                        if symbol[5] != call_parameters:
+                            print("===== WARNING =====\nIn call function '", func_name,"', it's expected ",
+                            symbol[5],", but received ", call_parameters, sep="")
 
 
     def walking(self):
@@ -414,6 +441,7 @@ class semantic_module(object):
         self.warningNonInitializedVariable()
         self.hasCallMainError()
         self.warningUnusedDefinedFunction()
+        self.warningParameterTypes()
         
 
 
