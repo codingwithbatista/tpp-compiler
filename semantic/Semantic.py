@@ -259,8 +259,6 @@ class semantic_module(object):
                     if message not in errorMessages:
                         errorMessages.append(message)
                         print(message)
-                    '''print("===== ERROR =====\nIn function ", symbol[2], ": it returns vazio, but should return ",
-                     symbol[1], sep="")'''
                 for node in PreOrderIter(self.syntax_tree):
                     if node.name == "RETURN_STMT":
                         returnNode = node.children[2]
@@ -273,9 +271,6 @@ class semantic_module(object):
                             if message not in errorMessages:
                                 print(message)
                                 errorMessages.append(message)
-                            '''print("===== ERROR =====\nIn function ", symbol[2]," (line ",
-                            node.children[0].line,") : it returns ",data_type,
-                            ", but should return ", symbol[1], sep="")'''
 
         return hasError
 
@@ -314,11 +309,6 @@ class semantic_module(object):
                 if node.children[0].name == "CALL_FUNCTION_WITH_ARGUMENTS_STMT":
                     callParameterNumber = len(node.children[0].children[2].children)
                     
-                '''for n in PreOrderIter(n2):
-                    if n.name == "EXPRESSION":
-                        callParameterNumber += 1
-                    if n.name == "CALL_FUNCTION_STMT":
-                        break'''
                 if callParameterNumber != parameterNumber:
                     hasError = True
                     print("===== ERROR =====\nIn call function '", funcNameNode.lexeme,"': function expect ", parameterNumber,
@@ -431,10 +421,6 @@ class semantic_module(object):
                     for n in argNode.children:
                         if n.name == "ARGUMENT_STATEMENT_STMT":
                             call_parameters.append(n.children[1].data_type)
-                '''for n in PreOrderIter(node, maxlevel=5):
-                    if n.name == "EXPRESSION":
-                        call_parameters.append(n.data_type)
-                        print(call_parameters)'''
                 
                 for symbol in self.SymbolTable:
                     if (symbol[0] == "func_declare" and symbol[2] == func_name):
