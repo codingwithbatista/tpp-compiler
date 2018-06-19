@@ -476,11 +476,23 @@ class semantic_module(object):
 
 
     def removeVariableDeclarations(self, tree=Node):
+        nodeName = "VAR_DECLARE"
         for node in PreOrderIter(tree):
+            if node.name == nodeName and len(node.children) == 1:
+                n = node.children[0]
+                self.cutting(n, node)
+                if self.treeHasElement(nodeName):
+                    self.removeVariableDeclarations(self.syntax_tree)
+                else:
+                    break
+        '''for node in PreOrderIter(tree):
+            if node.name == "VAR_LIST":
+                node.name = "VAR_DECLARE"'''
+        '''for node in PreOrderIter(tree):
             if node.name == "ACTION_STMT" and node.children[0].name == "VAR_DECLARE":
                 node.parent = None
             elif node.name == "VAR_DECLARE":
-                node.parent = None
+                node.parent = None'''
     
 
     
@@ -523,6 +535,21 @@ class semantic_module(object):
                         self.cuttingVarNodes(self.syntax_tree)
                     else:
                         break
+        nodeName = ["VAR_LIST","INDEX_STMT","VAR_INDEX_STMT"]
+        for node in PreOrderIter(tree):
+            if node.name in nodeName:
+                for n in node.children:
+                    parent = node.parent
+                    n.parent = parent
+                node.parent = None
+                if self.treeHasElement(node.name):
+                    self.cuttingVarNodes(self.syntax_tree)
+                else:
+                    break
+        nodeName = ["OPEN_BRACKET","CLOSE_BRACKET"]
+        for node in PreOrderIter(tree):
+            if node.name in nodeName:
+                node.parent = None
 
 
     def cuttingExpressionStatementsNodes(self, tree=Node):
@@ -651,7 +678,7 @@ class semantic_module(object):
     def cuttingTree(self):
         tree = self.syntax_tree
 
-        self.removeVariableDeclarations(tree)
+        #self.removeVariableDeclarations(tree)
         self.cuttingLeafs(tree)
         self.cuttingVarNodes(tree)
         self.cuttingExpressionStatementsNodes(tree)
