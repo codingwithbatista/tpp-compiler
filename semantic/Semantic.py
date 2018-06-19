@@ -528,11 +528,12 @@ class semantic_module(object):
                     self.cuttingVarNodes(self.syntax_tree)
                 else:
                     break
-        nodeName = ["OPEN_BRACKET","CLOSE_BRACKET"]
+        nodeName = ["OPEN_BRACKET","CLOSE_BRACKET", "NOT"]
         for node in PreOrderIter(tree):
             if node.name in nodeName:
                 node.parent = None
-            elif node.name == "MINUS" and node.parent.name == "NEGATIVE_VAR":
+            elif (node.name == "MINUS" and 
+            (node.parent.name == "NEGATIVE_VAR" or node.parent.name == "NEGATIVE_NUMBER")):
                 node.parent = None
 
 
