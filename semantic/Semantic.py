@@ -257,7 +257,7 @@ class semantic_module(object):
                             hasReturn = True
                         if data_type != symbol[1] and scope == symbol[3]:
                             hasError = True
-                            print("===== ERROR =====\nIn function ", symbol[2]," (line ",
+                            print("===== WARNING =====\nIn function ", symbol[2]," (line ",
                             node.children[0].line,") : it returns ",data_type,
                             ", but should return ", symbol[1], sep="")
                 if symbol[1] != "vazio" and hasReturn == False:
@@ -471,31 +471,7 @@ class semantic_module(object):
         self.warningUnusedDefinedFunction()
         self.warningParameterTypes()
         
-    
-    
-
-
-    def removeVariableDeclarations(self, tree=Node):
-        nodeName = "VAR_DECLARE"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.removeVariableDeclarations(self.syntax_tree)
-                else:
-                    break
-        '''for node in PreOrderIter(tree):
-            if node.name == "VAR_LIST":
-                node.name = "VAR_DECLARE"'''
-        '''for node in PreOrderIter(tree):
-            if node.name == "ACTION_STMT" and node.children[0].name == "VAR_DECLARE":
-                node.parent = None
-            elif node.name == "VAR_DECLARE":
-                node.parent = None'''
-    
-
-    
+     
     def cuttingLeafs(self, tree=Node):
         nodeName = ["RETURN","OPEN_PARENTHESES","CLOSE_PARENTHESES","TYPE","COMMA",
         "TWO_DOTS","END", "WRITE", "READ", "UNTIL", "FOR"]
@@ -675,10 +651,11 @@ class semantic_module(object):
             if "REPEAT" in node.name:
                 node.name = "REPEAT" 
 
+
+
+
     def cuttingTree(self):
         tree = self.syntax_tree
-
-        #self.removeVariableDeclarations(tree)
         self.cuttingLeafs(tree)
         self.cuttingVarNodes(tree)
         self.cuttingExpressionStatementsNodes(tree)
@@ -686,7 +663,6 @@ class semantic_module(object):
         self.cuttingFunctionNodes(tree)
         self.cuttingCallFunctionNodes(tree)
         self.cuttingRepeatNodes(tree)
-        #self.cuttingExpression(tree)
 
 
 
