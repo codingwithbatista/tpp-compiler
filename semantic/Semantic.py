@@ -240,47 +240,57 @@ class semantic_module(object):
 
 
     def hasReturnError(self):
-        hasError = False
-        errorMessages = []
         for symbol in self.SymbolTable:
             if symbol[0] == "func_declare":
+                hasError = True
                 hasReturn = False
                 for node in PreOrderIter(self.syntax_tree):
-                    if node.name == "RETURN_STMT":
-                        returnNode = node.children[2]
-                        if hasattr(returnNode, "data_type"):
-                            data_type = returnNode.data_type
-                            scope = returnNode.scope
+                    if (symbol[3] == node.scope and node.name == "EXPRESSION" 
+                    and node.parent.name == "RETURN_STMT"):
+                        if(symbol[1] == node.data_type):
+                            hasError = False
                         else:
-                            return hasError
-                        if scope == symbol[3]:
-                            hasReturn = True
-                        if data_type != symbol[1] and scope == symbol[3]:
-                            hasError = True
-                            print("===== WARNING =====\nIn function ", symbol[2]," (line ",
-                            node.children[0].line,") : it returns ",data_type,
-                            ", but should return ", symbol[1], sep="")
-                if symbol[1] != "vazio" and hasReturn == False:
-                    hasError = True
-                    message = ("===== ERROR =====\nIn function " + symbol[2] + 
-                    ": it returns vazio, but should return " + symbol[1])
-                    if message not in errorMessages:
-                        errorMessages.append(message)
-                        print(message)
-                for node in PreOrderIter(self.syntax_tree):
-                    if node.name == "RETURN_STMT":
-                        returnNode = node.children[2]
-                        data_type = returnNode.data_type
-                        scope = returnNode.scope
-                        if data_type != symbol[1] and symbol[3] in scope and symbol[3] != scope:
-                            hasError = True
-                            message = ("===== ERROR =====\nIn function " + symbol[2] + " (line " +
-                            str(node.children[0].line) + ") : it returns " + data_type +", but should return " + symbol[1])
-                            if message not in errorMessages:
+                            if(symbol[1] == "inteiro" and node.data_type == "flutuante"):
+                                message = ("===== WARNING =====\nIn function " + symbol[2] + 
+                                ": It should return inteiro, but "
+                                + "It returns flutuante. The return value will be casted to inteiro")
                                 print(message)
-                                errorMessages.append(message)
+                            elif(symbol[1] == "flutuante" and node.data_type == "inteiro"):
+                                message = ("===== WARNING =====\nIn function " + symbol[2] + ": It should return flutuante, but "
+                                + "It returns inteiro. The return value will be casted to flutuante")
+                                print(message)
+                            elif (symbol[1] == "vazio" and node.data_type == "inteiro"):
+                                message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
+                                + "It returns inteiro")
+                                print(message)
+                            elif(symbol[1] == "vazio" and node.data_type == "flutuante"):
+                                message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
+                                + "It returns flutuante")
+                                print(message)
+                            hasReturn = True
+                if(hasReturn == False and symbol[1] == "vazio"):
+                        hasError = False
+                if hasError:
+                    #print("aqui")
+                    #print(hasReturn)
+                    
+                    if(symbol[1] == "inteiro" and hasReturn == False):
+                        message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return inteiro, but "
+                        + "It returns vazio")
+                        print(message)
+                    elif(symbol[1] == "flutuante" and hasReturn == False):
+                        message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return flutuante, but "
+                        + "It returns vazio")
+                        print(message)
+                    
+                    
+                    
+                    
 
-        return hasError
+                    
+                    #print(message)
+
+
 
 
     def hasUndeclaredFunction(self):
@@ -453,8 +463,6 @@ class semantic_module(object):
                 if len(node.children) == 1:
                     if node.children[0].name != "NEGATIVE_VAR":
                         self.annotateVarTypes(node)
-
-
             elif node.name == "PARAMETER_LIST_STMT":
                 self.addParameterSymbolTable(node)
             elif node.name == "FUNCTION_DECLARATION":
