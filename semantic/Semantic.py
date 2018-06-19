@@ -204,7 +204,7 @@ class semantic_module(object):
     def isVarUnused(self, varSymbolTable=[]):
         for node in PreOrderIter(self.syntax_tree):
             if (node.name == "VAR" and node.parent.name != "VAR_LIST" 
-            and node.children[0].name != "VAR_INDEX_STMT"):
+            and node.children[0].name != "VAR_INDEX_STMT" and node.children[0].name != "NEGATIVE_VAR"):
                 varNode = node.children[0]
                 if varSymbolTable[3] in varNode.scope and varSymbolTable[2] == varNode.lexeme:
                     return True
@@ -340,6 +340,8 @@ class semantic_module(object):
             if node.name == "VAR" and node.parent.name == "FACTOR":
                 defined = False
                 nodeVar = node.children[0]
+                if(nodeVar.name == "NEGATIVE_VAR"):
+                    nodeVar = node.children[0].children[1]
                 for symbol in self.SymbolTable:
                     if symbol[0] == "var_declare" or symbol[0] == "parameter_func":
                         if symbol[2] == nodeVar.lexeme and symbol[3] in nodeVar.scope:
@@ -448,7 +450,11 @@ class semantic_module(object):
             elif node.tokenval == "NOTACAO_CIENTIFICA":
                 node.data_type = "flutuante"
             elif node.name == "VAR" and node.parent.name != "VAR_LIST":
-                self.annotateVarTypes(node)
+                if len(node.children) == 1:
+                    if node.children[0].name != "NEGATIVE_VAR":
+                        self.annotateVarTypes(node)
+
+
             elif node.name == "PARAMETER_LIST_STMT":
                 self.addParameterSymbolTable(node)
             elif node.name == "FUNCTION_DECLARATION":
