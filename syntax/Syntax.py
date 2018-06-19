@@ -109,6 +109,7 @@ class syntax_scanner(object):
             self.node_number += 1 
             token = tokenlist[0]
             isVar = self.rule_scanner.isVar(tokenlist)
+            isNegativeVar = self.rule_scanner.isNegativeVarStatement(tokenlist)
             isNegativeNumber = self.rule_scanner.IsNegativeNumber(tokenlist)
             isPositiveNumber = self.rule_scanner.isPositiveNumber(tokenlist)
             isFactorExpressionStatement = self.rule_scanner.isFactorExpressionStatement(tokenlist)
@@ -137,6 +138,10 @@ class syntax_scanner(object):
             elif isPositiveNumber[0]:
                 self.__consumePositiveNumber(factor_node, tokenlist)
                 return isPositiveNumber
+            
+            elif isNegativeVar[0]:
+                self.__consumeNegativeVarStatement(factor_node, tokenlist)
+                return isNegativeVar
             else:
                 return False, -1
         except IndexError:

@@ -105,6 +105,7 @@ class syntax_rule(object):
         try:
             token = tokenlist[0]
             isVar = self.isVar(tokenlist)
+            isNegativeVar = self.isNegativeVarStatement(tokenlist)
             isNegativeNumber = self.IsNegativeNumber(tokenlist)
             isPositiveNumber = self.isPositiveNumber(tokenlist)
             isFactorExpressionStatement = self.isFactorExpressionStatement(tokenlist)
@@ -125,6 +126,9 @@ class syntax_rule(object):
             elif isNegativeNumber[0]:
                 return isNegativeNumber
 
+            elif isNegativeVar[0]:
+                return isNegativeVar
+                
             elif isPositiveNumber[0]:
                 return isPositiveNumber
             else:
