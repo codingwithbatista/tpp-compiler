@@ -67,10 +67,14 @@ def main():
         syntax = syntax_process()
         syntax_tree = syntax.exec(tokenlist)
         sm = semantic_module(syntax_tree)
-
+        tree = sm.syntax_tree
+        render = tree_render()
+        render.exporToDotFile(tree, "out")   
+        render.compileDotFile("out")
 
     else:
         print("Invalid analise option")
+
         
 
 
