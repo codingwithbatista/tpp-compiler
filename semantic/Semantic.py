@@ -485,19 +485,17 @@ class semantic_module(object):
 
     
     def cuttingLeafs(self, tree=Node):
+        nodeName = ["RETURN","OPEN_PARENTHESES","CLOSE_PARENTHESES","TYPE","COMMA",
+        "TWO_DOTS","END", "WRITE", "READ", "UNTIL", "FOR"]
         for node in PreOrderIter(tree):
-            if node.name == "RETURN":
+            if node.name in nodeName:
                 node.parent = None
-            elif node.name == "OPEN_PARENTHESES" or node.name == "CLOSE_PARENTHESES":
-                node.parent = None
-            elif node.name == "TYPE":
-                node.parent = None
-            elif node.name == "COMMA":
-                node.parent = None
-            elif node.name == "TWO_DOTS":
-                node.parent = None
-            elif node.name == "END":
-                node.parent = None
+
+        for node in PreOrderIter(tree):
+            if "WRITE" in node.name:
+                node.name = "WRITE"
+            elif "READ" in node.name:
+                node.name = "READ"
             
 
     def treeHasElement(self, element=str):
@@ -634,12 +632,21 @@ class semantic_module(object):
             if "CALL_FUNCTION" in node.name:
                 node.name = "CALL_FUNCTION"
         
-    '''
-    ================== To Do ======================
     
-        # remover Call_function
-        # remover argument_statement
-    ==============================================='''
+    def cuttingRepeatNodes(self, tree=Node):
+        nodeName = ["REPEAT_STMT", "SIMPLE_STATEMENT"]
+        for name in nodeName:
+            for node in PreOrderIter(self.syntax_tree):
+                if node.name == name and len(node.children) == 1:
+                    n = node.children[0]
+                    self.cutting(n, node)
+                    if self.treeHasElement(name):
+                        self.cuttingRepeatNodes(self.syntax_tree)
+                    else:
+                        break
+        for node in PreOrderIter(tree):
+            if "REPEAT" in node.name:
+                node.name = "REPEAT" 
 
     def cuttingTree(self):
         tree = self.syntax_tree
@@ -651,6 +658,7 @@ class semantic_module(object):
         self.cuttingParameterStatementsNodes(tree)
         self.cuttingFunctionNodes(tree)
         self.cuttingCallFunctionNodes(tree)
+        self.cuttingRepeatNodes(tree)
         #self.cuttingExpression(tree)
 
 
