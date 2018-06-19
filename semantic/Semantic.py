@@ -532,6 +532,8 @@ class semantic_module(object):
         for node in PreOrderIter(tree):
             if node.name in nodeName:
                 node.parent = None
+            elif node.name == "MINUS" and node.parent.name == "NEGATIVE_VAR":
+                node.parent = None
 
 
     def cuttingExpressionStatementsNodes(self, tree=Node):
