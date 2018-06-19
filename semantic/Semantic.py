@@ -515,180 +515,58 @@ class semantic_module(object):
 
 
     def cuttingVarNodes(self, tree=Node):
-        nodeName = "VAR"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingVarNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "FACTOR"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingVarNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "NOT_FACTOR"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingVarNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "UNARY_EXPRESSION"
-        for node in PreOrderIter(tree):
-            if node.name ==  nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                   self.cuttingVarNodes(self.syntax_tree)
-                else:
-                    break
+        nodeName = ["VAR", "FACTOR", "NOT_FACTOR", "UNARY_EXPRESSION"]
+        for name in nodeName:
+            for node in PreOrderIter(tree):
+                if node.name == name and len(node.children) == 1:
+                    n = node.children[0]
+                    self.cutting(n, node)
+                    if self.treeHasElement(name):
+                        self.cuttingVarNodes(self.syntax_tree)
+                    else:
+                        break
 
 
     def cuttingExpressionStatementsNodes(self, tree=Node):
-        nodeName = "MULTIPLICATIVE_EXPRESSION_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName  and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "ADDITIVE_STATEMENT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "ADDITIVE_EXPRESSION_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "SIMPLE_EXPRESSION_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "LOGIC_EXPRESSION_STMT"
-        for node in PreOrderIter(tree): 
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "FACTOR_EXPRESSION_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "EXPRESSION"
-        for node in PreOrderIter(tree):      
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "ASSIGNMENT_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "ACTION_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingExpressionStatementsNodes(self.syntax_tree)
-                else:
-                    break
+        nodeName = ["MULTIPLICATIVE_EXPRESSION_STMT","ADDITIVE_STATEMENT","ADDITIVE_EXPRESSION_STMT",
+        "SIMPLE_EXPRESSION_STMT", "LOGIC_EXPRESSION_STMT","FACTOR_EXPRESSION_STMT","EXPRESSION",
+        "ASSIGNMENT_STMT","ACTION_STMT"]
+        for name in nodeName:
+            for node in PreOrderIter(tree):
+                if node.name == name  and len(node.children) == 1:
+                    n = node.children[0]
+                    self.cutting(n, node)
+                    if self.treeHasElement(name):
+                        self.cuttingExpressionStatementsNodes(self.syntax_tree)
+                    else:
+                        break
                             
 
     def cuttingParameterStatementsNodes(self, tree=Node):
-        nodeName = "PARAMETER_STATEMENT_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingParameterStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "PARAMETER_STMT"
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
-                n = node.children[0]
-                self.cutting(n, node)
-                if self.treeHasElement(nodeName):
-                    self.cuttingParameterStatementsNodes(self.syntax_tree)
-                else:
-                    break
-        nodeName = "PARAMETER_LIST_STMT"
-
-        for node in PreOrderIter(tree):
-            if node.name == nodeName and len(node.children) == 1:
+        nodeName = ["PARAMETER_STATEMENT_STMT","PARAMETER_STMT","PARAMETER_LIST_STMT"]
+        for name in nodeName:
+            for node in PreOrderIter(tree):
+                if node.name == name and len(node.children) == 1:
                     n = node.children[0]
                     self.cutting(n, node)
-                    if self.treeHasElement(nodeName):
+                    if self.treeHasElement(name):
                         self.cuttingParameterStatementsNodes(self.syntax_tree)
                     else:
-                        break
-
-
+                        break   
+        
     
     def cuttingFunctionNodes(self, tree=Node):
-            # remover header
-            nodeName = "HEADER"
-            for node in PreOrderIter(tree):
-                if node.name == nodeName and len(node.children) ==  1:
-                    n = node.children[0]
-                    self.cutting(n, node)
-                    if self.treeHasElement(nodeName):
-                        self.cuttingFunctionNodes(self.syntax_tree)
-                    else:
-                        break
-            nodeName = "FUNCTION_DECLARATION"
-            for node in PreOrderIter(tree):
-                if node.name == nodeName and len(node.children) == 1:
-                    n = node.children[0]
-                    self.cutting(n, node)
-                    if self.treeHasElement(nodeName):
-                        self.cuttingFunctionNodes(self.syntax_tree)
-                    else:
-                        break
+            nodeName = ["HEADER", "FUNCTION_DECLARATION"]
+            for name in nodeName:
+                for node in PreOrderIter(tree):
+                    if node.name == name and len(node.children) ==  1:
+                        n = node.children[0]
+                        self.cutting(n, node)
+                        if self.treeHasElement(name):
+                            self.cuttingFunctionNodes(self.syntax_tree)
+                        else:
+                            break
+    
             nodeName = "DECLARATION_LIST"
             for node in PreOrderIter(tree):
                 if node.name == nodeName:
@@ -697,22 +575,51 @@ class semantic_module(object):
                         n.parent = parent
                     node.parent = None
                     break
+            
+            nodeName = "PARAMETER_LIST_STMT"
+            for node in PreOrderIter(tree):
+                if node.name == nodeName:
+                    node.parent = None
+            
+            nodeName = "BODY_STMT"
+            for node in PreOrderIter(tree):
+                if node.name == nodeName:
+                    parent = node.parent
+                    for n in node.children:
+                        n.parent = parent
+                    node.parent = None
+                    if self.treeHasElement(nodeName):
+                        self.cuttingFunctionNodes(self.syntax_tree)
+                    else:
+                        break
 
             for node in PreOrderIter(tree):
                 if "HEADER" in node.name:
                     node.name = "FUNCTION"
-                elif "PARAMETER" in node.name:
-                    node.name = "PARAMETERS"
                 elif "RETURN" in node.name:
                     node.name = "RETURN"
-                elif "BODY" in node.name:
-                    node.name = "BODY"
+                
 
+    def cuttingCallFunctionNodes(self, tree=Node):
+        nodeName = ["ARGUMENT_STATEMENT_STMT", "CALL_FUNCTION_STMT"]
+        for name in nodeName:
+            for node in PreOrderIter(tree):
+                if node.name == name and len(node.children) == 1:
+                    n = node.children[0]
+                    self.cutting(n, node)
+                    if self.treeHasElement(name):
+                        self.cuttingCallFunctionNodes(self.syntax_tree)
+                    else:
+                        break
+        for node in PreOrderIter(tree):
+            if "ARGUMENT_LIST" in node.name:
+                node.name = "ARGUMENT_LIST"
+            elif "CALL_FUNCTION" in node.name:
+                node.name = "CALL_FUNCTION"
+        
     '''
     ================== To Do ======================
-            # remover function_declaration
-            # remover declaration_list
-    def cuttingCallFunctionNodes(self, tree=Node):
+    
         # remover Call_function
         # remover argument_statement
     ==============================================='''
@@ -726,6 +633,7 @@ class semantic_module(object):
         self.cuttingExpressionStatementsNodes(tree)
         self.cuttingParameterStatementsNodes(tree)
         self.cuttingFunctionNodes(tree)
+        self.cuttingCallFunctionNodes(tree)
         #self.cuttingExpression(tree)
 
 
