@@ -533,7 +533,7 @@ class semantic_module(object):
         "ASSIGNMENT_STMT","ACTION_STMT"]
         for name in nodeName:
             for node in PreOrderIter(tree):
-                if node.name == name  and len(node.children) == 1:
+                if node.name == name  and len(node.children) == 1 and "CONDITIONAL" not in node.parent.name:
                     n = node.children[0]
                     self.cutting(n, node)
                     if self.treeHasElement(name):
@@ -598,7 +598,15 @@ class semantic_module(object):
                     node.name = "FUNCTION"
                 elif "RETURN" in node.name:
                     node.name = "RETURN"
-                
+            
+            for node in PreOrderIter(tree):
+                if node.name == "FUNCTION" and node.children[0].name == "ID":
+                        for n in node.children:
+                            if n.name != "ID":
+                                n.parent = node.children[0]
+                        node.children[0].parent = node.parent
+                        node.parent = None
+
 
     def cuttingCallFunctionNodes(self, tree=Node):
         nodeName = ["ARGUMENT_STATEMENT_STMT", "CALL_FUNCTION_STMT"]
@@ -611,10 +619,19 @@ class semantic_module(object):
                         self.cuttingCallFunctionNodes(self.syntax_tree)
                     else:
                         break
+
         for node in PreOrderIter(tree):
-            if "ARGUMENT_LIST" in node.name:
-                node.name = "ARGUMENT_LIST"
-            elif "CALL_FUNCTION" in node.name:
+            if node.name == "ARGUMENT_LIST_STMT":
+                parent = node.parent
+                for n in node.children:
+                    n.parent = parent
+                node.parent = None
+                if self.treeHasElement("ARGUMENT_LIST_STMT"):
+                    self.cuttingCallFunctionNodes(self.syntax_tree)
+                else:
+                    break
+        for node in PreOrderIter(tree):
+            if "CALL_FUNCTION" in node.name:
                 node.name = "CALL_FUNCTION"
         
     '''
