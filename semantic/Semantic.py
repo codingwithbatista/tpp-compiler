@@ -652,6 +652,28 @@ class semantic_module(object):
                 node.name = "REPEAT" 
 
 
+    def cuttingConditionalNodes(self, tree=Node):
+        nodeName = ["CONDITIONAL_STMT", "EXPRESSION", "THEN"]#,"EXPRESSION", "IF"
+        for name in nodeName:
+            for node in PreOrderIter(tree):
+                if node.name == name and len(node.children) == 1:
+                    n = node.children[0]
+                    self.cutting(n,node)
+                    if self.treeHasElement(name):
+                        self.cuttingConditionalNodes(self.syntax_tree)
+                    else:
+                        break
+        
+        for node in PreOrderIter(tree):
+            if node.name == "IF" or node.name == "THEN":
+                node.parent = None
+            elif "CONDITIONAL" in node.name:
+                node.name = "CONDITIONAL" 
+        
+        for node in PreOrderIter(tree):
+            if "CONDITIONAL" in node.name:
+                node.name = "CONDITIONAL"
+
 
 
     def cuttingTree(self):
@@ -663,6 +685,7 @@ class semantic_module(object):
         self.cuttingFunctionNodes(tree)
         self.cuttingCallFunctionNodes(tree)
         self.cuttingRepeatNodes(tree)
+        self.cuttingConditionalNodes(tree)
 
 
 
