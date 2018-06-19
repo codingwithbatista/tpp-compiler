@@ -668,10 +668,48 @@ class semantic_module(object):
                         break
 
 
-    '''
-    ================== To Do ======================
+    
     def cuttingFunctionNodes(self, tree=Node):
             # remover header
+            nodeName = "HEADER"
+            for node in PreOrderIter(tree):
+                if node.name == nodeName and len(node.children) ==  1:
+                    n = node.children[0]
+                    self.cutting(n, node)
+                    if self.treeHasElement(nodeName):
+                        self.cuttingFunctionNodes(self.syntax_tree)
+                    else:
+                        break
+            nodeName = "FUNCTION_DECLARATION"
+            for node in PreOrderIter(tree):
+                if node.name == nodeName and len(node.children) == 1:
+                    n = node.children[0]
+                    self.cutting(n, node)
+                    if self.treeHasElement(nodeName):
+                        self.cuttingFunctionNodes(self.syntax_tree)
+                    else:
+                        break
+            nodeName = "DECLARATION_LIST"
+            for node in PreOrderIter(tree):
+                if node.name == nodeName:
+                    for n in node.children:
+                        parent = node.parent
+                        n.parent = parent
+                    node.parent = None
+                    break
+
+            for node in PreOrderIter(tree):
+                if "HEADER" in node.name:
+                    node.name = "FUNCTION"
+                elif "PARAMETER" in node.name:
+                    node.name = "PARAMETERS"
+                elif "RETURN" in node.name:
+                    node.name = "RETURN"
+                elif "BODY" in node.name:
+                    node.name = "BODY"
+
+    '''
+    ================== To Do ======================
             # remover function_declaration
             # remover declaration_list
     def cuttingCallFunctionNodes(self, tree=Node):
@@ -687,6 +725,7 @@ class semantic_module(object):
         self.cuttingVarNodes(tree)
         self.cuttingExpressionStatementsNodes(tree)
         self.cuttingParameterStatementsNodes(tree)
+        self.cuttingFunctionNodes(tree)
         #self.cuttingExpression(tree)
 
 
