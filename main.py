@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import sys
+import os
 from lexical.ScanLex import scanlex
 from lexical.structure.token.Token import token
 from syntax.Syntax import syntax_process
@@ -67,10 +68,18 @@ def main():
         syntax = syntax_process()
         syntax_tree = syntax.exec(tokenlist)
         sm = semantic_module(syntax_tree)
-        tree = sm.syntax_tree
-        render = tree_render()
-        render.exporToDotFile(tree, "out")   
-        render.compileDotFile("out")
+        
+        if len(sys.argv) > 3:
+            if "--printTable" in sys.argv:
+                sm.printTable()
+            elif "--printTree" in sys.argv:
+                tree = sm.syntax_tree
+                render = tree_render()
+                filename = os.path.splitext(sys.argv[1])[0]
+                render.exporToDotFile(tree, filename)   
+                render.compileDotFile(filename)
+            
+
 
     else:
         print("Invalid analise option")
