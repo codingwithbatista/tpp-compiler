@@ -72,7 +72,7 @@ class code_gen(object):
             var = ir.GlobalVariable(self.module, dtype, child.lexeme)
             var.initializer = ir.Constant(dtype, 0)
             var.linkage = "common"
-            var.align = 4
+            var.align = 8
             self.globalVariables.append(var)
 
 
@@ -83,13 +83,18 @@ class code_gen(object):
 
 
     def defineMainBlocks(self, mainNode=Node):
-        main = self.getFunction("principal")
-        entryBlock = main.append_basic_block('entry')
-        #endBasicBlock = main.append_basic_block('exit')
+        for func in self.funcs:
+            entryBlock = func.append_basic_block('entry')
+            #endBasicBlock = main.append_basic_block('exit')
+            
+            builder = ir.IRBuilder(entryBlock)
+            for node in PreOrderIter(mainNode):
+                if node.name == "VAR_DECLARE":
+                    for child in node.children:
+                        pass
+
+
         
-        builder = ir.IRBuilder(entryBlock)
-        for child in PreOrderIter(mainNode):
-            # declarar variavel
             # atribuicao
             # retorno
 
