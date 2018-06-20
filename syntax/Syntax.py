@@ -109,6 +109,7 @@ class syntax_scanner(object):
             self.node_number += 1 
             token = tokenlist[0]
             isVar = self.rule_scanner.isVar(tokenlist)
+            isNegativeVar = self.rule_scanner.isNegativeVarStatement(tokenlist)
             isNegativeNumber = self.rule_scanner.IsNegativeNumber(tokenlist)
             isPositiveNumber = self.rule_scanner.isPositiveNumber(tokenlist)
             isFactorExpressionStatement = self.rule_scanner.isFactorExpressionStatement(tokenlist)
@@ -137,6 +138,10 @@ class syntax_scanner(object):
             elif isPositiveNumber[0]:
                 self.__consumePositiveNumber(factor_node, tokenlist)
                 return isPositiveNumber
+            
+            elif isNegativeVar[0]:
+                self.__consumeNegativeVarStatement(factor_node, tokenlist)
+                return isNegativeVar
             else:
                 return False, -1
         except IndexError:
@@ -273,7 +278,7 @@ class syntax_scanner(object):
 
     def __consumeMultiplicativeExpression(self, node, tokenlist=[]):
         try:
-            mult_node = Node("MULTUPLICATIVE_EXPRESSION_STMT", parent = node, 
+            mult_node = Node("MULTIPLICATIVE_EXPRESSION_STMT", parent = node, 
             tokenval = "MULTIPLICATIVE_EXPRESSION_STMT", number = self.node_number)
             self.node_number += 1
 
@@ -1688,7 +1693,6 @@ class syntax_scanner(object):
 
     def __consumeParameterListStatement(self, node, tokenlist=[]):
         try:
-            
             parameter_list_node = Node("PARAMETER_LIST_STMT", parent = node, tokenval = "PARAMETER_LIST_STMT",
             number = self.node_number)
             self.node_number += 1
@@ -1866,23 +1870,23 @@ class syntax_scanner(object):
         try:
             index = 0
             token = tokenlist[index]
+            # erro está aqui
             third_header_node = Node("THIRD_HEADER_STMT", parent=node, tokenval="THIRD_HEADER_STMT",
             number = self.node_number)
             self.node_number += 1
             if token.tokenval == TokenVal.IDENTIFICATOR.value:
-                Node("ID", parent=node, tokenval = token.tokenval, tokentype = token.tokentype,
+                Node("ID", parent=third_header_node, tokenval = token.tokenval, tokentype = token.tokentype,
                 lexeme = token.lexeme, line = token.getNumberOfLine(), number = self.node_number)
                 self.node_number += 1
                 index = index + 1
                 token = tokenlist[index]
-
                 if token.tokenval == TokenVal.OPEN_PARENTHESES.value:
                     Node("OPEN_PARENTHESES", parent = third_header_node, tokenval = token.tokenval,
-                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfline(),
+                    tokentype = token.tokentype, lexeme = token.lexeme, line = token.getNumberOfLine(),
                     number = self.node_number)
                     self.node_number += 1
                     index = index + 1
-
+                    token = tokenlist[index]
                     isParameterList = self.rule_scanner.isParameterList(tokenlist[index:])
                     if isParameterList[0]:
                         self.__consumeParameterList(third_header_node, tokenlist[index:])

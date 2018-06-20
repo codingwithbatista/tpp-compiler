@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# dot and png formats
+*.dot
+*.png
+
+# tpp code
+*.tpp
+# vscode config files
+.vs
