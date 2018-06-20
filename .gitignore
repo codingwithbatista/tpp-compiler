@@ -109,3 +109,5 @@ venv.bak/
 
 # tpp code
 *.tpp
+# vscode config files
+.vs
