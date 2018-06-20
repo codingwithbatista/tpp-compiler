@@ -7,7 +7,7 @@ from lexical.structure.token.Token import token
 from syntax.Syntax import syntax_process
 from render.Render import tree_render
 from semantic.Semantic import semantic_module
-
+from codegen.CodeGen import code_gen
 
 def printToken(token, option):
     if "txt" == option:     
@@ -79,6 +79,18 @@ def main():
                 render.exporToDotFile(tree, filename)   
                 render.compileDotFile(filename)
             
+    elif analise == "-o":
+        tokenlist = lex.getTokenListProcess()
+        syntax = syntax_process()
+        syntax_tree = syntax.exec(tokenlist)
+        sm = semantic_module(syntax_tree)
+        ast = sm.syntax_tree
+        symbolTable = sm.SymbolTable
+        codegen = code_gen(sys.argv[3], ast, symbolTable)
+        codegen.exec_codeGeneration_process()
+        codegen.saveModule()
+
+
 
 
     else:
