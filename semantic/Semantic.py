@@ -8,7 +8,6 @@ class semantic_module(object):
         self.SymbolTable = []
         self.defineScopes()
         self.walking()
-        self.printTable(self.SymbolTable)
         self.cuttingTree()
     
 
@@ -243,66 +242,68 @@ class semantic_module(object):
             if symbol[0] == "func_declare":
                 hasError = True
                 hasReturn = False
-                for node in PreOrderIter(self.syntax_tree):
-                    if (symbol[3] == node.scope and node.name == "EXPRESSION" 
-                    and node.parent.name == "RETURN_STMT"):
-                        if(symbol[1] == node.data_type):
-                            hasError = False
-                        else:
+                try:
+                    for node in PreOrderIter(self.syntax_tree):
+                        if (symbol[3] == node.scope and node.name == "EXPRESSION" 
+                        and node.parent.name == "RETURN_STMT"):
+                            if(symbol[1] == node.data_type):
+                                hasError = False
+                            else:
+                                if(symbol[1] == "inteiro" and node.data_type == "flutuante"):
+                                    message = ("===== WARNING =====\nIn function " + symbol[2] + 
+                                    ": It should return inteiro, but "
+                                    + "It returns flutuante. The return value will be casted to inteiro")
+                                    print(message)
+                                elif(symbol[1] == "flutuante" and node.data_type == "inteiro"):
+                                    message = ("===== WARNING =====\nIn function " + symbol[2] + ": It should return flutuante, but "
+                                    + "It returns inteiro. The return value will be casted to flutuante")
+                                    print(message)
+                                elif (symbol[1] == "vazio" and node.data_type == "inteiro"):
+                                    message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
+                                    + "It returns inteiro")
+                                    print(message)
+                                elif(symbol[1] == "vazio" and node.data_type == "flutuante"):
+                                    message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
+                                    + "It returns flutuante")
+                                    print(message)
+                                hasReturn = True
+                        if (symbol[3] in node.scope and symbol[3] != node.scope and node.name == "EXPRESSION" 
+                        and node.parent.name == "RETURN_STMT"):
                             if(symbol[1] == "inteiro" and node.data_type == "flutuante"):
                                 message = ("===== WARNING =====\nIn function " + symbol[2] + 
                                 ": It should return inteiro, but "
-                                + "It returns flutuante. The return value will be casted to inteiro")
+                                + "It returns flutuante. The return value will be casted to inteiro. See line " + 
+                                str(node.parent.children[0].line))
                                 print(message)
                             elif(symbol[1] == "flutuante" and node.data_type == "inteiro"):
                                 message = ("===== WARNING =====\nIn function " + symbol[2] + ": It should return flutuante, but "
-                                + "It returns inteiro. The return value will be casted to flutuante")
+                                + "It returns inteiro. The return value will be casted to flutuante. See line " 
+                                + str(node.parent.children[0].line))
                                 print(message)
                             elif (symbol[1] == "vazio" and node.data_type == "inteiro"):
                                 message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
-                                + "It returns inteiro")
+                                + "It returns inteiro. See line " + str(node.parent.children[0].line))
                                 print(message)
                             elif(symbol[1] == "vazio" and node.data_type == "flutuante"):
                                 message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
-                                + "It returns flutuante")
+                                + "It returns flutuante. See line " + str(node.parent.children[0].line))
                                 print(message)
-                            hasReturn = True
-                    if (symbol[3] in node.scope and symbol[3] != node.scope and node.name == "EXPRESSION" 
-                    and node.parent.name == "RETURN_STMT"):
-                        if(symbol[1] == "inteiro" and node.data_type == "flutuante"):
-                            message = ("===== WARNING =====\nIn function " + symbol[2] + 
-                            ": It should return inteiro, but "
-                            + "It returns flutuante. The return value will be casted to inteiro. See line " + 
-                            str(node.parent.children[0].line))
-                            print(message)
-                        elif(symbol[1] == "flutuante" and node.data_type == "inteiro"):
-                            message = ("===== WARNING =====\nIn function " + symbol[2] + ": It should return flutuante, but "
-                            + "It returns inteiro. The return value will be casted to flutuante. See line " 
-                            + str(node.parent.children[0].line))
-                            print(message)
-                        elif (symbol[1] == "vazio" and node.data_type == "inteiro"):
-                            message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
-                            + "It returns inteiro. See line " + str(node.parent.children[0].line))
-                            print(message)
-                        elif(symbol[1] == "vazio" and node.data_type == "flutuante"):
-                            message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
-                            + "It returns flutuante. See line " + str(node.parent.children[0].line))
-                            print(message)
 
 
-                if(hasReturn == False and symbol[1] == "vazio"):
-                        hasError = False
-                if hasError:
-                    
-                    if(symbol[1] == "inteiro" and hasReturn == False):
-                        message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return inteiro, but "
-                        + "It returns vazio")
-                        print(message)
-                    elif(symbol[1] == "flutuante" and hasReturn == False):
-                        message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return flutuante, but "
-                        + "It returns vazio")
-                        print(message)
-                    
+                    if(hasReturn == False and symbol[1] == "vazio"):
+                            hasError = False
+                    if hasError:
+                        
+                        if(symbol[1] == "inteiro" and hasReturn == False):
+                            message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return inteiro, but "
+                            + "It returns vazio")
+                            print(message)
+                        elif(symbol[1] == "flutuante" and hasReturn == False):
+                            message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return flutuante, but "
+                            + "It returns vazio")
+                            print(message)
+                except AttributeError:
+                    pass    
 
     def hasUndeclaredFunction(self):
         hasError = False
