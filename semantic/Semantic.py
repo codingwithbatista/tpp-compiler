@@ -268,6 +268,30 @@ class semantic_module(object):
                                 + "It returns flutuante")
                                 print(message)
                             hasReturn = True
+                    if (symbol[3] in node.scope and symbol[3] != node.scope and node.name == "EXPRESSION" 
+                    and node.parent.name == "RETURN_STMT"):
+                        if(symbol[1] == "inteiro" and node.data_type == "flutuante"):
+                            message = ("===== WARNING =====\nIn function " + symbol[2] + 
+                            ": It should return inteiro, but "
+                            + "It returns flutuante. The return value will be casted to inteiro. See line " + 
+                            str(node.parent.children[0].line))
+                            print(message)
+                        elif(symbol[1] == "flutuante" and node.data_type == "inteiro"):
+                            message = ("===== WARNING =====\nIn function " + symbol[2] + ": It should return flutuante, but "
+                            + "It returns inteiro. The return value will be casted to flutuante. See line " 
+                            + str(node.parent.children[0].line))
+                            print(message)
+                        elif (symbol[1] == "vazio" and node.data_type == "inteiro"):
+                            message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
+                            + "It returns inteiro. See line " + str(node.parent.children[0].line))
+                            print(message)
+                        elif(symbol[1] == "vazio" and node.data_type == "flutuante"):
+                            message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
+                            + "It returns flutuante. See line " + str(node.parent.children[0].line))
+                            print(message)
+                        #hasReturn = True
+
+
                 if(hasReturn == False and symbol[1] == "vazio"):
                         hasError = False
                 if hasError:
