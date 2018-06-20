@@ -34,8 +34,8 @@ class semantic_module(object):
             self.printNode(node)
 
 
-    def printTable(self, table=[]):
-        for t in table:
+    def printTable(self):
+        for t in self.SymbolTable:
             print(t)
 
 
