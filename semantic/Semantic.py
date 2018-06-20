@@ -8,7 +8,6 @@ class semantic_module(object):
         self.SymbolTable = []
         self.defineScopes()
         self.walking()
-        #self.printTree()
         self.printTable(self.SymbolTable)
         self.cuttingTree()
     
@@ -289,14 +288,11 @@ class semantic_module(object):
                             message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return vazio, but "
                             + "It returns flutuante. See line " + str(node.parent.children[0].line))
                             print(message)
-                        #hasReturn = True
 
 
                 if(hasReturn == False and symbol[1] == "vazio"):
                         hasError = False
                 if hasError:
-                    #print("aqui")
-                    #print(hasReturn)
                     
                     if(symbol[1] == "inteiro" and hasReturn == False):
                         message = ("===== ERROR =====\nIn function " + symbol[2] + ": It should return inteiro, but "
@@ -307,15 +303,6 @@ class semantic_module(object):
                         + "It returns vazio")
                         print(message)
                     
-                    
-                    
-                    
-
-                    
-                    #print(message)
-
-
-
 
     def hasUndeclaredFunction(self):
         hasError = False
@@ -409,7 +396,6 @@ class semantic_module(object):
                         nodeElement.lexeme,"' wasn't initilized before", sep="")
         except AttributeError:
             pass
-
 
 
     def hasCallMainError(self):
