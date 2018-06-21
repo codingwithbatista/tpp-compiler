@@ -460,6 +460,20 @@ class semantic_module(object):
                             symbol[5],", but received ", call_parameters,". See line ", line, sep="")
 
 
+    def hasErrorVariableAndFunctionHasSameName(self):
+        for sb in self.SymbolTable:
+            for sb2 in self.SymbolTable:
+                if sb[0] == "var_declare" and sb2[0] == "func_declare":
+                    testName = sb[3] + ".fnc_" + sb[2]
+                    if testName == sb2[3]:
+                        print("===== ERROR =====\nIn line " + str(sb[4]) +", variable '" + sb[2] +"' was declared with " +
+                        "the same name of a function placed in line " + str(sb2[4]))
+                if (sb[0] == "func_declare") and (sb2[0] == "func_declare")  and (sb[4] != sb2[4]):
+                    if sb[3] == sb2[3]:
+                        print("===== ERROR =====\nIn line " + str(sb[4]) +", function '" + sb[2] +"' was declared with " +
+                        "the same name of a function placed in line " + str(sb2[4]))
+
+
     def walking(self):
         for node in PreOrderIter(self.syntax_tree):
             if node.name == "VAR_DECLARE":
@@ -495,6 +509,7 @@ class semantic_module(object):
         self.hasCallMainError()
         self.warningUnusedDefinedFunction()
         self.warningParameterTypes()
+        self.hasErrorVariableAndFunctionHasSameName()
         
      
     def cuttingLeafs(self, tree=Node):
@@ -701,7 +716,6 @@ class semantic_module(object):
         for node in PreOrderIter(tree):
             if "CONDITIONAL" in node.name:
                 node.name = "CONDITIONAL"
-
 
 
     def cuttingTree(self):
