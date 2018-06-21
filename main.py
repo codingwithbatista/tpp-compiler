@@ -87,7 +87,7 @@ def main():
         ast = sm.syntax_tree
         symbolTable = sm.SymbolTable
         codegen = code_gen(sys.argv[3], ast, symbolTable)
-        codegen.exec_codeGeneration_process()
+        codegen.walking()
         codegen.saveModule()
 
 

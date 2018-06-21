@@ -7,113 +7,102 @@ class code_gen(object):
         self.moduleName = moduleName
         self.ast = abstract_tree
         self.st = symbolTable
-        self.funcs = []
         self.module = ir.Module(moduleName + ".bc")
     
-
-    def create_types(self):
-        self.flutuante = ir.DoubleType()
-        self.inteiro = ir.IntType(64)
-        self.vazio = ir.VoidType()
-
-
-    def getArgumentNames(self,scope=str):
-        args = []
-        for symbol in self.st:
-            if symbol[0] == "parameter_func" and  symbol[3] == scope:
-                args.append(symbol[2])
-        return args
-
-    def getArgTypes(self, args=[]):
-        arg_types = []
-        for a in args:
-            if a == "inteiro":
-                arg_types.append(self.inteiro)
-            elif a == "flutuante":
-                arg_types.append(self.flutuante)
-        return arg_types
-
+            
     
-    def declareFunctions(self, nodeFunc=Node):
-        symbolTable = self.st
-        for symbol in symbolTable:
-            if symbol[0] == "func_declare" and symbol[2] == nodeFunc.lexeme and symbol[3] == nodeFunc.scope:
-                if symbol[1] == "inteiro":
-                    func_return = self.inteiro
-                elif symbol[1] == "flutuante":
-                    func_return = self.flutuante
-                
-                elif symbol[1] == "vazio":
-                    func_return = self.vazio
-                
-                
-                if len(symbol[5]) == 0:
-                    fnty = ir.FunctionType(func_return, ())                  
-                else:
-                    arg_types = self.getArgTypes(symbol[5])
-                    fnty = ir.FunctionType(func_return, arg_types)
-                func = ir.Function(self.module, fnty, name = nodeFunc.lexeme)
-                self.funcs.append(func)
-            
-                #print()
-                #self.funcs.append(func)
-
-
-    def searchTypeInSymbolTable(self, varLexeme=str, scope=str):
-        for sb in self.st:
-            if sb[0] == "var_declare" and sb[3] == scope and sb[2] == varLexeme:
-                return self.inteiro if "inteiro" == sb[1] else self.flutuante
-
-
-    def declareGlobalVariables(self, nodeVarDeclare=Node):
-        self.globalVariables = []
-        for child in nodeVarDeclare.children:
-            dtype = self.searchTypeInSymbolTable(child.lexeme, child.scope)
-            var = ir.GlobalVariable(self.module, dtype, child.lexeme)
-            var.initializer = ir.Constant(dtype, 0)
-            var.linkage = "common"
-            var.align = 8
-            self.globalVariables.append(var)
-
-
-    def getFunction(self, name=str):
-        for f in self.funcs:
-            if f._get_name == name:
-                return f
-
-
-    def defineMainBlocks(self, mainNode=Node):
-        for func in self.funcs:
-            entryBlock = func.append_basic_block('entry')
-            #endBasicBlock = main.append_basic_block('exit')
-            
-            builder = ir.IRBuilder(entryBlock)
-            for node in PreOrderIter(mainNode):
-                if node.name == "VAR_DECLARE":
-                    for child in node.children:
-                        pass
-
-
-        
-            # atribuicao
-            # retorno
-
-
-
-
-    def exec_codeGeneration_process(self):
-        ast = self.ast
-        self.create_types()
-        for node in PreOrderIter(ast):
-            if node.name == "ID" and node.parent.name == "PROGRAM":
-                self.declareFunctions(node)
-            elif node.name == "VAR_DECLARE" and node.parent.name == "PROGRAM":
-                self.declareGlobalVariables(node)
-
     def saveModule(self):
         with open(self.moduleName + ".ll", 'w') as file:
             file.write(str(self.module))
             file.close()
-            print(file)
+    
+    
+
+    def getVarType(self, nodeVar):
+        dtype = None
+        for sb in self.st:
+            if (sb[0] == "var_declare" and sb[2] == nodeVar.lexeme and 
+            sb[3] in nodeVar.scope and nodeVar.line >= sb[4]):
+                dtype =  sb[1]
+        
+        return ir.IntType(64) if dtype == "inteiro" else ir.FloatType()
+
+
+    def initializeGlobalVars(self, gVar):
+        if gVar.value_type == ir.IntType(64):
+            gVar.initializer = ir.Constant(ir.IntType(64), 0)
+        else:
+            gVar.initializer = ir.Constant(ir.FloatType(), 0.0)
+        gVar.linkage = "common"
+        gVar.align = 8
+
+    def declareGlobalVariables(self, node=Node):
+        self.globalVars = []
+        for n in node.children:
+            dtype = self.getVarType(n)
+            gVar = ir.GlobalVariable(self.module, dtype, name=n.lexeme)
+            self.initializeGlobalVars(gVar)
+            self.globalVars.append(gVar)
+    
+    def getType(self,dtype=str):
+        if dtype == "flutuante":
+            return ir.FloatType()
+        elif dtype == "inteiro":
+            return ir.IntType(64)
+        elif dtype == "vazio":
+            return ir.VoidType()
+        else:
+            return None
+
+   
+    def declareFuncHeader(self, nodeFunc=Node):
+        for sb in self.st:
+            if (sb[0] == "func_declare" and sb[2] == nodeFunc.lexeme and  sb[3] == nodeFunc.scope):
+                dtype_r = sb[1]
+                
+                if len(sb[5]) == 0:
+                    param = None
+                else:
+                    param = []
+                    for p in sb[5]:
+                        param.append(self.getType(p))
+                dtype_r = self.getType(dtype_r)
+                if param != None:
+                    fnty = ir.FunctionType(dtype_r,param)
+                else:
+                    fnty = ir.FunctionType(dtype_r,())
+                func = ir.Function(self.module,fnty,name=nodeFunc.lexeme)
+                return func
+    
+    
+    def declareVar(self, varDeclareNode=Node, builder=ir.IRBuilder):
+        for n in varDeclareNode.children:
+            dtype = self.getVarType(n)
+            builder.alloca(dtype, n.lexeme)
+    
+
+    def doAssignment(self, assignNode=Node, builder=ir.IRBuilder):
+        pass
+
+
+    def declareFunctionsBlock(self, nodeFunc=Node):
+        func = self.declareFuncHeader(nodeFunc)
+        entryBlock = func.append_basic_block('entry')
+        endBasicBlock = func.append_basic_block('exit')
+        builder = ir.IRBuilder(entryBlock)
+        for node in PreOrderIter(nodeFunc):
+            if node.name == "VAR_DECLARE":
+                self.declareVar(node, builder)
+
+
+
+    
+    def walking(self):
+        for node in PreOrderIter(self.ast):
+            if node.name == "VAR_DECLARE" and node.parent.name == "PROGRAM":
+                self.declareGlobalVariables(node)
+            elif node.name == "ID" and node.parent.name == "PROGRAM":
+                self.declareFunctionsBlock(node)
+
         
 
