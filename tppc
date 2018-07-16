@@ -1,0 +1,20 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+from lexical.Lex import lex
+
+def read_sourceCode(path=str):
+        """ Read a source code file as a stream of characters.
+
+
+            Keyword arguments:
+            path -- the path of source code file (default '')
+        """
+        sourceCode = open(path,'r',encoding="utf-8")
+        return sourceCode
+
+
+def main():
+    print(read_sourceCode.__doc__)
+
+if __name__ == "__main__":
+    main()
