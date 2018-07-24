@@ -1,4 +1,4 @@
-baseurl = "http://replace-this-with-your-hugo-site.com/"
+baseurl = "http://www.paulobatista.ml/tpp-compiler/"
 languageCode = "en-us"
 title = "My New Hugo Site"
 theme = "hugo-theme-learn"
