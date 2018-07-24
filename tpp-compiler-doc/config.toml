@@ -1,0 +1,7 @@
+baseurl = "http://replace-this-with-your-hugo-site.com/"
+languageCode = "en-us"
+title = "My New Hugo Site"
+theme = "hugo-theme-learn"
+[params]
+# change default color scheme with a variant one
+themeVariant = "green"
