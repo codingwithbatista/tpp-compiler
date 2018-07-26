@@ -1,0 +1,82 @@
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 1 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 1 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: T ; line: 1 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: T ; line: 2 >
+<tokentype: SB ; tokenval: ATRIBUICAO ; lexeme: := ; line: 2 >
+<tokentype: NUM ; tokenval: NUMERO_INTEIRO ; lexeme: 4 ; line: 2 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 4 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 4 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: V1 ; line: 4 >
+<tokentype: SB ; tokenval: ABRE_COLCHETES ; lexeme: [ ; line: 4 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: T ; line: 4 >
+<tokentype: SB ; tokenval: FECHA_COLCHETES ; lexeme: ] ; line: 4 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 6 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: somavet ; line: 6 >
+<tokentype: SB ; tokenval: ABRE_PARENTESES ; lexeme: ( ; line: 6 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 6 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 6 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: vet ; line: 6 >
+<tokentype: SB ; tokenval: ABRE_COLCHETES ; lexeme: [ ; line: 6 >
+<tokentype: SB ; tokenval: FECHA_COLCHETES ; lexeme: ] ; line: 6 >
+<tokentype: SB ; tokenval: VIRGULA ; lexeme: , ; line: 6 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 6 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 6 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: tam ; line: 6 >
+<tokentype: SB ; tokenval: FECHA_PARENTESES ; lexeme: ) ; line: 6 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 7 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 7 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: result ; line: 7 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: result ; line: 8 >
+<tokentype: SB ; tokenval: ATRIBUICAO ; lexeme: := ; line: 8 >
+<tokentype: NUM ; tokenval: NUMERO_INTEIRO ; lexeme: 0 ; line: 8 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 10 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 10 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: i ; line: 10 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: i ; line: 11 >
+<tokentype: SB ; tokenval: ATRIBUICAO ; lexeme: := ; line: 11 >
+<tokentype: NUM ; tokenval: NUMERO_INTEIRO ; lexeme: 0 ; line: 11 >
+<tokentype: PR ; tokenval: REPITA ; lexeme: repita ; line: 13 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: result ; line: 14 >
+<tokentype: SB ; tokenval: ATRIBUICAO ; lexeme: := ; line: 14 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: result ; line: 14 >
+<tokentype: SB ; tokenval: SOMA ; lexeme: + ; line: 14 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: vet ; line: 14 >
+<tokentype: SB ; tokenval: ABRE_COLCHETES ; lexeme: [ ; line: 14 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: i ; line: 14 >
+<tokentype: SB ; tokenval: FECHA_COLCHETES ; lexeme: ] ; line: 14 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: i ; line: 15 >
+<tokentype: SB ; tokenval: ATRIBUICAO ; lexeme: := ; line: 15 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: i ; line: 15 >
+<tokentype: SB ; tokenval: SOMA ; lexeme: + ; line: 15 >
+<tokentype: NUM ; tokenval: NUMERO_INTEIRO ; lexeme: 1 ; line: 15 >
+<tokentype: PR ; tokenval: ATE ; lexeme: até ; line: 16 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: i ; line: 16 >
+<tokentype: SB ; tokenval: IGUAL ; lexeme: = ; line: 16 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: tam ; line: 16 >
+<tokentype: SB ; tokenval: MENOS ; lexeme: - ; line: 16 >
+<tokentype: NUM ; tokenval: NUMERO_INTEIRO ; lexeme: 1 ; line: 16 >
+<tokentype: PR ; tokenval: RETORNA ; lexeme: retorna ; line: 18 >
+<tokentype: SB ; tokenval: ABRE_PARENTESES ; lexeme: ( ; line: 18 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: result ; line: 18 >
+<tokentype: SB ; tokenval: FECHA_PARENTESES ; lexeme: ) ; line: 18 >
+<tokentype: PR ; tokenval: FIM ; lexeme: fim ; line: 19 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 21 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: principal ; line: 21 >
+<tokentype: SB ; tokenval: ABRE_PARENTESES ; lexeme: ( ; line: 21 >
+<tokentype: SB ; tokenval: FECHA_PARENTESES ; lexeme: ) ; line: 21 >
+<tokentype: PR ; tokenval: TIPO_INTEIRO ; lexeme: inteiro ; line: 22 >
+<tokentype: SB ; tokenval: DOIS PONTOS ; lexeme: : ; line: 22 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: x ; line: 22 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: x ; line: 23 >
+<tokentype: SB ; tokenval: ATRIBUICAO ; lexeme: := ; line: 23 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: somavet ; line: 23 >
+<tokentype: SB ; tokenval: ABRE_PARENTESES ; lexeme: ( ; line: 23 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: V1 ; line: 23 >
+<tokentype: SB ; tokenval: VIRGULA ; lexeme: , ; line: 23 >
+<tokentype: ID ; tokenval: IDENTIFICADOR ; lexeme: T ; line: 23 >
+<tokentype: SB ; tokenval: FECHA_PARENTESES ; lexeme: ) ; line: 23 >
+<tokentype: PR ; tokenval: RETORNA ; lexeme: retorna ; line: 24 >
+<tokentype: SB ; tokenval: ABRE_PARENTESES ; lexeme: ( ; line: 24 >
+<tokentype: NUM ; tokenval: NUMERO_INTEIRO ; lexeme: 0 ; line: 24 >
+<tokentype: SB ; tokenval: FECHA_PARENTESES ; lexeme: ) ; line: 24 >
+<tokentype: PR ; tokenval: FIM ; lexeme: fim ; line: 25 >
